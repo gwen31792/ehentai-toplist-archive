@@ -42,10 +42,11 @@ export default function Home() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [selectedType, setSelectedType] = useState<string>('All')
 
-  const [data, setData] = useState<DataItem[]>([]);
+  const [data, setData] = useState<DataItem[]>([]); const [loading, setLoading] = useState(true);
   useEffect(() => {
     async function func() {
       setData(await fetchData(selectedDate, selectedType));
+      setLoading(false);
     }
     func();
   }, [selectedDate, selectedType]);
@@ -71,7 +72,7 @@ export default function Home() {
       <div className="flex flex-col items-center space-y-4">
         <DatePicker onDateChange={setSelectedDate} language={language} />
         <TypeSelect onSelectChange={setSelectedType} />
-        <DataTable data={data} language={language} />
+        <DataTable data={data} language={language} loading={loading} />
       </div>
 
     </div>

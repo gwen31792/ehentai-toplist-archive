@@ -21,13 +21,15 @@ import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/h
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { DataItem } from '@/lib/data'
 import { Language } from '@/lib/types'
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface DataTableProps {
     data: DataItem[]
     language: Language
+    loading: boolean
 }
 
-export function DataTable({ data, language }: DataTableProps) {
+export function DataTable({ data, language, loading }: DataTableProps) {
     const content = {
         en: {
             headers: {
@@ -79,6 +81,15 @@ export function DataTable({ data, language }: DataTableProps) {
 
     const columns: (keyof DataItem)[] = ['id', 'name', 'value', 'category', 'date'];
 
+    // 加载状态下的骨架屏行
+    const SkeletonRow = () => (
+        <TableRow>
+            <TableCell><Skeleton className="h-4 w-[100px] bg-gray-200" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-[200px] bg-gray-200" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-[200px] bg-gray-200" /></TableCell>
+        </TableRow>
+    )
+
     return (
         <div className="w-full max-w-2xl mx-auto mt-8">
             <Table>
@@ -92,40 +103,49 @@ export function DataTable({ data, language }: DataTableProps) {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {currentItems.map((item) => (
-                        <TableRow key={item.id}>
-                            {columns.map((column) => (
-                                <TableCell key={column}>
-                                    {column === 'name' ? (
-                                        <HoverCard>
-                                            <HoverCardTrigger asChild>
-                                                <span className="cursor-pointer underline">{item[column]}</span>
-                                            </HoverCardTrigger>
-                                            <HoverCardContent className="w-80">
-                                                <div className="space-y-2">
-                                                    <h4 className="text-sm font-semibold">{content[language].hoverCardTitle}</h4>
-                                                    <p className="text-sm">
-                                                        <span className="font-medium">{content[language].headers.name}:</span> {item.name}
-                                                    </p>
-                                                    <p className="text-sm">
-                                                        <span className="font-medium">{content[language].headers.value}:</span> {item.value}
-                                                    </p>
-                                                    <p className="text-sm">
-                                                        <span className="font-medium">{content[language].headers.category}:</span> {item.category}
-                                                    </p>
-                                                    <p className="text-sm">
-                                                        <span className="font-medium">{content[language].headers.date}:</span> {item.date}
-                                                    </p>
-                                                </div>
-                                            </HoverCardContent>
-                                        </HoverCard>
-                                    ) : (
-                                        item[column]
-                                    )}
-                                </TableCell>
-                            ))}
-                        </TableRow>
-                    ))}
+                    {loading ? (
+                        <>
+                            <SkeletonRow />
+                            <SkeletonRow />
+                        </>) :
+                        (
+                            currentItems.map((item) => (
+                                <TableRow key={item.id}>
+                                    {columns.map((column) => (
+                                        <TableCell key={column}>
+                                            {column === 'name' ? (
+                                                <HoverCard>
+                                                    <HoverCardTrigger asChild>
+                                                        <span className="cursor-pointer underline">{item[column]}</span>
+                                                    </HoverCardTrigger>
+                                                    <HoverCardContent className="w-80">
+                                                        <div className="space-y-2">
+                                                            <h4 className="text-sm font-semibold">{content[language].hoverCardTitle}</h4>
+                                                            <p className="text-sm">
+                                                                <span className="font-medium">{content[language].headers.name}:</span> {item.name}
+                                                            </p>
+                                                            <p className="text-sm">
+                                                                <span className="font-medium">{content[language].headers.value}:</span> {item.value}
+                                                            </p>
+                                                            <p className="text-sm">
+                                                                <span className="font-medium">{content[language].headers.category}:</span> {item.category}
+                                                            </p>
+                                                            <p className="text-sm">
+                                                                <span className="font-medium">{content[language].headers.date}:</span> {item.date}
+                                                            </p>
+                                                        </div>
+                                                    </HoverCardContent>
+                                                </HoverCard>
+                                            ) : (
+                                                item[column]
+                                            )}
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            ))
+                        )
+                    }
+
                 </TableBody>
             </Table>
             <div className="flex justify-between items-center mt-4">
