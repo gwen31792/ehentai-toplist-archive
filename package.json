@@ -43,6 +43,9 @@
   },
   "resolutions": {
     "semver": ">=7.5.2",
-    "path-to-regexp": ">=6.3.0"
+    "path-to-regexp": ">=6.3.0",
+    "tar": ">=6.2.1",
+    "cookie": ">=0.7.0",
+    "debug": ">=4.3.1"
   }
 }
