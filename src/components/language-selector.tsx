@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { Languages } from 'lucide-react'
-
-type Language = 'en' | 'zh'
+import { Language } from '@/lib/types'
 
 interface LanguageSelectorProps {
     onLanguageChange: (lang: Language) => void

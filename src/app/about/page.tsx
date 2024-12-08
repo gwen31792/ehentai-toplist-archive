@@ -5,8 +5,7 @@ import Link from 'next/link'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { GitHubLink } from '@/components/github-link'
 import { LanguageSelector } from '@/components/language-selector'
-
-type Language = 'en' | 'zh'
+import { Language } from '@/lib/types'
 
 export default function About() {
     const [language, setLanguage] = useState<Language>('en')

@@ -7,9 +7,9 @@ import { GitHubLink } from '@/components/github-link'
 import { LanguageSelector } from '@/components/language-selector'
 import { TypeSelect } from '@/components/type-select'
 import { DatePicker } from '@/components/date-picker'
-import { DataTable, DataItem } from '@/components/data-table'
-
-type Language = 'en' | 'zh'
+import { DataTable } from '@/components/data-table'
+import { fetchData, DataItem } from '@/lib/data'
+import { Language } from '@/lib/types'
 
 export default function Home() {
   const [language, setLanguage] = useState<Language>('en')
@@ -39,19 +39,16 @@ export default function Home() {
     },
   }
 
-  const sampleData: DataItem[] = [
-    { id: 1, name: 'Item 1', value: 100, category: 'A', date: '2023-05-01' },
-    { id: 2, name: 'Item 2', value: 200, category: 'B', date: '2023-05-02' },
-    { id: 3, name: 'Item 3', value: 300, category: 'A', date: '2023-05-03' },
-    { id: 4, name: 'Item 4', value: 400, category: 'C', date: '2023-05-04' },
-    { id: 5, name: 'Item 5', value: 500, category: 'B', date: '2023-05-05' },
-    { id: 6, name: 'Item 6', value: 600, category: 'C', date: '2023-05-06' },
-    { id: 7, name: 'Item 7', value: 700, category: 'A', date: '2023-05-07' },
-    { id: 8, name: 'Item 8', value: 800, category: 'B', date: '2023-05-08' },
-    { id: 9, name: 'Item 9', value: 900, category: 'C', date: '2023-05-09' },
-    { id: 10, name: 'Item 10', value: 1000, category: 'A', date: '2023-05-10' },
-  ]
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
+  const [selectedType, setSelectedType] = useState<string>('All')
 
+  const [data, setData] = useState<DataItem[]>([]);
+  useEffect(() => {
+    async function func() {
+      setData(await fetchData(selectedDate, selectedType));
+    }
+    func();
+  }, [selectedDate, selectedType]);
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 transition-colors">
       <div className="absolute top-4 right-4 flex items-center space-x-2">
@@ -72,9 +69,9 @@ export default function Home() {
         </p>
       </div>
       <div className="flex flex-col items-center space-y-4">
-        <DatePicker />
-        <TypeSelect />
-        <DataTable data={sampleData} language={language} />
+        <DatePicker onDateChange={setSelectedDate} language={language} />
+        <TypeSelect onSelectChange={setSelectedType} />
+        <DataTable data={data} language={language} />
       </div>
 
     </div>

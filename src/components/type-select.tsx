@@ -6,9 +6,13 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 
-export function TypeSelect() {
+interface TypeSelectProps {
+    onSelectChange: (type: string) => void
+}
+
+export function TypeSelect({ onSelectChange }: TypeSelectProps) {
     return (
-        <Select>
+        <Select onValueChange={onSelectChange}>
             <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Theme" />
             </SelectTrigger>

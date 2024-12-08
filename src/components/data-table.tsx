@@ -19,17 +19,8 @@ import {
 } from "@/components/ui/select"
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card"
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-
-export type DataItem = {
-    id: number
-    name: string
-    value: number
-    category: string
-    date: string
-    description: string
-}
-
-type Language = 'en' | 'zh'
+import { DataItem } from '@/lib/data'
+import { Language } from '@/lib/types'
 
 interface DataTableProps {
     data: DataItem[]
@@ -122,9 +113,6 @@ export function DataTable({ data, language }: DataTableProps) {
                                                     </p>
                                                     <p className="text-sm">
                                                         <span className="font-medium">{content[language].headers.date}:</span> {item.date}
-                                                    </p>
-                                                    <p className="text-sm">
-                                                        <span className="font-medium">{content[language].description}:</span> {item.description}
                                                     </p>
                                                 </div>
                                             </HoverCardContent>

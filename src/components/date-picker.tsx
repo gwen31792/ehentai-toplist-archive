@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { format } from "date-fns"
-import { Calendar as CalendarIcon } from "lucide-react"
+import { CalendarIcon } from 'lucide-react'
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -12,9 +12,19 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
+import { Language } from "@/lib/types"
 
-export function DatePicker() {
+interface DatePickerProps {
+    onDateChange: (date: Date) => void,
+    language: Language
+}
+
+export function DatePicker({ onDateChange, language }: DatePickerProps) {
     const [date, setDate] = React.useState<Date>()
+    const dateText = {
+        en: 'Pick a date',
+        zh: '选择日期'
+    };
 
     return (
         <Popover>
@@ -27,17 +37,21 @@ export function DatePicker() {
                     )}
                 >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? format(date, "PPP") : <span>Pick a date</span>}
+                    {date ? format(date, "PPP") : <span>{dateText[language]}</span>}
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
                 <Calendar
                     mode="single"
                     selected={date}
-                    onSelect={setDate}
+                    onSelect={(newDate) => {
+                        setDate(newDate)
+                        onDateChange(newDate as Date)
+                    }}
                     initialFocus
                 />
             </PopoverContent>
         </Popover>
     )
 }
+
