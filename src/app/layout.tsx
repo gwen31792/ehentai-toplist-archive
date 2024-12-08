@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+// import { useState } from 'react'
 import './globals.css'
 import { Inter } from 'next/font/google'
 
@@ -12,7 +12,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   // TODO: 国际化路由
-  const [language, setLanguage] = useState<'en' | 'zh'>('en')
+  // const [language, setLanguage] = useState<'en' | 'zh'>('en')
+  const language = 'en'
 
   const metadata = {
     en: {

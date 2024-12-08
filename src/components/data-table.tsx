@@ -31,6 +31,7 @@ export function DataTable({ data, language }: DataTableProps) {
     const content = {
         en: {
             headers: {
+                id: 'ID',
                 name: 'Name',
                 value: 'Value',
                 category: 'Category',
@@ -44,6 +45,7 @@ export function DataTable({ data, language }: DataTableProps) {
         },
         zh: {
             headers: {
+                id: '编号',
                 name: '名称',
                 value: '数值',
                 category: '类别',
@@ -75,7 +77,7 @@ export function DataTable({ data, language }: DataTableProps) {
         setCurrentPage(1)
     }
 
-    const columns: (keyof DataItem)[] = ['name', 'value', 'category', 'date'];
+    const columns: (keyof DataItem)[] = ['id', 'name', 'value', 'category', 'date'];
 
     return (
         <div className="w-full max-w-2xl mx-auto mt-8">

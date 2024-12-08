@@ -6,7 +6,8 @@ export type DataItem = {
     date: string
 }
 
-export async function fetchData(date: Date, type: String): Promise<DataItem[]> {
+export async function fetchData(date: Date, type: string): Promise<DataItem[]> {
+    console.log('fetchData', date, type)
     const sampleData: DataItem[] = [
         { id: 1, name: 'Item 1', value: 100, category: 'A', date: '2023-05-01' },
         { id: 2, name: 'Item 2', value: 200, category: 'B', date: '2023-05-02' },
