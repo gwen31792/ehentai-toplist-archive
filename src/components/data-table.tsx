@@ -17,6 +17,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card"
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 export type DataItem = {
@@ -25,6 +26,7 @@ export type DataItem = {
     value: number
     category: string
     date: string
+    description: string
 }
 
 type Language = 'en' | 'zh'
@@ -37,7 +39,6 @@ interface DataTableProps {
 export function DataTable({ data, language }: DataTableProps) {
     const content = {
         en: {
-            title: 'Sample Data',
             headers: {
                 name: 'Name',
                 value: 'Value',
@@ -47,9 +48,10 @@ export function DataTable({ data, language }: DataTableProps) {
             itemsPerPage: 'Items per page',
             page: 'Page',
             of: 'of',
+            hoverCardTitle: 'Item Details',
+            description: 'Description',
         },
         zh: {
-            title: '示例数据',
             headers: {
                 name: '名称',
                 value: '数值',
@@ -59,6 +61,8 @@ export function DataTable({ data, language }: DataTableProps) {
             itemsPerPage: '每页项目数',
             page: '页',
             of: '/',
+            hoverCardTitle: '项目详情',
+            description: '描述',
         },
     }
 
@@ -84,9 +88,6 @@ export function DataTable({ data, language }: DataTableProps) {
 
     return (
         <div className="w-full max-w-2xl mx-auto mt-8">
-            <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">
-                {content[language].title}
-            </h2>
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -102,7 +103,35 @@ export function DataTable({ data, language }: DataTableProps) {
                         <TableRow key={item.id}>
                             {columns.map((column) => (
                                 <TableCell key={column}>
-                                    {item[column]}
+                                    {column === 'name' ? (
+                                        <HoverCard>
+                                            <HoverCardTrigger asChild>
+                                                <span className="cursor-pointer underline">{item[column]}</span>
+                                            </HoverCardTrigger>
+                                            <HoverCardContent className="w-80">
+                                                <div className="space-y-2">
+                                                    <h4 className="text-sm font-semibold">{content[language].hoverCardTitle}</h4>
+                                                    <p className="text-sm">
+                                                        <span className="font-medium">{content[language].headers.name}:</span> {item.name}
+                                                    </p>
+                                                    <p className="text-sm">
+                                                        <span className="font-medium">{content[language].headers.value}:</span> {item.value}
+                                                    </p>
+                                                    <p className="text-sm">
+                                                        <span className="font-medium">{content[language].headers.category}:</span> {item.category}
+                                                    </p>
+                                                    <p className="text-sm">
+                                                        <span className="font-medium">{content[language].headers.date}:</span> {item.date}
+                                                    </p>
+                                                    <p className="text-sm">
+                                                        <span className="font-medium">{content[language].description}:</span> {item.description}
+                                                    </p>
+                                                </div>
+                                            </HoverCardContent>
+                                        </HoverCard>
+                                    ) : (
+                                        item[column]
+                                    )}
                                 </TableCell>
                             ))}
                         </TableRow>
