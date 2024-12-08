@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { GitHubLink } from '@/components/github-link'
 import { LanguageSelector } from '@/components/language-selector'
+import { TypeSelect } from '@/components/type-select'
+import { DatePicker } from '@/components/date-picker'
 
 type Language = 'en' | 'zh'
 
@@ -37,7 +39,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 transition-colors">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 transition-colors">
       <div className="fixed top-4 right-4 flex items-center space-x-2">
         <LanguageSelector onLanguageChange={handleLanguageChange} currentLang={language} />
         <GitHubLink />
@@ -55,6 +57,11 @@ export default function Home() {
           {language === 'zh' && '了解更多关于我们项目的信息。'}
         </p>
       </div>
+      <div className="flex flex-col items-center space-y-4">
+        <DatePicker />
+        <TypeSelect />
+      </div>
+
     </div>
   )
 }
