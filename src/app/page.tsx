@@ -70,8 +70,10 @@ export default function Home() {
         </p>
       </div>
       <div className="flex flex-col items-center space-y-4">
-        <DatePicker onDateChange={setSelectedDate} language={language} />
-        <TypeSelect onSelectChange={setSelectedType} />
+        <div className='flex space-x-4'>
+          <DatePicker onDateChange={setSelectedDate} language={language} />
+          <TypeSelect onSelectChange={setSelectedType} />
+        </div>
         <DataTable data={data} language={language} loading={loading} />
       </div>
 
