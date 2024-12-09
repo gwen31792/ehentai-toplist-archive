@@ -2,3 +2,8 @@ name = "ehentai-toplist-archive"
 compatibility_date = "2024-12-08"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = ".vercel/output/static"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ehentai-toplist-archive"
+database_id = "${DATABASE_ID}"
