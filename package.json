@@ -31,6 +31,7 @@
   },
   "devDependencies": {
     "@cloudflare/next-on-pages": "^1.13.6",
+    "@cloudflare/workers-types": "^4.20241205.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

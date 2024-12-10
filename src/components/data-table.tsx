@@ -19,25 +19,24 @@ import {
 } from "@/components/ui/select"
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card"
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { DataItem } from '@/lib/data'
-import { Language } from '@/lib/types'
+import { Language, QueryResponseItem, ContentType } from '@/lib/types'
 import { Skeleton } from "@/components/ui/skeleton"
 
 interface DataTableProps {
-    data: DataItem[]
+    data: QueryResponseItem[]
     language: Language
     loading: boolean
 }
 
 export function DataTable({ data, language, loading }: DataTableProps) {
-    const content = {
+    const content: ContentType = {
         en: {
             headers: {
-                id: 'ID',
-                name: 'Name',
-                value: 'Value',
-                category: 'Category',
-                date: 'Date',
+                rank: 'Rank',
+                gallery_name: 'Name',
+                gallery_type: 'Value',
+                published_time: 'Category',
+                uploader: 'Date',
             },
             itemsPerPage: 'Items per page',
             page: 'Page',
@@ -47,11 +46,11 @@ export function DataTable({ data, language, loading }: DataTableProps) {
         },
         zh: {
             headers: {
-                id: '编号',
-                name: '名称',
-                value: '数值',
-                category: '类别',
-                date: '日期',
+                rank: '排名',
+                gallery_name: '名称',
+                gallery_type: '数值',
+                published_time: '类别',
+                uploader: '日期',
             },
             itemsPerPage: '每页项目数',
             page: '页',
@@ -79,7 +78,7 @@ export function DataTable({ data, language, loading }: DataTableProps) {
         setCurrentPage(1)
     }
 
-    const columns: (keyof DataItem)[] = ['id', 'name', 'value', 'category', 'date'];
+    const columns: (keyof QueryResponseItem)[] = ['rank', 'gallery_name', 'gallery_type', 'published_time', 'uploader'];
 
     // 加载状态下的骨架屏行
     const SkeletonRow = () => (
@@ -110,10 +109,10 @@ export function DataTable({ data, language, loading }: DataTableProps) {
                         </>) :
                         (
                             currentItems.map((item) => (
-                                <TableRow key={item.id}>
+                                <TableRow key={item.gallery_id}>
                                     {columns.map((column) => (
                                         <TableCell key={column}>
-                                            {column === 'name' ? (
+                                            {column === 'gallery_name' ? (
                                                 <HoverCard>
                                                     <HoverCardTrigger asChild>
                                                         <span className="cursor-pointer underline">{item[column]}</span>
@@ -121,7 +120,7 @@ export function DataTable({ data, language, loading }: DataTableProps) {
                                                     <HoverCardContent className="w-80">
                                                         <div className="space-y-2">
                                                             <h4 className="text-sm font-semibold">{content[language].hoverCardTitle}</h4>
-                                                            <p className="text-sm">
+                                                            {/* <p className="text-sm">
                                                                 <span className="font-medium">{content[language].headers.name}:</span> {item.name}
                                                             </p>
                                                             <p className="text-sm">
@@ -132,7 +131,7 @@ export function DataTable({ data, language, loading }: DataTableProps) {
                                                             </p>
                                                             <p className="text-sm">
                                                                 <span className="font-medium">{content[language].headers.date}:</span> {item.date}
-                                                            </p>
+                                                            </p> */}
                                                         </div>
                                                     </HoverCardContent>
                                                 </HoverCard>

@@ -8,8 +8,7 @@ import { LanguageSelector } from '@/components/language-selector'
 import { TypeSelect } from '@/components/type-select'
 import { DatePicker } from '@/components/date-picker'
 import { DataTable } from '@/components/data-table'
-import { fetchData, DataItem } from '@/lib/data'
-import { Language } from '@/lib/types'
+import { Language, QueryResponseItem } from '@/lib/types'
 
 export default function Home() {
   const [language, setLanguage] = useState<Language>('en')
@@ -42,10 +41,14 @@ export default function Home() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [selectedType, setSelectedType] = useState<string>('All')
 
-  const [data, setData] = useState<DataItem[]>([]); const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<QueryResponseItem[]>([]);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     async function func() {
-      setData(await fetchData(selectedDate, selectedType));
+      const dateString = selectedDate.toISOString().split('T')[0];
+      const temp_type = "all"
+      const res = await fetch(`/api/data?list_date=${dateString}&period_type=${temp_type}`);
+      setData(await res.json());
       setLoading(false);
     }
     func();
