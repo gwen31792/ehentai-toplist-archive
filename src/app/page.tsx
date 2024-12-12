@@ -9,6 +9,7 @@ import { TypeSelect } from '@/components/type-select'
 import { DatePicker } from '@/components/date-picker'
 import { DataTable } from '@/components/data-table'
 import { Language, QueryResponseItem } from '@/lib/types'
+import { format } from 'date-fns';
 
 export default function Home() {
   const [language, setLanguage] = useState<Language>('en')
@@ -45,7 +46,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     async function func() {
-      const dateString = selectedDate.toISOString().split('T')[0];
+      const dateString = format(selectedDate, 'yyyy-MM-dd');
       const temp_type = "all"
       const res = await fetch(`/api/data?list_date=${dateString}&period_type=${temp_type}`);
       setData(await res.json());
