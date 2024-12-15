@@ -1,3 +1,4 @@
+// TODO: use animation like https://elysiajs.com/
 'use client'
 
 import { useState, useEffect } from 'react'
