@@ -1,5 +1,4 @@
 "use client"
-// TODO: 翻页的时候，有时候日期过多，行数会变化
 // TODO: 如果页面太短，日期选择框会冒到看不见的地方
 
 import * as React from "react"
@@ -23,6 +22,8 @@ interface DatePickerProps {
 
 export function DatePicker({ onDateChange, language }: DatePickerProps) {
     const [date, setDate] = React.useState<Date>()
+    // 添加新的 state 来保存当前查看的月份
+    const [month, setMonth] = React.useState<Date>(new Date())
     const dateText = {
         en: 'Pick a date',
         zh: '选择日期'
@@ -50,6 +51,8 @@ export function DatePicker({ onDateChange, language }: DatePickerProps) {
                         setDate(newDate)
                         onDateChange(newDate as Date)
                     }}
+                    defaultMonth={month}
+                    onMonthChange={setMonth}
                     initialFocus
                     fixedWeeks
                 />
