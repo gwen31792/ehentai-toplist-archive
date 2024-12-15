@@ -7,19 +7,21 @@ import {
 } from "@/components/ui/select"
 
 interface TypeSelectProps {
+    type: string
     onSelectChange: (type: string) => void
 }
 
-export function TypeSelect({ onSelectChange }: TypeSelectProps) {
+export function TypeSelect({ type, onSelectChange }: TypeSelectProps) {
     return (
-        <Select onValueChange={onSelectChange}>
+        <Select value={type} onValueChange={onSelectChange}>
             <SelectTrigger className="w-[180px] bg-gray-50 dark:bg-gray-950">
-                <SelectValue placeholder="Theme" />
+                <SelectValue placeholder="select toplist type" />
             </SelectTrigger>
             <SelectContent className="bg-gray-50 dark:bg-gray-950">
-                <SelectItem value="light">Light</SelectItem>
-                <SelectItem value="dark">Dark</SelectItem>
-                <SelectItem value="system">System</SelectItem>
+                <SelectItem value="day">Galleries Yesterday</SelectItem>
+                <SelectItem value="month">Galleries Past Month</SelectItem>
+                <SelectItem value="year">Galleries Past Year</SelectItem>
+                <SelectItem value="all">Galleries All-Time</SelectItem>
             </SelectContent>
         </Select>
     )

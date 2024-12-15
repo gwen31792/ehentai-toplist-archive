@@ -40,15 +40,14 @@ export default function Home() {
   }
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
-  const [selectedType, setSelectedType] = useState<string>('All')
+  const [selectedType, setSelectedType] = useState<string>('day')
 
   const [data, setData] = useState<QueryResponseItem[]>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     async function func() {
       const dateString = format(selectedDate, 'yyyy-MM-dd');
-      const temp_type = "all"
-      const res = await fetch(`/api/data?list_date=${dateString}&period_type=${temp_type}`);
+      const res = await fetch(`/api/data?list_date=${dateString}&period_type=${selectedType}`);
       setData(await res.json());
       setLoading(false);
     }
@@ -76,7 +75,7 @@ export default function Home() {
       <div className="flex flex-col items-center space-y-4">
         <div className='flex space-x-4'>
           <DatePicker onDateChange={setSelectedDate} language={language} />
-          <TypeSelect onSelectChange={setSelectedType} />
+          <TypeSelect type={selectedType} onSelectChange={setSelectedType} />
         </div>
         <DataTable data={data} language={language} loading={loading} />
       </div>
