@@ -51,6 +51,7 @@ export function DatePicker({ onDateChange, language }: DatePickerProps) {
                         onDateChange(newDate as Date)
                     }}
                     initialFocus
+                    fixedWeeks
                 />
             </PopoverContent>
         </Popover>
