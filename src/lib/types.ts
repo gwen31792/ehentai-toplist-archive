@@ -26,7 +26,6 @@ export interface ContentType {
         itemsPerPage: string;
         page: string;
         of: string;
-        hoverCardTitle: string;
         description: string;
     };
     zh: {
@@ -36,7 +35,6 @@ export interface ContentType {
         itemsPerPage: string;
         page: string;
         of: string;
-        hoverCardTitle: string;
         description: string;
     };
 }
