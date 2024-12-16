@@ -2,11 +2,11 @@
 
 // TODO: Image 样式优化，固定宽度？
 // TODO: Image 边框收窄
-// TODO: 各个列改为真正的内容
 // TODO: 图片从 cloudflare r2 中读取，这需要先一步优化爬虫
 
 import React, { useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 
 import {
     Table,
@@ -41,9 +41,9 @@ export function DataTable({ data, language, loading }: DataTableProps) {
             headers: {
                 rank: 'Rank',
                 gallery_name: 'Name',
-                gallery_type: 'Value',
-                published_time: 'Category',
-                uploader: 'Date',
+                gallery_type: 'Type',
+                published_time: 'Published Date',
+                tags: 'Tags',
             },
             itemsPerPage: 'Items per page',
             page: 'Page',
@@ -54,9 +54,9 @@ export function DataTable({ data, language, loading }: DataTableProps) {
             headers: {
                 rank: '排名',
                 gallery_name: '名称',
-                gallery_type: '数值',
-                published_time: '类别',
-                uploader: '日期',
+                gallery_type: '类型',
+                published_time: '上传日期',
+                tags: '标签',
             },
             itemsPerPage: '每页项目数',
             page: '页',
@@ -83,7 +83,7 @@ export function DataTable({ data, language, loading }: DataTableProps) {
         setCurrentPage(1)
     }
 
-    const columns: (keyof QueryResponseItem)[] = ['rank', 'gallery_name', 'gallery_type', 'published_time', 'uploader'];
+    const columns: (keyof QueryResponseItem)[] = ['rank', 'gallery_name', 'gallery_type', 'published_time', 'tags'];
 
     // 加载状态下的骨架屏行
     const SkeletonRow = () => (
@@ -95,12 +95,21 @@ export function DataTable({ data, language, loading }: DataTableProps) {
     )
 
     return (
-        <div className="w-full max-w-2xl mx-auto mt-8">
+        <div className="w-full max-w-4xl mx-auto mt-8">
             <Table>
                 <TableHeader>
                     <TableRow>
                         {columns.map((column) => (
-                            <TableHead key={column}>
+                            <TableHead
+                                key={column}
+                                className={`
+                                    ${column === 'rank' ? 'w-[80px]' : ''}
+                                    ${column === 'gallery_name' ? 'w-[300px]' : ''}
+                                    ${column === 'gallery_type' ? 'w-[120px]' : ''}
+                                    ${column === 'published_time' ? 'w-[150px]' : ''}
+                                    ${column === 'tags' ? 'w-[200px]' : ''}
+                                `}
+                            >
                                 {content[language].headers[column]}
                             </TableHead>
                         ))}
@@ -116,11 +125,22 @@ export function DataTable({ data, language, loading }: DataTableProps) {
                             currentItems.map((item) => (
                                 <TableRow key={item.gallery_id} className='dark:hover:bg-gray-700'>
                                     {columns.map((column) => (
-                                        <TableCell key={column}>
+                                        <TableCell
+                                            key={column}
+                                            className={`
+                                                ${column === 'rank' ? 'w-[80px]' : ''}
+                                                ${column === 'gallery_name' ? 'w-[300px]' : ''}
+                                                ${column === 'gallery_type' ? 'w-[120px]' : ''}
+                                                ${column === 'published_time' ? 'w-[150px]' : ''}
+                                                ${column === 'tags' ? 'w-[500px]' : ''}
+                                            `}
+                                        >
                                             {column === 'gallery_name' ? (
                                                 <HoverCard>
                                                     <HoverCardTrigger asChild>
-                                                        <span className="cursor-pointer underline">{item[column]}</span>
+                                                        <Link href={item.gallery_url} target="_blank" rel="noopener noreferrer">
+                                                            {item[column]}
+                                                        </Link>
                                                     </HoverCardTrigger>
                                                     <HoverCardContent side='left'>
                                                         <Image
