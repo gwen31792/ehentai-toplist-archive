@@ -1,6 +1,13 @@
 'use client'
 
+// TODO: Image 样式优化，固定宽度？
+// TODO: Image 边框收窄
+// TODO: 各个列改为真正的内容
+// TODO: 图片从 cloudflare r2 中读取，这需要先一步优化爬虫
+
 import React, { useState } from 'react'
+import Image from 'next/image'
+
 import {
     Table,
     TableBody,
@@ -41,7 +48,6 @@ export function DataTable({ data, language, loading }: DataTableProps) {
             itemsPerPage: 'Items per page',
             page: 'Page',
             of: 'of',
-            hoverCardTitle: 'Item Details',
             description: 'Description',
         },
         zh: {
@@ -55,7 +61,6 @@ export function DataTable({ data, language, loading }: DataTableProps) {
             itemsPerPage: '每页项目数',
             page: '页',
             of: '/',
-            hoverCardTitle: '项目详情',
             description: '描述',
         },
     }
@@ -109,7 +114,7 @@ export function DataTable({ data, language, loading }: DataTableProps) {
                         </>) :
                         (
                             currentItems.map((item) => (
-                                <TableRow key={item.gallery_id}>
+                                <TableRow key={item.gallery_id} className='dark:hover:bg-gray-700'>
                                     {columns.map((column) => (
                                         <TableCell key={column}>
                                             {column === 'gallery_name' ? (
@@ -117,22 +122,17 @@ export function DataTable({ data, language, loading }: DataTableProps) {
                                                     <HoverCardTrigger asChild>
                                                         <span className="cursor-pointer underline">{item[column]}</span>
                                                     </HoverCardTrigger>
-                                                    <HoverCardContent className="w-80">
-                                                        <div className="space-y-2">
-                                                            <h4 className="text-sm font-semibold">{content[language].hoverCardTitle}</h4>
-                                                            {/* <p className="text-sm">
-                                                                <span className="font-medium">{content[language].headers.name}:</span> {item.name}
-                                                            </p>
-                                                            <p className="text-sm">
-                                                                <span className="font-medium">{content[language].headers.value}:</span> {item.value}
-                                                            </p>
-                                                            <p className="text-sm">
-                                                                <span className="font-medium">{content[language].headers.category}:</span> {item.category}
-                                                            </p>
-                                                            <p className="text-sm">
-                                                                <span className="font-medium">{content[language].headers.date}:</span> {item.date}
-                                                            </p> */}
-                                                        </div>
+                                                    <HoverCardContent side='left'>
+                                                        <Image
+                                                            src={item.preview_url}
+                                                            alt={item.gallery_name}
+                                                            width={0}
+                                                            height={0}
+                                                            style={{ width: '100%', height: 'auto' }}
+                                                            sizes='100vw'
+                                                            quality={100}
+                                                            className='m-0'
+                                                        />
                                                     </HoverCardContent>
                                                 </HoverCard>
                                             ) : (

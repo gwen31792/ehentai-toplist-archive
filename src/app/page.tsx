@@ -1,5 +1,7 @@
 'use client'
 
+// TODO: 很多组件的背景颜色，悬浮颜色，暗黑模式下的颜色都不统一
+
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ThemeToggle } from '@/components/theme-toggle'
