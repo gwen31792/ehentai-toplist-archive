@@ -160,9 +160,9 @@ export function DataTable({ data, language, loading }: DataTableProps) {
                             <SelectValue placeholder={itemsPerPage.toString()} />
                         </SelectTrigger>
                         <SelectContent className='bg-gray-50 dark:bg-gray-800'>
-                            <SelectItem value="5">5</SelectItem>
-                            <SelectItem value="10">10</SelectItem>
-                            <SelectItem value="20">20</SelectItem>
+                            <SelectItem value="5" className="dark:hover:bg-gray-700 dark:data-[highlighted]:bg-gray-700">5</SelectItem>
+                            <SelectItem value="10" className="dark:hover:bg-gray-700 dark:data-[highlighted]:bg-gray-700">10</SelectItem>
+                            <SelectItem value="20" className="dark:hover:bg-gray-700 dark:data-[highlighted]:bg-gray-700">20</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
