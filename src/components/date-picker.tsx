@@ -1,6 +1,6 @@
 "use client"
-// TODO: 如果页面太短，日期选择框会冒到看不见的地方
 // TODO: 大的翻页按钮，一次走一年
+// 这个问题有点复杂，claude 3.5 和 gpt-4o 都搞不定，之后用 o1 试试
 
 import * as React from "react"
 import { format } from "date-fns"
@@ -9,6 +9,7 @@ import { CalendarIcon } from 'lucide-react'
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
+import { Matcher } from "react-day-picker"
 import {
     Popover,
     PopoverContent,
@@ -29,6 +30,13 @@ export function DatePicker({ onDateChange, language }: DatePickerProps) {
         en: 'Pick a date',
         zh: '选择日期'
     };
+
+    // 禁止查看没有数据的日期
+    const disabledDays: Matcher = {
+        // 禁止 2023-11-15 之前的日期
+        before: new Date(2023, 11, 15),
+        after: new Date(),
+    }
 
     return (
         <Popover>
@@ -57,6 +65,10 @@ export function DatePicker({ onDateChange, language }: DatePickerProps) {
                     }}
                     defaultMonth={month}
                     onMonthChange={setMonth}
+                    modifiers={{ disabled: disabledDays }}
+                    modifiersStyles={{
+                        disabled: { opacity: 0.5, cursor: 'not-allowed' }
+                    }}
                     initialFocus
                     fixedWeeks
                 />
