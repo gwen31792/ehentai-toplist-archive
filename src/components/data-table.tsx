@@ -88,9 +88,9 @@ export function DataTable({ data, language, loading }: DataTableProps) {
     // 加载状态下的骨架屏行
     const SkeletonRow = () => (
         <TableRow>
-            <TableCell><Skeleton className="h-4 w-[100px] bg-gray-200" /></TableCell>
-            <TableCell><Skeleton className="h-4 w-[200px] bg-gray-200" /></TableCell>
-            <TableCell><Skeleton className="h-4 w-[200px] bg-gray-200" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-[100px] bg-zinc-200" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-[200px] bg-zinc-200" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-[200px] bg-zinc-200" /></TableCell>
         </TableRow>
     )
 
@@ -123,7 +123,7 @@ export function DataTable({ data, language, loading }: DataTableProps) {
                         </>) :
                         (
                             currentItems.map((item) => (
-                                <TableRow key={item.gallery_id} className='dark:hover:bg-gray-700'>
+                                <TableRow key={item.gallery_id} className='dark:hover:bg-zinc-700'>
                                     {columns.map((column) => (
                                         <TableCell
                                             key={column}
@@ -169,20 +169,20 @@ export function DataTable({ data, language, loading }: DataTableProps) {
             </Table>
             <div className="flex justify-between items-center mt-4">
                 <div className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                    <span className="text-sm text-zinc-700 dark:text-zinc-300">
                         {content[language].itemsPerPage}
                     </span>
                     <Select
                         value={itemsPerPage.toString()}
                         onValueChange={handleItemsPerPageChange}
                     >
-                        <SelectTrigger className="w-[70px] bg-gray-50 dark:bg-gray-800">
+                        <SelectTrigger className="w-[70px] bg-zinc-50 dark:bg-zinc-800">
                             <SelectValue placeholder={itemsPerPage.toString()} />
                         </SelectTrigger>
-                        <SelectContent className='bg-gray-50 dark:bg-gray-800'>
-                            <SelectItem value="5" className="dark:hover:bg-gray-700 dark:data-[highlighted]:bg-gray-700">5</SelectItem>
-                            <SelectItem value="10" className="dark:hover:bg-gray-700 dark:data-[highlighted]:bg-gray-700">10</SelectItem>
-                            <SelectItem value="20" className="dark:hover:bg-gray-700 dark:data-[highlighted]:bg-gray-700">20</SelectItem>
+                        <SelectContent className='bg-zinc-50 dark:bg-zinc-800'>
+                            <SelectItem value="5" className="dark:hover:bg-zinc-700 dark:data-[highlighted]:bg-zinc-700">5</SelectItem>
+                            <SelectItem value="10" className="dark:hover:bg-zinc-700 dark:data-[highlighted]:bg-zinc-700">10</SelectItem>
+                            <SelectItem value="20" className="dark:hover:bg-zinc-700 dark:data-[highlighted]:bg-zinc-700">20</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
@@ -192,11 +192,11 @@ export function DataTable({ data, language, loading }: DataTableProps) {
                         size="sm"
                         onClick={() => handlePageChange(currentPage - 1)}
                         disabled={currentPage === 1}
-                        className='bg-gray-50 dark:bg-gray-800'
+                        className='bg-zinc-50 dark:bg-zinc-800'
                     >
                         <ChevronLeft className="w-4 h-4" />
                     </Button>
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                    <span className="text-sm text-zinc-700 dark:text-zinc-300">
                         {content[language].page} {currentPage} {content[language].of} {totalPages}
                     </span>
                     <Button
@@ -204,7 +204,7 @@ export function DataTable({ data, language, loading }: DataTableProps) {
                         size="sm"
                         onClick={() => handlePageChange(currentPage + 1)}
                         disabled={currentPage === totalPages}
-                        className='bg-gray-50 dark:bg-gray-800'
+                        className='bg-zinc-50 dark:bg-zinc-800'
                     >
                         <ChevronRight className="w-4 h-4" />
                     </Button>

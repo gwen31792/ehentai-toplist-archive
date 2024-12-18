@@ -12,6 +12,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   // TODO: 国际化路由
+  // see also https://blog.cloudflare.com/cloudflare-radar-localization-journey/
   // const [language, setLanguage] = useState<'en' | 'zh'>('en')
   const language = 'en'
 

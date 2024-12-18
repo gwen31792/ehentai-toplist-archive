@@ -1,6 +1,7 @@
 "use client"
 // TODO: 大的翻页按钮，一次走一年
 // 这个问题有点复杂，claude 3.5 和 gpt-4o 都搞不定，之后用 o1 试试
+// TODO: 暗黑模式下的颜色调整
 
 import * as React from "react"
 import { format } from "date-fns"
@@ -44,7 +45,7 @@ export function DatePicker({ onDateChange, language }: DatePickerProps) {
                 <Button
                     variant={"outline"}
                     className={cn(
-                        "w-[280px] justify-start text-left font-normal bg-gray-50 dark:bg-gray-800",
+                        "w-[280px] justify-start text-left font-normal bg-zinc-50 dark:bg-zinc-800",
                         !date && "text-muted-foreground"
                     )}
                 >
@@ -53,7 +54,7 @@ export function DatePicker({ onDateChange, language }: DatePickerProps) {
                 </Button>
             </PopoverTrigger>
             <PopoverContent
-                className="w-auto p-0 bg-gray-50 dark:bg-gray-800"
+                className="w-auto p-0 bg-zinc-50 dark:bg-zinc-800"
                 side="bottom"
                 align="start">
                 <Calendar

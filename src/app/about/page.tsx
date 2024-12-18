@@ -36,17 +36,17 @@ export default function About() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 transition-colors">
+        <div className="min-h-screen flex items-center justify-center bg-zinc-200 dark:bg-zinc-800 transition-colors">
             <div className="fixed top-4 right-4 flex items-center space-x-2">
                 <LanguageSelector onLanguageChange={handleLanguageChange} currentLang={language} />
                 <GitHubLink />
                 <ThemeToggle />
             </div>
             <div className="max-w-2xl px-4 py-8 text-center">
-                <h1 className="text-4xl font-bold mb-4 text-gray-900 dark:text-gray-100">
+                <h1 className="text-4xl font-bold mb-4 text-zinc-800 dark:text-zinc-200">
                     {content[language].title}
                 </h1>
-                <p className="text-lg text-gray-600 dark:text-gray-300 mb-4">
+                <p className="text-lg text-zinc-600 dark:text-zinc-400 mb-4">
                     {content[language].description}
                 </p>
                 <Link href="/" className="text-blue-600 dark:text-blue-400 hover:underline">
