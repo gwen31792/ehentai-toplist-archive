@@ -3,7 +3,7 @@
 // 这个问题有点复杂，claude 3.5 和 gpt-4o 都搞不定，之后用 o1 试试
 // TODO: 暗黑模式下的颜色调整，已经调整好了，但是方案有点复杂，感觉可以优化一下
 
-import * as React from "react"
+import { useState, useEffect, useMemo } from 'react'
 import { format } from "date-fns"
 import { CalendarIcon } from 'lucide-react'
 
@@ -24,9 +24,9 @@ interface DatePickerProps {
 }
 
 export function DatePicker({ onDateChange, language }: DatePickerProps) {
-    const [date, setDate] = React.useState<Date>()
+    const [date, setDate] = useState<Date>()
     // 添加新的 state 来保存当前查看的月份
-    const [month, setMonth] = React.useState<Date>(new Date())
+    const [month, setMonth] = useState<Date>(new Date())
     const dateText = {
         en: 'Pick a date',
         zh: '选择日期'
@@ -39,9 +39,9 @@ export function DatePicker({ onDateChange, language }: DatePickerProps) {
         after: new Date(),
     }
 
-    const [isDarkMode, setIsDarkMode] = React.useState(false)
+    const [isDarkMode, setIsDarkMode] = useState(false)
     // 监听主题变化
-    React.useEffect(() => {
+    useEffect(() => {
         setIsDarkMode(document.documentElement.classList.contains('dark'))
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
@@ -59,13 +59,13 @@ export function DatePicker({ onDateChange, language }: DatePickerProps) {
         return () => observer.disconnect()
     }, [])
 
-    const calendarStyles = React.useMemo(() => ({
+    const calendarStyles = useMemo(() => ({
         disabled: { opacity: 0.5, cursor: 'not-allowed' },
         selected: {
-            backgroundColor: isDarkMode ? 'rgb(82 82 91)' : 'rgb(82 82 91)',// zinc-600 : zinc-400
+            backgroundColor: isDarkMode ? 'rgb(82 82 91)' : 'rgb(82 82 91)', // zinc-600 : zinc-400
             color: 'white',
         },
-        // 因为已经把不能选择的日期 disable 了，所以这里不需要再设置
+        // 因为已经把不能选择的日期 disable 了，今天就是最后一个可选的日期，所以这里不需要再设置
         // today: {
         //     backgroundColor: isDarkMode ? 'rgb(63 63 70)' : 'rgb(212 212 216)',// zinc-700 : zinc-300
         //     color: isDarkMode ? 'white' : 'black',
@@ -94,6 +94,7 @@ export function DatePicker({ onDateChange, language }: DatePickerProps) {
                 <Calendar
                     mode="single"
                     selected={date}
+                    required={true} // 防止取消点击传输 undefined 日期
                     onSelect={(newDate) => {
                         setDate(newDate)
                         onDateChange(newDate as Date)
