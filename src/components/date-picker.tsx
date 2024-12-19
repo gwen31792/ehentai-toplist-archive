@@ -1,7 +1,7 @@
 "use client"
 // TODO: 大的翻页按钮，一次走一年
 // 这个问题有点复杂，claude 3.5 和 gpt-4o 都搞不定，之后用 o1 试试
-// TODO: 暗黑模式下的颜色调整
+// TODO: 暗黑模式下的颜色调整，已经调整好了，但是方案有点复杂，感觉可以优化一下
 
 import * as React from "react"
 import { format } from "date-fns"
@@ -39,6 +39,40 @@ export function DatePicker({ onDateChange, language }: DatePickerProps) {
         after: new Date(),
     }
 
+    const [isDarkMode, setIsDarkMode] = React.useState(false)
+    // 监听主题变化
+    React.useEffect(() => {
+        setIsDarkMode(document.documentElement.classList.contains('dark'))
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'class') {
+                    setIsDarkMode(document.documentElement.classList.contains('dark'))
+                }
+            })
+        })
+
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['class']
+        })
+
+        return () => observer.disconnect()
+    }, [])
+
+    const calendarStyles = React.useMemo(() => ({
+        disabled: { opacity: 0.5, cursor: 'not-allowed' },
+        selected: {
+            backgroundColor: isDarkMode ? 'rgb(82 82 91)' : 'rgb(82 82 91)',// zinc-600 : zinc-400
+            color: 'white',
+        },
+        // 因为已经把不能选择的日期 disable 了，所以这里不需要再设置
+        // today: {
+        //     backgroundColor: isDarkMode ? 'rgb(63 63 70)' : 'rgb(212 212 216)',// zinc-700 : zinc-300
+        //     color: isDarkMode ? 'white' : 'black',
+        // },
+    }), [isDarkMode])
+
+
     return (
         <Popover>
             <PopoverTrigger asChild>
@@ -67,9 +101,7 @@ export function DatePicker({ onDateChange, language }: DatePickerProps) {
                     defaultMonth={month}
                     onMonthChange={setMonth}
                     modifiers={{ disabled: disabledDays }}
-                    modifiersStyles={{
-                        disabled: { opacity: 0.5, cursor: 'not-allowed' }
-                    }}
+                    modifiersStyles={calendarStyles}
                     initialFocus
                     fixedWeeks
                 />

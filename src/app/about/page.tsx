@@ -36,7 +36,7 @@ export default function About() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-zinc-200 dark:bg-zinc-800 transition-colors">
+        <div className="min-h-screen flex items-center justify-center bg-zinc-100 dark:bg-zinc-900 transition-colors">
             <div className="fixed top-4 right-4 flex items-center space-x-2">
                 <LanguageSelector onLanguageChange={handleLanguageChange} currentLang={language} />
                 <GitHubLink />
