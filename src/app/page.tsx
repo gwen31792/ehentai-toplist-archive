@@ -28,13 +28,13 @@ export default function Home() {
 
   const content = {
     en: {
-      title: 'Ehentai Toplist Archive',
+      title: 'E-Hentai Toplist Archive',
       description: 'browse past gallery toplists of e-hentai. Learn more on the ',
       aboutLink: 'about page',
     },
     zh: {
       title: 'E 站排行榜存档',
-      description: '浏览过去的 e-hentai 画廊排行榜。在',
+      description: '浏览过去的 E-Hentai 画廊排行榜。在',
       aboutLink: '关于页面',
     },
   }
