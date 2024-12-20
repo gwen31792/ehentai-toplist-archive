@@ -35,7 +35,7 @@ export function DatePicker({ onDateChange, language }: DatePickerProps) {
     // 禁止查看没有数据的日期
     const disabledDays: Matcher = {
         // 禁止 2023-11-15 之前的日期
-        before: new Date(2023, 11, 15),
+        before: new Date(2023, 10, 15),
         after: new Date(),
     }
 
