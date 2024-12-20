@@ -28,13 +28,13 @@ export default function Home() {
 
   const content = {
     en: {
-      title: 'Welcome to Our Web App',
-      description: 'This is a simple web application built with Next.js and Tailwind CSS. Learn more about our project on the',
+      title: 'Ehentai Toplist Archive',
+      description: 'browse past gallery toplists of e-hentai. Learn more on the ',
       aboutLink: 'about page',
     },
     zh: {
-      title: '欢迎来到我们的网络应用',
-      description: '这是一个使用 Next.js 和 Tailwind CSS 构建的简单网络应用。在',
+      title: 'E 站排行榜存档',
+      description: '浏览过去的 e-hentai 画廊排行榜。在',
       aboutLink: '关于页面',
     },
   }
@@ -54,22 +54,22 @@ export default function Home() {
     func();
   }, [selectedDate, selectedType]);
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-zinc-100 dark:bg-zinc-900 transition-colors">
-      <div className="absolute top-4 right-4 flex items-center space-x-2">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-100 transition-colors dark:bg-zinc-900">
+      <div className="absolute right-4 top-4 flex items-center space-x-2">
         <LanguageSelector onLanguageChange={handleLanguageChange} currentLang={language} />
         <GitHubLink />
         <ThemeToggle />
       </div>
       <div className="max-w-2xl px-4 py-8 text-center">
-        <h1 className="text-4xl font-bold mb-4 text-zinc-800 dark:text-zinc-200">
+        <h1 className="mb-4 text-4xl font-bold text-zinc-800 dark:text-zinc-200">
           {content[language].title}
         </h1>
         <p className="text-lg font-medium text-zinc-600 dark:text-zinc-400">
-          {content[language].description}{' '}
-          <Link href="/about" className="text-blue-600 dark:text-blue-400 hover:underline">
+          {content[language].description}
+          <Link href="/about" className="text-blue-600 hover:underline dark:text-blue-400">
             {content[language].aboutLink}
           </Link>
-          {language === 'zh' && '了解更多关于我们项目的信息。'}
+          {language === 'zh' && '了解更多'}
         </p>
       </div>
       <div className="flex flex-col items-center space-y-4">
