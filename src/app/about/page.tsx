@@ -46,7 +46,7 @@ export default function About() {
                 <h1 className="text-4xl font-bold mb-4 text-zinc-800 dark:text-zinc-200">
                     {content[language].title}
                 </h1>
-                <p className="text-lg text-zinc-600 dark:text-zinc-400 mb-4">
+                <p className="text-lg font-medium text-zinc-600 dark:text-zinc-400 mb-4">
                     {content[language].description}
                 </p>
                 <Link href="/" className="text-blue-600 dark:text-blue-400 hover:underline">

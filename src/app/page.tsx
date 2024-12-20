@@ -1,7 +1,5 @@
 'use client'
 
-// TODO: 很多组件的背景颜色，悬浮颜色，暗黑模式下的颜色都不统一
-
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -66,7 +64,7 @@ export default function Home() {
         <h1 className="text-4xl font-bold mb-4 text-zinc-800 dark:text-zinc-200">
           {content[language].title}
         </h1>
-        <p className="text-lg text-zinc-600 dark:text-zinc-400">
+        <p className="text-lg font-medium text-zinc-600 dark:text-zinc-400">
           {content[language].description}{' '}
           <Link href="/about" className="text-blue-600 dark:text-blue-400 hover:underline">
             {content[language].aboutLink}
