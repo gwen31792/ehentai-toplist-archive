@@ -15,19 +15,19 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
+} from '@/components/ui/table'
+import { Button } from '@/components/ui/button'
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select"
-import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card"
+} from '@/components/ui/select'
+import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/hover-card'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Language, QueryResponseItem, ContentType } from '@/lib/types'
-import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface DataTableProps {
     data: QueryResponseItem[]

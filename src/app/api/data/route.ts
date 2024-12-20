@@ -1,9 +1,9 @@
 // TODO: cloudflare workers runtime using env vars
 // https://github.com/cloudflare/next-on-pages/issues/760
-export const runtime = "edge";
-import { drizzle } from "drizzle-orm/d1"
-import { galleriesTable, toplistItems2023Table } from "@/db/schema"
-import { eq, and, getTableColumns } from "drizzle-orm"
+export const runtime = 'edge';
+import { drizzle } from 'drizzle-orm/d1'
+import { galleriesTable, toplistItems2023Table } from '@/db/schema'
+import { eq, and, getTableColumns } from 'drizzle-orm'
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
