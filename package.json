@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "lint:fix": "eslint ./src --fix",
     "pages:build": "npx @cloudflare/next-on-pages",
     "preview": "npm run pages:build && wrangler pages dev",
     "deploy": "npm run pages:build && wrangler pages deploy"
@@ -32,6 +33,7 @@
   "devDependencies": {
     "@cloudflare/next-on-pages": "^1.13.7",
     "@cloudflare/workers-types": "^4.20241218.0",
+    "@eslint/migrate-config": "^1.3.5",
     "@types/node": "^22.10.2",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
@@ -40,6 +42,7 @@
     "eslint": "^9.17.0",
     "eslint-config-next": "15.1.2",
     "eslint-plugin-next-on-pages": "^1.13.7",
+    "eslint-plugin-tailwindcss": "^3.17.5",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
     "tsx": "^4.19.2",

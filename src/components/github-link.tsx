@@ -6,7 +6,7 @@ export function GitHubLink() {
             href="https://github.com/yourusername/your-repo"
             target="_blank"
             rel="noopener noreferrer"
-            className="p-2 rounded-full bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 hover:text-zinc-600 dark:hover:text-zinc-400 transition-colors"
+            className="rounded-full bg-zinc-100 p-2 text-zinc-900 transition-colors hover:text-zinc-600 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:text-zinc-400"
             aria-label="View source on GitHub"
         >
             <Github size={24} />

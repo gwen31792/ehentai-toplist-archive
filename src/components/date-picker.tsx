@@ -83,12 +83,12 @@ export function DatePicker({ onDateChange, language }: DatePickerProps) {
                         !date && "text-muted-foreground"
                     )}
                 >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    <CalendarIcon className="mr-2 size-4" />
                     {date ? format(date, "PPP") : <span>{dateText[language]}</span>}
                 </Button>
             </PopoverTrigger>
             <PopoverContent
-                className="w-auto p-0 bg-zinc-50 dark:bg-zinc-800"
+                className="w-auto bg-zinc-50 p-0 dark:bg-zinc-800"
                 side="bottom"
                 align="start">
                 <Calendar

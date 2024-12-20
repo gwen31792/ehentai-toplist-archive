@@ -95,7 +95,7 @@ export function DataTable({ data, language, loading }: DataTableProps) {
     )
 
     return (
-        <div className="w-full max-w-4xl mx-auto mt-8">
+        <div className="mx-auto mt-8 w-full max-w-4xl">
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -167,7 +167,7 @@ export function DataTable({ data, language, loading }: DataTableProps) {
 
                 </TableBody>
             </Table>
-            <div className="flex justify-between items-center mt-4">
+            <div className="mt-4 flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                     <span className="text-sm text-zinc-700 dark:text-zinc-300">
                         {content[language].itemsPerPage}
@@ -194,7 +194,7 @@ export function DataTable({ data, language, loading }: DataTableProps) {
                         disabled={currentPage === 1}
                         className='bg-zinc-50 dark:bg-zinc-800'
                     >
-                        <ChevronLeft className="w-4 h-4" />
+                        <ChevronLeft className="size-4" />
                     </Button>
                     <span className="text-sm text-zinc-700 dark:text-zinc-300">
                         {content[language].page} {currentPage} {content[language].of} {totalPages}
@@ -206,7 +206,7 @@ export function DataTable({ data, language, loading }: DataTableProps) {
                         disabled={currentPage === totalPages}
                         className='bg-zinc-50 dark:bg-zinc-800'
                     >
-                        <ChevronRight className="w-4 h-4" />
+                        <ChevronRight className="size-4" />
                     </Button>
                 </div>
             </div>

@@ -37,7 +37,7 @@ export function LanguageSelector({ onLanguageChange, currentLang }: LanguageSele
         <div className="relative" ref={dropdownRef}>
             <button
                 onClick={toggleDropdown}
-                className="p-2 rounded-full bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 hover:text-zinc-600 dark:hover:text-zinc-400 transition-colors flex items-center"
+                className="flex items-center rounded-full bg-zinc-100 p-2 text-zinc-900 transition-colors hover:text-zinc-600 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:text-zinc-400"
                 aria-label="Select language"
                 aria-expanded={isOpen}
                 aria-haspopup="true"
@@ -45,16 +45,16 @@ export function LanguageSelector({ onLanguageChange, currentLang }: LanguageSele
                 <Languages size={24} />
             </button>
             {isOpen && (
-                <div className="absolute right-0 mt-2 py-2 min-w-[120px] whitespace-nowrap bg-white dark:bg-zinc-800 rounded-md shadow-xl z-20">
+                <div className="absolute right-0 z-20 mt-2 min-w-[120px] whitespace-nowrap rounded-md bg-white py-2 shadow-xl dark:bg-zinc-800">
                     <button
-                        className={`block px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 w-full text-left ${currentLang === 'en' ? 'bg-zinc-100 dark:bg-zinc-700' : ''
+                        className={`block w-full px-4 py-2 text-left text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-700 ${currentLang === 'en' ? 'bg-zinc-100 dark:bg-zinc-700' : ''
                             }`}
                         onClick={() => selectLanguage('en')}
                     >
                         English
                     </button>
                     <button
-                        className={`block px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 w-full text-left ${currentLang === 'zh' ? 'bg-zinc-100 dark:bg-zinc-700' : ''
+                        className={`block w-full px-4 py-2 text-left text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-700 ${currentLang === 'zh' ? 'bg-zinc-100 dark:bg-zinc-700' : ''
                             }`}
                         onClick={() => selectLanguage('zh')}
                     >
