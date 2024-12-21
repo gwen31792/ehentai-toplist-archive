@@ -18,12 +18,12 @@ export default function RootLayout({
 
   const metadata = {
     en: {
-      title: 'Simple Web App',
-      description: 'A simple web app with dark mode toggle and language selection',
+      title: 'E-Hentai Toplist Archive',
+      description: 'browse past gallery toplists of e-hentai',
     },
     zh: {
-      title: '简单网络应用',
-      description: '一个具有深色模式切换和语言选择功能的简单网络应用',
+      title: 'E 站排行榜存档',
+      description: '浏览过去的 E-Hentai 画廊排行榜',
     },
   }
 

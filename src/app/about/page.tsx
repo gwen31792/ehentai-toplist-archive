@@ -55,12 +55,18 @@ export default function About() {
             <div className="w-full max-w-2xl px-4 text-left text-zinc-800 dark:text-zinc-200">
                 {language === 'en' && (
                     <div>
-                        <h2 className="mb-4 text-2xl font-bold">Background</h2>
-                        <p className="mb-2">some text</p>
-                        <p className="mb-2">some text</p>
-                        <h2 className="mb-4 text-2xl font-bold">english</h2>
-                        <p className="mb-2">some text</p>
-                        <p className="mb-2">some text</p>
+                        <h2 className="mb-4 text-2xl font-bold tracking-wide">Background</h2>
+                        <p className="mb-4 leading-relaxed tracking-wide">E-Hentai does not provide a feature to view past toplists. You can only check the toplists for yesterday, the past month, the past year, or all time. However, there are times when you might want to look at the toplist from a specific point in time.</p>
+                        <p className="mb-4 leading-relaxed tracking-wide">For instance, if you want to view the toplist from two months ago, the past month toplist won&apos;t cover that period, while the past year toplist includes too much data from other months. This makes it difficult for galleries from the target month to stand out among those from the other 11 months.</p>
+                        <p className="mb-4 leading-relaxed tracking-wide">This was my initial motivation for creating this application. I wanted a way to ensure I wouldn’t miss certain toplists and still be able to revisit them months later.</p>
+
+                        <h2 className="mb-4 text-2xl font-bold tracking-wide">Description</h2>
+                        <p className="mb-4 leading-relaxed tracking-wide">This application gathers its data from E-Hentai&apos;s toplists. I scrape the toplist data once a day (minimizing the impact on the server&apos;s load) and store it in a database. You can use this app to access historical toplist data.</p>
+                        <p className='mb-4 leading-relaxed tracking-wide '>The app only provides historical toplist data that E-Hentai itself does not offer. It does not affect E-Hentai&apos;s regular traffic. Users still need to visit the official E-Hentai website to browse specific galleries.</p>
+                        <p className='mb-4 leading-relaxed tracking-wide'>For technical details about this application, including the tech stack, the underlying infrastructure, the frontend-backend interaction architecture, and changelog, please refer to the <Link href="https://github.com/gwen31792/ehentai-toplist-archive" className='text-blue-600 hover:underline dark:text-blue-400'>GitHub repository</Link>.</p>
+
+                        <h2 className="mb-4 text-2xl font-bold tracking-wide">Feedback</h2>
+                        <p className='mb-4 leading-relaxed tracking-wide'>If you have any questions or suggestions for features, feel free to submit them via <Link href="https://github.com/gwen31792/ehentai-toplist-archive/issues" className='text-blue-600 hover:underline dark:text-blue-400'>GitHub Issues</Link>.</p>
                     </div>
                 )}
                 {language === 'zh' && (
