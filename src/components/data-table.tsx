@@ -88,8 +88,10 @@ export function DataTable({ data, language, loading }: DataTableProps) {
     // 加载状态下的骨架屏行
     const SkeletonRow = () => (
         <TableRow>
-            <TableCell><Skeleton className="h-4 w-[100px] bg-zinc-200" /></TableCell>
-            <TableCell><Skeleton className="h-4 w-[200px] bg-zinc-200" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-[80px] bg-zinc-200" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-[300px] bg-zinc-200" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-[120px] bg-zinc-200" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-[150px] bg-zinc-200" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[200px] bg-zinc-200" /></TableCell>
         </TableRow>
     )
@@ -118,6 +120,9 @@ export function DataTable({ data, language, loading }: DataTableProps) {
                 <TableBody>
                     {loading ? (
                         <>
+                            <SkeletonRow />
+                            <SkeletonRow />
+                            <SkeletonRow />
                             <SkeletonRow />
                             <SkeletonRow />
                         </>) :
