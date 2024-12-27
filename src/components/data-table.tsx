@@ -3,6 +3,8 @@
 // TODO: Image 样式优化，固定宽度？
 // TODO: Image 边框收窄
 // TODO: 图片从 cloudflare r2 中读取，这需要先一步优化爬虫
+// TODO: 骨架屏 dark mode
+// TODO: 骨架屏最右边的宽度 
 
 import React, { useState } from 'react'
 import Image from 'next/image'
