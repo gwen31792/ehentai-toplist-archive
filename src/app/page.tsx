@@ -66,7 +66,7 @@ export default function Home() {
         </h1>
         <p className="text-lg font-medium text-zinc-600 dark:text-zinc-400">
           {content[language].description}
-          <Link href="/about" className="text-blue-600 hover:underline dark:text-blue-400">
+          <Link href="/about" className="link-hover-underline text-blue-600 dark:text-blue-400">
             {content[language].aboutLink}
           </Link>
           {language === 'zh' && '了解更多'}

@@ -81,3 +81,20 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .link-hover-underline {
+    @apply relative;
+  }
+
+  .link-hover-underline::after {
+    content: '';
+    @apply absolute w-0 h-[1px] bottom-0 left-0;
+    @apply bg-blue-600 dark:bg-blue-400;
+    transition: width 0.3s ease-in-out;
+  }
+
+  .link-hover-underline:hover::after {
+    @apply w-full;
+  }
+}
