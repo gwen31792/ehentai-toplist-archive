@@ -1,5 +1,5 @@
 -- npx wrangler d1 execute ehentai-toplist-archive --local --file=./src/db/mock.sql
--- npx wrangler d1 execute ehentai-toplist-archive --local --command="SELECT * FROM galleries"
+-- npx wrangler d1 execute ehentai-toplist-archive --local --command="SELECT * FROM toplist_items_2025"
 
 DROP TABLE IF EXISTS galleries;
 DROP TABLE IF EXISTS toplist_items_2023;
@@ -69,3 +69,29 @@ INSERT INTO toplist_items_2023 (gallery_id, rank, list_date, period_type)
 VALUES (2055704, 4, '2023-11-15', 'all');
 INSERT INTO toplist_items_2023 (gallery_id, rank, list_date, period_type)
 VALUES (1284427, 5, '2023-11-15', 'all');
+
+INSERT INTO galleries (gallery_id, gallery_name, gallery_type, tags, published_time, uploader, gallery_length, points, torrents_url, preview_url, gallery_url) 
+VALUES (3176443, '[Ringoya (Alp)] Otaku Tomodachi to no Sex wa Saikou ni Kimochi Ii 3  [Chinese] [無邪気漢化組] [Digital]', 'Doujinshi', 'chinese, translated, original, f:anal intercourse, f:anal, f:asphyxiation, f:big breasts, f:blowjob, f:chinese dress, f:deepthroat, f:exposed clothing, f:glasses', '2024-12-30', 'Kaito.', 104, 842097, 'https://e-hentai.org/gallerytorrents.php?gid=3176443&t=3c35f14f9e', 'https://ehgt.org/w/01/699/65397-gbdvzu9k.webp', 'https://e-hentai.org/g/3176443/3c35f14f9e/');
+INSERT INTO galleries (gallery_id, gallery_name, gallery_type, tags, published_time, uploader, gallery_length, points, torrents_url, preview_url, gallery_url)
+VALUES (3176494, "[Vpan's EXTASY (Satou Kuuki)] Vanishing Reality 2 ~Mashou Zessei~ [Digital]", 'Doujinshi', 'original, f:big breasts, f:corruption, f:crotch tattoo, f:gloves, f:leotard, f:magical girl, f:netorare, f:sole female, f:stockings, f:tentacles, m:gender change', '2024-12-30', 'みぅく', 54, 411912, 'https://e-hentai.org/gallerytorrents.php?gid=3176494&t=6958f50f99', 'https://ehgt.org/w/01/699/69633-ftczila0.webp', 'https://e-hentai.org/g/3176494/6958f50f99/');
+INSERT INTO galleries (gallery_id, gallery_name, gallery_type, tags, published_time, uploader, gallery_length, points, torrents_url, preview_url, gallery_url)
+VALUES (3176518, '[Bad Mushrooms (Chicke III, 4why)] 1/5 no Renai Kanjou (Gotoubun no Hanayome) [Chinese] [Digital]', 'Doujinshi', 'chinese, gotoubun no hanayome, ichika nakano, nino nakano, f:anal, f:big breasts, f:blowjob, f:multimouth blowjob, m:sole male, x:ffm threesome, x:group, bad mushrooms', '2024-12-30', 'みぅく', 135, 390021, 'https://e-hentai.org/gallerytorrents.php?gid=3176518&t=12d331b200', 'https://ehgt.org/w/01/699/71343-boy074hs.webp', 'https://e-hentai.org/g/3176518/12d331b200/');
+INSERT INTO galleries (gallery_id, gallery_name, gallery_type, tags, published_time, uploader, gallery_length, points, torrents_url, preview_url, gallery_url)
+VALUES (3177735, '[Ringoya (Alp)] Otaku Tomodachi to no Sex wa Saikou ni Kimochi Ii 3  [Chinese] [無邪気漢化組] [Digital]', 'Doujinshi', 'chinese, translated, original, f:anal intercourse, f:anal, f:asphyxiation, f:big breasts, f:blowjob, f:chinese dress, f:deepthroat, f:exposed clothing, f:glasses', '2024-12-31', 'Kaito.', 104, 332508, 'https://e-hentai.org/gallerytorrents.php?gid=3177735&t=8a357ad791', 'https://ehgt.org/w/01/699/65397-gbdvzu9k.webp', 'https://e-hentai.org/g/3177735/8a357ad791/');
+INSERT INTO galleries (gallery_id, gallery_name, gallery_type, tags, published_time, uploader, gallery_length, points, torrents_url, preview_url, gallery_url)
+VALUES (3177247, '[小飞鼠(Smallflyingrat)] 危城（全本）', 'Misc', 'chinese, f:blackmail, f:blowjob, f:bondage, f:gag, f:pregnant, smallflyingrat, 3d, uncensored', '2024-12-31', 'smallflyingrat', 386, 328084, 'https://e-hentai.org/gallerytorrents.php?gid=3177247&t=fb24142e8b', 'https://ehgt.org/w/01/700/52376-p0tx9w6u.webp', 'https://e-hentai.org/g/3177247/fb24142e8b/');
+INSERT INTO galleries (gallery_id, gallery_name, gallery_type, tags, published_time, uploader, gallery_length, points, torrents_url, preview_url, gallery_url)
+VALUES (3176723, '[jayep] 妖女大陆01-02', 'Misc', 'chinese, f:big breasts, m:big penis, m:shotacon, 3d, uncensored', '2024-12-30', 'seinicht1111', 714, 259959, 'https://e-hentai.org/gallerytorrents.php?gid=3176723&t=522c4b2761', 'https://ehgt.org/w/01/700/01115-kt9kng6d.webp', 'https://e-hentai.org/g/3176723/522c4b2761/');
+
+INSERT INTO toplist_items_2025 (gallery_id, rank, list_date, period_type)
+VALUES (3176443, 1, '2025-01-01', 'day');
+INSERT INTO toplist_items_2025 (gallery_id, rank, list_date, period_type)
+VALUES (3176494, 2, '2025-01-01', 'day');
+INSERT INTO toplist_items_2025 (gallery_id, rank, list_date, period_type)
+VALUES (3176518, 3, '2025-01-01', 'day');
+INSERT INTO toplist_items_2025 (gallery_id, rank, list_date, period_type)
+VALUES (3177735, 4, '2025-01-01', 'day');
+INSERT INTO toplist_items_2025 (gallery_id, rank, list_date, period_type)
+VALUES (3177247, 5, '2025-01-01', 'day');
+INSERT INTO toplist_items_2025 (gallery_id, rank, list_date, period_type)
+VALUES (3176723, 6, '2025-01-01', 'day');

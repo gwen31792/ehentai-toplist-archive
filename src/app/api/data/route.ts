@@ -2,7 +2,7 @@
 // https://github.com/cloudflare/next-on-pages/issues/760
 export const runtime = 'edge';
 import { drizzle } from 'drizzle-orm/d1'
-import { galleriesTable, toplistItems2023Table } from '@/db/schema'
+import { galleriesTable, toplistItems2023Table, toplistItems2024Table, toplistItems2025Table } from '@/db/schema'
 import { eq, and, getTableColumns } from 'drizzle-orm'
 
 export async function GET(request: Request) {
@@ -12,22 +12,31 @@ export async function GET(request: Request) {
 
     const db = drizzle(process.env.DB);
 
+    // 根据传入的年份，选择对应的表
+    const tableMap = {
+        '2023': toplistItems2023Table,
+        '2024': toplistItems2024Table,
+        '2025': toplistItems2025Table,
+    };
+    const toplistItemsTable = tableMap[list_date_param.split('-')[0] as keyof typeof tableMap];
+
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { list_date, period_type, ...rest } = getTableColumns(toplistItems2023Table)
+    const { list_date, period_type, ...rest } = getTableColumns(toplistItemsTable)
     const result = await db.select(
         {
             ...rest,
             ...getTableColumns(galleriesTable),
         }
     )
-        .from(toplistItems2023Table)
+        .from(toplistItemsTable)
         .where(
             and(
-                eq(toplistItems2023Table.list_date, list_date_param),
-                eq(toplistItems2023Table.period_type, period_type_param),
+                eq(toplistItemsTable.list_date, list_date_param),
+                eq(toplistItemsTable.period_type, period_type_param),
             ))
-        .innerJoin(galleriesTable, eq(toplistItems2023Table.gallery_id, galleriesTable.gallery_id))
-        .orderBy(toplistItems2023Table.rank)
+        .innerJoin(galleriesTable, eq(toplistItemsTable.gallery_id, galleriesTable.gallery_id))
+        .orderBy(toplistItemsTable.rank)
 
     return Response.json(result)
 }
