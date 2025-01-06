@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronsLeft, ChevronRight, ChevronsRight } from 'lucide-react'
 import { DayPicker } from 'react-day-picker'
 
 import { cn } from '@/lib/utils'
@@ -15,8 +15,44 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: CalendarProps) {
+  const [month, setMonth] = React.useState(new Date())
+
+  const handlePreviousYear = () => {
+    setMonth((prev) => {
+      const newDate = new Date(prev)
+      newDate.setFullYear(newDate.getFullYear() - 1)
+      return newDate
+    })
+  }
+
+  const handleNextYear = () => {
+    setMonth((prev) => {
+      const newDate = new Date(prev)
+      newDate.setFullYear(newDate.getFullYear() + 1)
+      return newDate
+    })
+  }
+
+  const handlePreviousMonth = () => {
+    setMonth((prev) => {
+      const newDate = new Date(prev)
+      newDate.setMonth(newDate.getMonth() - 1)
+      return newDate
+    })
+  }
+
+  const handleNextMonth = () => {
+    setMonth((prev) => {
+      const newDate = new Date(prev)
+      newDate.setMonth(newDate.getMonth() + 1)
+      return newDate
+    })
+  }
+
   return (
     <DayPicker
+      month={month}
+      onMonthChange={setMonth}
       showOutsideDays={showOutsideDays}
       className={cn('p-3', className)}
       classNames={{
@@ -54,11 +90,55 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        IconLeft: ({ className, ...props }) => (
-          <ChevronLeft className={cn('h-4 w-4', className)} {...props} />
-        ),
-        IconRight: ({ className, ...props }) => (
-          <ChevronRight className={cn('h-4 w-4', className)} {...props} />
+        Caption: ({ displayMonth }) => (
+          <div className="flex items-center justify-between">
+            <button
+              type="button"
+              onClick={handlePreviousYear}
+              className={cn(
+                buttonVariants({ variant: 'outline' }),
+                'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100'
+              )}
+            >
+              <ChevronsLeft className="size-4" />
+            </button>
+            <button
+              type="button"
+              onClick={handlePreviousMonth}
+              className={cn(
+                buttonVariants({ variant: 'outline' }),
+                'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100'
+              )}
+            >
+              <ChevronLeft className="size-4" />
+            </button>
+            <span className="text-sm font-medium">
+              {displayMonth.toLocaleString('default', {
+                month: 'long',
+                year: 'numeric',
+              })}
+            </span>
+            <button
+              type="button"
+              onClick={handleNextMonth}
+              className={cn(
+                buttonVariants({ variant: 'outline' }),
+                'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100'
+              )}
+            >
+              <ChevronRight className="size-4" />
+            </button>
+            <button
+              type="button"
+              onClick={handleNextYear}
+              className={cn(
+                buttonVariants({ variant: 'outline' }),
+                'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100'
+              )}
+            >
+              <ChevronsRight className="size-4" />
+            </button>
+          </div>
         ),
       }}
       {...props}
