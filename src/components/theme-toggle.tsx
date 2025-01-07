@@ -1,4 +1,5 @@
 // TODO: use animation like https://elysiajs.com/
+// TODO: 解决 dark mode 下刷新的闪烁问题 FOUC
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -8,14 +9,19 @@ export function ThemeToggle() {
     const [darkMode, setDarkMode] = useState(false)
 
     useEffect(() => {
-        const isDarkMode = document.documentElement.classList.contains('dark')
+        // 从 localStorage 获取主题状态
+        const savedTheme = localStorage.getItem('theme')
+        const isDarkMode = savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)
         setDarkMode(isDarkMode)
+        document.documentElement.classList.toggle('dark', isDarkMode)
     }, [])
 
     const toggleDarkMode = () => {
         const newDarkMode = !darkMode
         setDarkMode(newDarkMode)
         document.documentElement.classList.toggle('dark', newDarkMode)
+        // 保存主题状态到 localStorage
+        localStorage.setItem('theme', newDarkMode ? 'dark' : 'light')
     }
 
     return (
@@ -28,4 +34,3 @@ export function ThemeToggle() {
         </button>
     )
 }
-

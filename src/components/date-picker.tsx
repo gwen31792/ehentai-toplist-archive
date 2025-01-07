@@ -1,10 +1,4 @@
 'use client'
-// TODO: 大的翻页按钮，一次走一年
-// 依赖的是 React DayPicker，无法在这个上面直接加按钮，只能在月份和年份上加 select
-// 但是加 select 的 PR 好久合不进去，官方也不做，这个地方真是自己无法解决的痛点了
-// see also: https://github.com/shadcn-ui/ui/issues/6196
-
-// TODO: 暗黑模式下的颜色调整，已经调整好了，但是方案有点复杂，感觉可以优化一下
 
 import { useState, useEffect, useMemo } from 'react'
 import { format } from 'date-fns'
