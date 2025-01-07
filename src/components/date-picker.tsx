@@ -108,6 +108,7 @@ export function DatePicker({ onDateChange, language }: DatePickerProps) {
                     modifiersStyles={calendarStyles}
                     initialFocus
                     fixedWeeks
+                    language={language}
                 />
             </PopoverContent>
         </Popover>

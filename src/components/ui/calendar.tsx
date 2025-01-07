@@ -1,4 +1,4 @@
-// TODO: 显示的语言，中英切换
+// TODO: 禁止不允许日期范围内的翻页
 'use client'
 
 import * as React from 'react'
@@ -8,7 +8,9 @@ import { DayPicker } from 'react-day-picker'
 import { cn } from '@/lib/utils'
 import { buttonVariants } from '@/components/ui/button'
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker>
+type CalendarProps = React.ComponentProps<typeof DayPicker> & {
+  language?: string
+}
 
 function Calendar({
   className,
@@ -114,7 +116,7 @@ function Calendar({
               <ChevronLeft className="size-4" />
             </button>
             <span className="text-sm font-medium">
-              {displayMonth.toLocaleString('default', {
+              {displayMonth.toLocaleString(props.language || 'default', {
                 month: 'long',
                 year: 'numeric',
               })}
