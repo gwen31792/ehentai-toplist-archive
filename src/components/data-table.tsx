@@ -3,8 +3,7 @@
 // TODO: Image 样式优化，固定宽度？
 // TODO: Image 边框收窄
 // TODO: 图片从 cloudflare r2 中读取，这需要先一步优化爬虫
-// TODO: 骨架屏 dark mode
-// TODO: 骨架屏最右边的宽度 
+// TODO: 优化各列宽度，在加载时，有数据时，无数据时保持一致
 
 import React, { useState } from 'react'
 import Image from 'next/image'
@@ -90,11 +89,11 @@ export function DataTable({ data, language, loading }: DataTableProps) {
     // 加载状态下的骨架屏行
     const SkeletonRow = () => (
         <TableRow>
-            <TableCell><Skeleton className="h-4 w-[80px] bg-zinc-200" /></TableCell>
-            <TableCell><Skeleton className="h-4 w-[300px] bg-zinc-200" /></TableCell>
-            <TableCell><Skeleton className="h-4 w-[120px] bg-zinc-200" /></TableCell>
-            <TableCell><Skeleton className="h-4 w-[150px] bg-zinc-200" /></TableCell>
-            <TableCell><Skeleton className="h-4 w-[200px] bg-zinc-200" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-[80px] bg-zinc-200 dark:bg-zinc-800" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-[300px] bg-zinc-200 dark:bg-zinc-800" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-[120px] bg-zinc-200 dark:bg-zinc-800" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-[150px] bg-zinc-200 dark:bg-zinc-800" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-[500px] bg-zinc-200 dark:bg-zinc-800" /></TableCell>
         </TableRow>
     )
 
@@ -111,7 +110,7 @@ export function DataTable({ data, language, loading }: DataTableProps) {
                                     ${column === 'gallery_name' ? 'w-[300px]' : ''}
                                     ${column === 'gallery_type' ? 'w-[120px]' : ''}
                                     ${column === 'published_time' ? 'w-[150px]' : ''}
-                                    ${column === 'tags' ? 'w-[200px]' : ''}
+                                    ${column === 'tags' ? 'w-[500px]' : ''}
                                 `}
                             >
                                 {content[language].headers[column]}
