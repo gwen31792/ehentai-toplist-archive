@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "vercel-build": "next build",
     "dev": "pnpm generate-types && next dev --turbopack",
     "lint:fix": "eslint ./src --fix",
     "pages:build": "npx @cloudflare/next-on-pages",
