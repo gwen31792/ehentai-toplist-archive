@@ -27,6 +27,9 @@
         "./src/*"
       ],
     },
+    "types": [
+      "./.wrangler/types/runtime"
+    ],
   },
   "include": [
     "next-env.d.ts",
