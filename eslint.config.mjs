@@ -18,7 +18,7 @@ const eslintConfig = [...compat.extends(
   'next/core-web-vitals',
   'next/typescript',
   'eslint:recommended',
-  'plugin:json/recommended-legacy',
+  'plugin:json/recommended-with-comments-legacy',
   'plugin:@typescript-eslint/recommended',
   'plugin:next-on-pages/recommended',
   'plugin:tailwindcss/recommended',
@@ -28,7 +28,7 @@ const eslintConfig = [...compat.extends(
     'json': json,
   },
 }, {
-  files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx', '**/*.mjs'],
+  files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx', '**/*.mjs', '**/*.json'],
 
   languageOptions: {
     parser: tsParser,
@@ -39,6 +39,15 @@ const eslintConfig = [...compat.extends(
     indent: ['error', 2],
     'comma-dangle': ['error', 'always-multiline'],
   },
+
+  overrides: [
+    {
+      files: ['*.json'],
+      rules: {
+        'comma-dangle': ['error', 'never'], 
+      },
+    },
+  ],
 }];
 
 export default eslintConfig;
