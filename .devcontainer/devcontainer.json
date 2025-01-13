@@ -8,11 +8,7 @@
 	"forwardPorts": [
 		3000
 	],
-	"postCreateCommand": [
-		"pnpm install",
-		"git config user.email gwen31792@gmail.com",
-		"git config user.name gwen31792"
-	],
+	"postCreateCommand": "pnpm install",
 	"customizations": {
 		"vscode": {
 			"extensions": [
