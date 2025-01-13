@@ -1,19 +1,18 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/typescript-node
 {
-	"name": "Node.js & TypeScript",
-	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"name": "Ehentai Toplist Archive Dev Container",
 	"build": {
 		"dockerfile": "Dockerfile"
 	},
-	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {},
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	"forwardPorts": [
 		3000
 	],
-	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "pnpm install",
+	"postCreateCommand": [
+		"pnpm install",
+		"git config user.email gwen31792@gmail.com",
+		"git config user.name gwen31792"
+	],
 	"customizations": {
 		"vscode": {
 			"extensions": [
@@ -25,12 +24,13 @@
 				"mechatroner.rainbow-csv",
 				"bradlc.vscode-tailwindcss",
 				"pflannery.vscode-versionlens",
-				"ms-azuretools.vscode-docker"
+				"ms-azuretools.vscode-docker",
+				"GitHub.copilot-chat"
 			]
 		}
-	}
-	// Configure tool-specific properties.
-	// "customizations": {},
-	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-	// "remoteUser": "root"
+	},
+	"remoteUser": "root",
+	"mounts":[
+    	"source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/root/.ssh,type=bind,consistency=cached"
+	]
 }
