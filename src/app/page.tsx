@@ -57,7 +57,7 @@ export default function Home() {
     func();
   }, [selectedDate, selectedType]);
   return (
-    <div className="flex min-h-[550px] flex-col items-center justify-start bg-zinc-100 transition-colors dark:bg-zinc-900">
+    <div className="flex min-h-[calc(100vh+50px)] flex-col items-center justify-start bg-zinc-100 transition-colors dark:bg-zinc-900">
       <div className="absolute right-4 top-4 flex items-center space-x-2">
         <LanguageSelector onLanguageChange={handleLanguageChange} currentLang={language} />
         <GitHubLink />
