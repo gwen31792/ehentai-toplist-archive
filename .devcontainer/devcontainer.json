@@ -8,7 +8,7 @@
 	"forwardPorts": [
 		3000
 	],
-	"postCreateCommand": "./scripts/dev-container.sh",
+	"postCreateCommand": "chmod +x ./scripts/dev-container.sh && ./scripts/dev-container.sh",
 	"customizations": {
 		"vscode": {
 			"extensions": [
