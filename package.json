@@ -4,12 +4,13 @@
   "private": true,
   "scripts": {
     "vercel-build": "next build",
-    "dev": "pnpm generate-types && next dev --turbopack",
+    "dev": "pnpm generate-db && pnpm generate-types && next dev --turbopack",
     "lint:fix": "eslint ./src --fix",
     "pages:build": "npx @cloudflare/next-on-pages",
-    "preview": "pnpm generate-types && pnpm pages:build && wrangler pages dev",
+    "preview": "pnpm generate-db && pnpm generate-types && pnpm pages:build && wrangler pages dev",
     "deploy": "pnpm pages:build && wrangler pages deploy",
-    "generate-types": "wrangler types --experimental-include-runtime"
+    "generate-types": "wrangler types --experimental-include-runtime",
+    "generate-db": "npx wrangler d1 execute ehentai-toplist-archive --local --file=./src/db/mock.sql"
   },
   "dependencies": {
     "@radix-ui/react-hover-card": "^1.1.4",
