@@ -8,7 +8,7 @@
 	"forwardPorts": [
 		3000
 	],
-	"postCreateCommand": "pnpm install",
+	"postCreateCommand": "./scripts/dev-container.sh",
 	"customizations": {
 		"vscode": {
 			"extensions": [
@@ -21,7 +21,8 @@
 				"bradlc.vscode-tailwindcss",
 				"pflannery.vscode-versionlens",
 				"ms-azuretools.vscode-docker",
-				"GitHub.copilot-chat"
+				"GitHub.copilot-chat",
+				"foxundermoon.shell-format"
 			]
 		}
 	},

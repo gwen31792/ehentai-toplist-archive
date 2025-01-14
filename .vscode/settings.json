@@ -18,4 +18,10 @@
         "editor.defaultFormatter": "dbaeumer.vscode-eslint"
     },
     "eslint.format.enable": true,
+    "[shellscript]": {
+        "editor.defaultFormatter": "foxundermoon.shell-format"
+    },
+    "[dockerfile]": {
+        "editor.defaultFormatter": "ms-azuretools.vscode-docker"
+    },
 }
