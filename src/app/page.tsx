@@ -1,4 +1,3 @@
-// TODO: favicon
 'use client'
 
 import { useState, useEffect } from 'react'
