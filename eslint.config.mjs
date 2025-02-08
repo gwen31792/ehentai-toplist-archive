@@ -39,15 +39,10 @@ const eslintConfig = [...compat.extends(
     indent: ['error', 2],
     'comma-dangle': ['error', 'always-multiline'],
   },
-
-  overrides: [
-    {
-      files: ['*.json'],
-      rules: {
-        'comma-dangle': ['error', 'never'], 
-      },
-    },
-  ],
 }];
 
 export default eslintConfig;
+
+// 暂时不考虑切换到 flat config 精简现有的配置
+// 有的插件，比如 eslint-plugin-next-on-pages，不提供直接可以用的 flat config
+// 现在的配置还能用，就先不调整了
