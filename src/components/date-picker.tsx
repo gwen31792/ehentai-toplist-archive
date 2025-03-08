@@ -1,10 +1,9 @@
 'use client'
 
-// TODO: 选择中文时显示中文
-
 import { useState, useEffect, useMemo } from 'react'
 import { format } from 'date-fns'
 import { CalendarIcon } from 'lucide-react'
+import { zhCN, enUS } from 'date-fns/locale'
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -21,6 +20,11 @@ interface DatePickerProps {
     onDateChange: (date: Date) => void,
     language: Language
 }
+
+const localeMap = {
+  en: enUS,
+  zh: zhCN,
+};
 
 export function DatePicker({ onDateChange, language }: DatePickerProps) {
   const [date, setDate] = useState<Date>()
@@ -83,7 +87,7 @@ export function DatePicker({ onDateChange, language }: DatePickerProps) {
           )}
         >
           <CalendarIcon className="mr-2 size-4" />
-          {date ? format(date, 'PPP') : <span>{dateText[language]}</span>}
+          {date ? format(date, 'PPP', { locale: localeMap[language] }) : <span>{dateText[language]}</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent
