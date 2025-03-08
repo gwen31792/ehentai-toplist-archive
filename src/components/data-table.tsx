@@ -155,9 +155,16 @@ export function DataTable({ data, language, loading }: DataTableProps) {
                         {column === 'gallery_name' ? (
                           <HoverCard openDelay={50} closeDelay={100}>
                             <HoverCardTrigger asChild>
-                              <Link href={item.gallery_url} target="_blank" rel="noopener noreferrer">
-                                {item[column]}
-                              </Link>
+                              <div className="size-full">
+                                <Link 
+                                  href={item.gallery_url} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer" 
+                                  className="block size-full"
+                                >
+                                  {item[column]}
+                                </Link>
+                              </div>
                             </HoverCardTrigger>
                             <HoverCardContent side='left' className="p-1">
                               <ImageWithSkeleton 
