@@ -6,7 +6,7 @@
 // TODO: 重新选择表格库，Tanstack Table?
 // TODO: 定制列
 // TODO: 筛选语言
-// TODO: 未选择日期时默认数据
+// TODO: 切换日期和类型时页面的闪烁，考虑固定表头
 
 import React, { useState } from 'react'
 
@@ -131,42 +131,49 @@ export function DataTable({ data, language, loading }: DataTableProps) {
               <SkeletonRow />
               <SkeletonRow />
             </>) :
-            (
-              currentItems.map((item) => (
-                <TableRow key={item.gallery_id} className='dark:hover:bg-zinc-700'>
-                  {columns.map((column) => (
-                    <TableCell
-                      key={column}
-                      className={`
+            currentItems.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center">
+                  {language === 'zh' ? '无数据' : 'No Data'}
+                </TableCell>
+              </TableRow>
+            ) :
+              (
+                currentItems.map((item) => (
+                  <TableRow key={item.gallery_id} className='dark:hover:bg-zinc-700'>
+                    {columns.map((column) => (
+                      <TableCell
+                        key={column}
+                        className={`
                                                 ${column === 'rank' ? 'w-[80px]' : ''}
                                                 ${column === 'gallery_name' ? 'w-[300px]' : ''}
                                                 ${column === 'gallery_type' ? 'w-[120px]' : ''}
                                                 ${column === 'published_time' ? 'w-[150px]' : ''}
                                                 ${column === 'tags' ? 'w-[500px]' : ''}
                                             `}
-                    >
-                      {column === 'gallery_name' ? (
-                        <HoverCard openDelay={50} closeDelay={100}>
-                          <HoverCardTrigger asChild>
-                            <Link href={item.gallery_url} target="_blank" rel="noopener noreferrer">
-                              {item[column]}
-                            </Link>
-                          </HoverCardTrigger>
-                          <HoverCardContent side='left' className="p-1">
-                            <ImageWithSkeleton 
-                              src={item.preview_url} 
-                              alt={item.gallery_name} 
-                            />
-                          </HoverCardContent>
-                        </HoverCard>
-                      ) : (
-                        item[column]
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            )
+                      >
+                        {column === 'gallery_name' ? (
+                          <HoverCard openDelay={50} closeDelay={100}>
+                            <HoverCardTrigger asChild>
+                              <Link href={item.gallery_url} target="_blank" rel="noopener noreferrer">
+                                {item[column]}
+                              </Link>
+                            </HoverCardTrigger>
+                            <HoverCardContent side='left' className="p-1">
+                              <ImageWithSkeleton 
+                                src={item.preview_url} 
+                                alt={item.gallery_name} 
+                              />
+                            </HoverCardContent>
+                          </HoverCard>
+                        ) : (
+                          item[column]
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              )
           }
 
         </TableBody>
