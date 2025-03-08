@@ -1,12 +1,15 @@
 'use client'
 
-// TODO: Image 样式优化，固定宽度？
-// TODO: Image 边框收窄
+// TODO: hover card 点击时会闪烁
 // TODO: 图片从 cloudflare r2 中读取，这需要先一步优化爬虫
 // TODO: 优化各列宽度，在加载时，有数据时，无数据时保持一致
+// TODO: 重新选择表格库，Tanstack Table?
+// TODO: 定制列
+// TODO: 筛选语言
+// TODO: 未选择日期时默认数据
 
 import React, { useState } from 'react'
-import Image from 'next/image'
+
 import Link from 'next/link'
 
 import {
@@ -29,6 +32,7 @@ import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/h
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Language, QueryResponseItem, ContentType } from '@/lib/types'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ImageWithSkeleton } from '@/components/image-with-skeleton'
 
 interface DataTableProps {
     data: QueryResponseItem[]
@@ -149,15 +153,9 @@ export function DataTable({ data, language, loading }: DataTableProps) {
                             </Link>
                           </HoverCardTrigger>
                           <HoverCardContent side='left' className="p-1">
-                            <Image
-                              src={item.preview_url}
-                              alt={item.gallery_name}
-                              width={0}
-                              height={0}
-                              style={{ width: '100%', height: 'auto' }}
-                              sizes='100vw'
-                              quality={100}
-                              className='m-0'
+                            <ImageWithSkeleton 
+                              src={item.preview_url} 
+                              alt={item.gallery_name} 
                             />
                           </HoverCardContent>
                         </HoverCard>
