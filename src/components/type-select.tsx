@@ -5,11 +5,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Language } from '@/lib/types'
+import { Language, ToplistType } from '@/lib/types'
 
 interface TypeSelectProps {
-    type: string
-    onSelectChange: (type: string) => void
+    type: ToplistType
+    onSelectChange: (type: ToplistType) => void
     language: Language
 }
 

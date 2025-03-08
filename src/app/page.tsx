@@ -8,7 +8,7 @@ import { LanguageSelector } from '@/components/language-selector'
 import { TypeSelect } from '@/components/type-select'
 import { DatePicker } from '@/components/date-picker'
 import { DataTable } from '@/components/data-table'
-import { Language, QueryResponseItem } from '@/lib/types'
+import { Language, QueryResponseItem, ToplistType } from '@/lib/types'
 import { format } from 'date-fns';
 
 export default function Home() {
@@ -40,7 +40,7 @@ export default function Home() {
   }
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
-  const [selectedType, setSelectedType] = useState<string>('')
+  const [selectedType, setSelectedType] = useState<ToplistType>('day')
 
   const [data, setData] = useState<QueryResponseItem[]>([]);
   const [loading, setLoading] = useState(true);
