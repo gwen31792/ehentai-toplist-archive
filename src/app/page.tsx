@@ -40,7 +40,7 @@ export default function Home() {
   }
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
-  const [selectedType, setSelectedType] = useState<string>('day')
+  const [selectedType, setSelectedType] = useState<string>('')
 
   const [data, setData] = useState<QueryResponseItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -77,7 +77,7 @@ export default function Home() {
       <div className="flex flex-col items-center space-y-4">
         <div className='flex space-x-4'>
           <DatePicker onDateChange={setSelectedDate} language={language} />
-          <TypeSelect type={selectedType} onSelectChange={setSelectedType} />
+          <TypeSelect type={selectedType} onSelectChange={setSelectedType} language={language} />
         </div>
         <DataTable data={data} language={language} loading={loading} />
       </div>
