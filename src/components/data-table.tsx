@@ -142,13 +142,13 @@ export function DataTable({ data, language, loading }: DataTableProps) {
                                             `}
                     >
                       {column === 'gallery_name' ? (
-                        <HoverCard>
+                        <HoverCard openDelay={50} closeDelay={100}>
                           <HoverCardTrigger asChild>
                             <Link href={item.gallery_url} target="_blank" rel="noopener noreferrer">
                               {item[column]}
                             </Link>
                           </HoverCardTrigger>
-                          <HoverCardContent side='left'>
+                          <HoverCardContent side='left' className="p-1">
                             <Image
                               src={item.preview_url}
                               alt={item.gallery_name}

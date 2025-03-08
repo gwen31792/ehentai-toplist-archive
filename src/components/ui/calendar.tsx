@@ -100,63 +100,63 @@ function Calendar({
           const isPrevYearDisabled = displayMonth < startDate
           const isNextYearDisabled = displayMonth > today
           return (
-          <div className="flex items-center justify-between">
-            <button
-              type="button"
-              onClick={handlePreviousYear}
-              disabled={isPrevYearDisabled}
-              className={cn(
-                buttonVariants({ variant: 'outline' }),
-                'h-7 w-7 bg-transparent p-0',
-                isPrevYearDisabled ? 'opacity-50 cursor-not-allowed' : 'opacity-100 hover:opacity-100'
-              )}
-            >
-              <ChevronsLeft className="size-4" />
-            </button>
-            <button
-              type="button"
-              onClick={handlePreviousMonth}
-              disabled={isPrevMonthDisabled}
-              className={cn(
-                buttonVariants({ variant: 'outline' }),
-                'h-7 w-7 bg-transparent p-0',
-                isPrevMonthDisabled ? 'opacity-50 cursor-not-allowed' : 'opacity-100 hover:opacity-100'
-              )}
-            >
-              <ChevronLeft className="size-4" />
-            </button>
-            <span className="text-sm font-medium">
-              {displayMonth.toLocaleString(props.language || 'default', {
-                month: 'long',
-                year: 'numeric',
-              })}
-            </span>
-            <button
-              type="button"
-              onClick={handleNextMonth}
-              disabled={isNextMonthDisabled}
-              className={cn(
-                buttonVariants({ variant: 'outline' }),
-                'h-7 w-7 bg-transparent p-0',
-                isNextMonthDisabled ? 'opacity-50 cursor-not-allowed' : 'opacity-100 hover:opacity-100'
-              )}
-            >
-              <ChevronRight className="size-4" />
-            </button>
-            <button
-              type="button"
-              onClick={handleNextYear}
-              disabled={isNextYearDisabled}
-              className={cn(
-                buttonVariants({ variant: 'outline' }),
-                'h-7 w-7 bg-transparent p-0',
-                isNextYearDisabled ? 'opacity-50 cursor-not-allowed' : 'opacity-100 hover:opacity-100'
-              )}
-            >
-              <ChevronsRight className="size-4" />
-            </button>
-          </div>
-        )},
+            <div className="flex items-center justify-between">
+              <button
+                type="button"
+                onClick={handlePreviousYear}
+                disabled={isPrevYearDisabled}
+                className={cn(
+                  buttonVariants({ variant: 'outline' }),
+                  'h-7 w-7 bg-transparent p-0',
+                  isPrevYearDisabled ? 'opacity-50 cursor-not-allowed' : 'opacity-100 hover:opacity-100',
+                )}
+              >
+                <ChevronsLeft className="size-4" />
+              </button>
+              <button
+                type="button"
+                onClick={handlePreviousMonth}
+                disabled={isPrevMonthDisabled}
+                className={cn(
+                  buttonVariants({ variant: 'outline' }),
+                  'h-7 w-7 bg-transparent p-0',
+                  isPrevMonthDisabled ? 'opacity-50 cursor-not-allowed' : 'opacity-100 hover:opacity-100',
+                )}
+              >
+                <ChevronLeft className="size-4" />
+              </button>
+              <span className="text-sm font-medium">
+                {displayMonth.toLocaleString(props.language || 'default', {
+                  month: 'long',
+                  year: 'numeric',
+                })}
+              </span>
+              <button
+                type="button"
+                onClick={handleNextMonth}
+                disabled={isNextMonthDisabled}
+                className={cn(
+                  buttonVariants({ variant: 'outline' }),
+                  'h-7 w-7 bg-transparent p-0',
+                  isNextMonthDisabled ? 'opacity-50 cursor-not-allowed' : 'opacity-100 hover:opacity-100',
+                )}
+              >
+                <ChevronRight className="size-4" />
+              </button>
+              <button
+                type="button"
+                onClick={handleNextYear}
+                disabled={isNextYearDisabled}
+                className={cn(
+                  buttonVariants({ variant: 'outline' }),
+                  'h-7 w-7 bg-transparent p-0',
+                  isNextYearDisabled ? 'opacity-50 cursor-not-allowed' : 'opacity-100 hover:opacity-100',
+                )}
+              >
+                <ChevronsRight className="size-4" />
+              </button>
+            </div>
+          )},
       }}
       {...props}
     />
