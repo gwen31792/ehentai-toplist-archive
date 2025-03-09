@@ -1,12 +1,5 @@
 'use client'
 
-// TODO: hover card 点击时会闪烁
-// TODO: 图片从 cloudflare r2 中读取，这需要先一步优化爬虫
-// TODO: 重新选择表格库，Tanstack Table?
-// TODO: 定制列
-// TODO: 筛选语言
-// TODO: No Data 的不居中
-
 import React, { useState } from 'react'
 
 import Link from 'next/link'

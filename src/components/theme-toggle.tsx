@@ -1,5 +1,3 @@
-// TODO: use animation like https://elysiajs.com/
-// TODO: 解决 dark mode 下刷新的闪烁问题 FOUC
 'use client'
 
 import { useState, useEffect } from 'react'

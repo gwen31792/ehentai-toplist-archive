@@ -48,7 +48,6 @@ export default function Home() {
     async function func() {
       setLoading(true);
       const dateString = format(selectedDate, 'yyyy-MM-dd');
-      // TODO: 似乎缓存没有生效，到生产再看看
       const res = await fetch(`/api/data?list_date=${dateString}&period_type=${selectedType}`, { cache: 'force-cache' });
       setData(await res.json());
       setLoading(false);
