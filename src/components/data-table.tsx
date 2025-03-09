@@ -35,11 +35,11 @@ import { ImageWithSkeleton } from '@/components/image-with-skeleton'
 
 // 定义列宽度配置
 const columnWidths = {
-  rank: 'w-[80px] min-w-[80px]',
-  gallery_name: 'w-[300px] min-w-[200px]',
-  gallery_type: 'w-[120px] min-w-[100px]',
-  published_time: 'w-[150px] min-w-[120px]',
-  tags: 'w-[500px] min-w-[200px] flex-1',
+  rank: 'w-[60px] min-w-[60px]',
+  gallery_name: 'w-[25%] min-w-[150px]',
+  gallery_type: 'w-[10%] min-w-[80px]',
+  published_time: 'w-[15%] min-w-[100px]',
+  tags: 'w-[40%] min-w-[150px]',
 }
 
 interface DataTableProps {
@@ -110,16 +110,16 @@ export function DataTable({ data, language, loading }: DataTableProps) {
   )
 
   return (
-    <div className="mx-auto mt-8 w-full max-w-4xl">
-      {/* 表格容器 - 固定布局 */}
-      <div className="w-full overflow-x-auto">
-        <Table className="w-full table-fixed">
+    <div className="mx-auto mt-8 w-full max-w-[80%]">
+      {/* 表格容器 - 自适应布局 */}
+      <div className="w-full">
+        <Table className="w-full">
           <TableHeader>
             <TableRow>
               {columns.map((column) => (
                 <TableHead
                   key={column}
-                  className={`${columnWidths[column as keyof typeof columnWidths]}`}
+                  className={`${columnWidths[column as keyof typeof columnWidths]} break-words`}
                 >
                   {content[language].headers[column]}
                 </TableHead>
@@ -137,7 +137,7 @@ export function DataTable({ data, language, loading }: DataTableProps) {
               </>) :
               currentItems.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center">
+                  <TableCell colSpan={5} className="h-24 text-center">
                     {language === 'zh' ? '无数据' : 'No Data'}
                   </TableCell>
                 </TableRow>
@@ -148,17 +148,17 @@ export function DataTable({ data, language, loading }: DataTableProps) {
                       {columns.map((column) => (
                         <TableCell
                           key={column}
-                          className={`${columnWidths[column as keyof typeof columnWidths]} align-top`}
+                          className={`${columnWidths[column as keyof typeof columnWidths]} break-words align-top`}
                         >
                           {column === 'gallery_name' ? (
                             <HoverCard openDelay={50} closeDelay={100}>
                               <HoverCardTrigger asChild>
-                                <div className="size-full">
+                                <div className="w-full">
                                   <Link 
                                     href={item.gallery_url} 
                                     target="_blank" 
                                     rel="noopener noreferrer" 
-                                    className="block size-full break-words"
+                                    className="block w-full break-words"
                                   >
                                     {item[column]}
                                   </Link>
