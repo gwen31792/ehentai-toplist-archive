@@ -2,11 +2,10 @@
 
 // TODO: hover card 点击时会闪烁
 // TODO: 图片从 cloudflare r2 中读取，这需要先一步优化爬虫
-// TODO: 优化各列宽度，在加载时，有数据时，无数据时保持一致
 // TODO: 重新选择表格库，Tanstack Table?
 // TODO: 定制列
 // TODO: 筛选语言
-// TODO: 切换日期和类型时页面的闪烁，考虑固定表头
+// TODO: No Data 的不居中
 
 import React, { useState } from 'react'
 
@@ -33,6 +32,15 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Language, QueryResponseItem, ContentType } from '@/lib/types'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ImageWithSkeleton } from '@/components/image-with-skeleton'
+
+// 定义列宽度配置
+const columnWidths = {
+  rank: 'w-[80px] min-w-[80px]',
+  gallery_name: 'w-[300px] min-w-[200px]',
+  gallery_type: 'w-[120px] min-w-[100px]',
+  published_time: 'w-[150px] min-w-[120px]',
+  tags: 'w-[500px] min-w-[200px] flex-1',
+}
 
 interface DataTableProps {
     data: QueryResponseItem[]
@@ -93,98 +101,91 @@ export function DataTable({ data, language, loading }: DataTableProps) {
   // 加载状态下的骨架屏行
   const SkeletonRow = () => (
     <TableRow>
-      <TableCell><Skeleton className="h-4 w-[80px] bg-zinc-200 dark:bg-zinc-800" /></TableCell>
-      <TableCell><Skeleton className="h-4 w-[300px] bg-zinc-200 dark:bg-zinc-800" /></TableCell>
-      <TableCell><Skeleton className="h-4 w-[120px] bg-zinc-200 dark:bg-zinc-800" /></TableCell>
-      <TableCell><Skeleton className="h-4 w-[150px] bg-zinc-200 dark:bg-zinc-800" /></TableCell>
-      <TableCell><Skeleton className="h-4 w-[500px] bg-zinc-200 dark:bg-zinc-800" /></TableCell>
+      {columns.map((column) => (
+        <TableCell key={column} className={`${columnWidths[column as keyof typeof columnWidths]}`}>
+          <Skeleton className="h-4 w-full bg-zinc-200 dark:bg-zinc-800" />
+        </TableCell>
+      ))}
     </TableRow>
   )
 
   return (
     <div className="mx-auto mt-8 w-full max-w-4xl">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            {columns.map((column) => (
-              <TableHead
-                key={column}
-                className={`
-                                    ${column === 'rank' ? 'w-[80px]' : ''}
-                                    ${column === 'gallery_name' ? 'w-[300px]' : ''}
-                                    ${column === 'gallery_type' ? 'w-[120px]' : ''}
-                                    ${column === 'published_time' ? 'w-[150px]' : ''}
-                                    ${column === 'tags' ? 'w-[500px]' : ''}
-                                `}
-              >
-                {content[language].headers[column]}
-              </TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {loading ? (
-            <>
-              <SkeletonRow />
-              <SkeletonRow />
-              <SkeletonRow />
-              <SkeletonRow />
-              <SkeletonRow />
-            </>) :
-            currentItems.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center">
-                  {language === 'zh' ? '无数据' : 'No Data'}
-                </TableCell>
-              </TableRow>
-            ) :
-              (
-                currentItems.map((item) => (
-                  <TableRow key={item.gallery_id} className='dark:hover:bg-zinc-700'>
-                    {columns.map((column) => (
-                      <TableCell
-                        key={column}
-                        className={`
-                                                ${column === 'rank' ? 'w-[80px]' : ''}
-                                                ${column === 'gallery_name' ? 'w-[300px]' : ''}
-                                                ${column === 'gallery_type' ? 'w-[120px]' : ''}
-                                                ${column === 'published_time' ? 'w-[150px]' : ''}
-                                                ${column === 'tags' ? 'w-[500px]' : ''}
-                                            `}
-                      >
-                        {column === 'gallery_name' ? (
-                          <HoverCard openDelay={50} closeDelay={100}>
-                            <HoverCardTrigger asChild>
-                              <div className="size-full">
-                                <Link 
-                                  href={item.gallery_url} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer" 
-                                  className="block size-full"
-                                >
-                                  {item[column]}
-                                </Link>
-                              </div>
-                            </HoverCardTrigger>
-                            <HoverCardContent side='left' className="p-1">
-                              <ImageWithSkeleton 
-                                src={item.preview_url} 
-                                alt={item.gallery_name} 
-                              />
-                            </HoverCardContent>
-                          </HoverCard>
-                        ) : (
-                          item[column]
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              )
-          }
-
-        </TableBody>
-      </Table>
+      {/* 表格容器 - 固定布局 */}
+      <div className="w-full overflow-x-auto">
+        <Table className="w-full table-fixed">
+          <TableHeader>
+            <TableRow>
+              {columns.map((column) => (
+                <TableHead
+                  key={column}
+                  className={`${columnWidths[column as keyof typeof columnWidths]}`}
+                >
+                  {content[language].headers[column]}
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <>
+                <SkeletonRow />
+                <SkeletonRow />
+                <SkeletonRow />
+                <SkeletonRow />
+                <SkeletonRow />
+              </>) :
+              currentItems.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center">
+                    {language === 'zh' ? '无数据' : 'No Data'}
+                  </TableCell>
+                </TableRow>
+              ) :
+                (
+                  currentItems.map((item) => (
+                    <TableRow key={item.gallery_id} className='dark:hover:bg-zinc-700'>
+                      {columns.map((column) => (
+                        <TableCell
+                          key={column}
+                          className={`${columnWidths[column as keyof typeof columnWidths]} align-top`}
+                        >
+                          {column === 'gallery_name' ? (
+                            <HoverCard openDelay={50} closeDelay={100}>
+                              <HoverCardTrigger asChild>
+                                <div className="size-full">
+                                  <Link 
+                                    href={item.gallery_url} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    className="block size-full break-words"
+                                  >
+                                    {item[column]}
+                                  </Link>
+                                </div>
+                              </HoverCardTrigger>
+                              <HoverCardContent side='left' className="p-1">
+                                <ImageWithSkeleton 
+                                  src={item.preview_url} 
+                                  alt={item.gallery_name} 
+                                />
+                              </HoverCardContent>
+                            </HoverCard>
+                          ) : column === 'tags' ? (
+                            <div className="whitespace-normal break-words">{item[column]}</div>
+                          ) : (
+                            item[column]
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                )
+            }
+          </TableBody>
+        </Table>
+      </div>
+      
       <div className="mt-4 flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <span className="text-sm text-zinc-700 dark:text-zinc-300">
