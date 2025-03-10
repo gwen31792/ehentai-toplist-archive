@@ -2,7 +2,6 @@
 ## 高优先级
 - [ ] 限流器，防止额度被刷没了
 - [ ] 图片在空闲时后台加载
-- [ ] shadcn/ui 升级
 
 ## 中优先级
 - [ ] 对数据库查询的缓存，从 F12 看，相同内容还是会重发请求
@@ -22,6 +21,9 @@
 - [ ] SEO 优化，see also: https://vercel.com/blog/how-core-web-vitals-affect-seo
 - [ ] 检查 CLS 问题，see also: https://liudon.com/posts/fix-blog-cls/
 - [ ] 检查 ipv6 支持
+
+## 实在闲得没事再做
+- [ ] shadcn/ui 升级，tailwind css 升级到 v4 本身不复杂，但是需要在 `globals.css` 里面改一堆，而且没有什么收益，先不管了
 
 # 专项
 ## 图片加载速度解决方案
