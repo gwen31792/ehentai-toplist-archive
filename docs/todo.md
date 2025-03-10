@@ -1,6 +1,6 @@
 # 待开发事项
 ## 高优先级
-- [ ] 限流器，防止额度被刷没了
+- [ ] 日历关闭后再打开的默认月份
 - [ ] 图片在空闲时后台加载
 
 ## 中优先级
@@ -40,3 +40,6 @@ WebP Cloud Services 这里感觉可以不做了，公网连接怎么也不会有
 - [ ] WebP Cloud Services
 - [ ] 图片从 cloudflare r2 中读取
 - [ ] skeleton 尺寸抖动
+
+# 已完成
+- [x] 限流器，防止额度被刷没了，用 durable object 写令牌桶太麻烦了，直接用 cloudflare 自带的 waf 了
