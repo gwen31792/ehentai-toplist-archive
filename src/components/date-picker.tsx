@@ -28,12 +28,19 @@ const localeMap = {
 
 export function DatePicker({ onDateChange, language }: DatePickerProps) {
   const [date, setDate] = useState<Date>()
-  // 添加新的 state 来保存当前查看的月份
-  const [month, setMonth] = useState<Date>(new Date())
+  // 设置初始月份为当前日期或选中日期
+  const [month, setMonth] = useState<Date>(date || new Date())
   const dateText = {
     en: 'Pick a date',
     zh: '选择日期',
   };
+
+  // 当选择日期变化时，同步更新月份显示
+  useEffect(() => {
+    if (date) {
+      setMonth(date);
+    }
+  }, [date]);
 
   // 禁止查看没有数据的日期
   const disabledDays: Matcher = {
@@ -99,10 +106,13 @@ export function DatePicker({ onDateChange, language }: DatePickerProps) {
           selected={date}
           required={true} // 防止取消点击传输 undefined 日期
           onSelect={(newDate) => {
-            setDate(newDate)
-            onDateChange(newDate as Date)
+            if (newDate) {
+              setDate(newDate)
+              setMonth(newDate) // 同步更新月份显示
+              onDateChange(newDate as Date)
+            }
           }}
-          defaultMonth={month}
+          month={month}
           onMonthChange={setMonth}
           modifiers={{ disabled: disabledDays }}
           modifiersStyles={calendarStyles}

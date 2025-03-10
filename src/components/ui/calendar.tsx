@@ -15,48 +15,49 @@ function Calendar({
   className,
   classNames,
   showOutsideDays = true,
+  month,
+  onMonthChange,
   ...props
 }: CalendarProps) {
   const startDate = new Date(2023, 10, 15)
   const today = new Date()
-  const [month, setMonth] = React.useState(today)
   
   const handlePreviousYear = () => {
-    setMonth((prev) => {
-      const newDate = new Date(prev)
+    if (onMonthChange) {
+      const newDate = new Date(month || today)
       newDate.setFullYear(newDate.getFullYear() - 1)
-      return newDate
-    })
+      onMonthChange(newDate)
+    }
   }
 
   const handleNextYear = () => {
-    setMonth((prev) => {
-      const newDate = new Date(prev)
+    if (onMonthChange) {
+      const newDate = new Date(month || today)
       newDate.setFullYear(newDate.getFullYear() + 1)
-      return newDate
-    })
+      onMonthChange(newDate)
+    }
   }
 
   const handlePreviousMonth = () => {
-    setMonth((prev) => {
-      const newDate = new Date(prev)
+    if (onMonthChange) {
+      const newDate = new Date(month || today)
       newDate.setMonth(newDate.getMonth() - 1)
-      return newDate
-    })
+      onMonthChange(newDate)
+    }
   }
 
   const handleNextMonth = () => {
-    setMonth((prev) => {
-      const newDate = new Date(prev)
+    if (onMonthChange) {
+      const newDate = new Date(month || today)
       newDate.setMonth(newDate.getMonth() + 1)
-      return newDate
-    })
+      onMonthChange(newDate)
+    }
   }
 
   return (
     <DayPicker
-      month={month}
-      onMonthChange={setMonth}
+      month={month || today}
+      onMonthChange={onMonthChange}
       showOutsideDays={showOutsideDays}
       className={cn('p-3', className)}
       classNames={{
