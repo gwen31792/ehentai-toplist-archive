@@ -10,7 +10,6 @@
 - [ ] skeleton 时列宽收窄
 
 ## 低优先级
-- [ ] 国际化路由，see also: https://blog.cloudflare.com/cloudflare-radar-localization-journey/
 - [ ] hover card 点击时会闪烁，用各种 ai 试了，都不行，以后慢慢研究，chakra-ui 的 hover card 似乎点击不会闪烁
 - [ ] No Data 不居中，不过这个情况也没几个人能看到
 - [ ] 重新选择表格库，Tanstack Table?
@@ -22,7 +21,8 @@
 - [ ] 检查 ipv6 支持
 
 ## 实在闲得没事再做
-- [ ] shadcn/ui 升级，tailwind css 升级到 v4 本身不复杂，但是需要在 `globals.css` 里面改一堆，而且没有什么收益，先不管了
+- [ ] shadcn/ui 升级，试了一下，tailwind css 升级到 v4 本身不复杂，但是需要在 `globals.css` 里面改一堆，而且没有什么收益，先不管了
+- [ ] 国际化路由，see also: https://blog.cloudflare.com/cloudflare-radar-localization-journey/, 没尝试只是看了一下，性价比不高，未来没有添加更多语言的计划，目前硬编码也挺好
 
 # 专项
 ## 图片加载速度解决方案
