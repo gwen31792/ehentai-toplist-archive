@@ -83,6 +83,16 @@ VALUES (3177247, '[小飞鼠(Smallflyingrat)] 危城（全本）', 'Misc', 'chin
 INSERT INTO galleries (gallery_id, gallery_name, gallery_type, tags, published_time, uploader, gallery_length, points, torrents_url, preview_url, gallery_url)
 VALUES (3176723, '[jayep] 妖女大陆01-02', 'Misc', 'chinese, f:big breasts, m:big penis, m:shotacon, 3d, uncensored', '2024-12-30', 'seinicht1111', 714, 259959, 'https://e-hentai.org/gallerytorrents.php?gid=3176723&t=522c4b2761', 'https://ehgt.org/w/01/700/01115-kt9kng6d.webp', 'https://e-hentai.org/g/3176723/522c4b2761/');
 
+INSERT INTO galleries (gallery_id, gallery_name, gallery_type, tags, published_time, uploader, gallery_length, points, torrents_url, preview_url, gallery_url)
+VALUES (3177985, '[もすきーと音。 (ぐれーともす)] 文学少女は染められる2（是小狐狸哦）', 'Doujinshi', 'chinese, translated, original, f:big breasts, f:bikini, f:eye-covering bang, f:kemonomimi, f:netorare, f:netorase, f:schoolgirl uniform, f:sole female, f:stockings', '2024-12-31', 'mini13', 61, 123904, 'https://e-hentai.org/gallerytorrents.php?gid=3177985&t=279fe416ec', 'https://ehgt.org/w/01/698/60917-h38v11mt.webp', 'https://e-hentai.org/g/3177985/279fe416ec/');
+INSERT INTO galleries (gallery_id, gallery_name, gallery_type, tags, published_time, uploader, gallery_length, points, torrents_url, preview_url, gallery_url)
+VALUES (3176542, '[Fatalpulse (Asanagi)] Jinsei Recycle - RECYCLE of the LIFE [Digital]', 'Doujinshi', 'original, f:ahegao, f:asphyxiation, f:big breasts, f:blowjob, f:eye-covering bang, f:foot licking, f:nakadashi, f:stockings, f:twintails, f:x-ray, m:glasses', '2024-12-30', 'みぅく', 53, 105354, 'https://e-hentai.org/gallerytorrents.php?gid=3176542&t=6820d31b49', 'https://ehgt.org/w/01/699/73435-b4np9kjl.webp', 'https://e-hentai.org/g/3176542/6820d31b49/');
+INSERT INTO galleries (gallery_id, gallery_name, gallery_type, tags, published_time, uploader, gallery_length, points, torrents_url, preview_url, gallery_url)
+VALUES (3176507, '[Aodouhu (Neromashin)] Omae no Kaa-chan Ikutoki no Kao Sugee Busu da zo w After [Digital]', 'Doujinshi', 'original, f:ahegao, f:anal intercourse, f:anal, f:ball sucking, f:bbw, f:beauty mark, f:big areolae, f:big ass, f:big breasts, f:big nipples, f:bikini', '2024-12-30', 'nothingbutfire', 50, 889434, 'https://e-hentai.org/gallerytorrents.php?gid=3176507&t=f5db53806e', 'https://ehgt.org/w/01/699/69556-0inrzi5m.webp', 'https://e-hentai.org/g/3176507/f5db53806e/');
+INSERT INTO galleries (gallery_id, gallery_name, gallery_type, tags, published_time, uploader, gallery_length, points, torrents_url, preview_url, gallery_url)
+VALUES (3177297, '(C105) [Gessyu (Chouzetsu Bishoujo mine)] Gehenna no Meushi 2 (Blue Archive) [Chinese] [空気系☆漢化]', 'Doujinshi', 'chinese, translated, blue archive, ako amau, f:big breasts, f:halo, f:lactation, f:stockings, gessyu, chouzetsu bishoujo mine', '2024-12-31', 'NEET☆遥', 24, 129652, 'https://e-hentai.org/gallerytorrents.php?gid=3177297&t=1ef869cbb4', 'https://ehgt.org/w/01/700/58562-dfdi897c.webp', 'https://e-hentai.org/g/3177297/1ef869cbb4/');
+
+
 INSERT INTO toplist_items_2025 (gallery_id, rank, list_date, period_type)
 VALUES (3176443, 1, '2025-01-01', 'day');
 INSERT INTO toplist_items_2025 (gallery_id, rank, list_date, period_type)
@@ -95,3 +105,11 @@ INSERT INTO toplist_items_2025 (gallery_id, rank, list_date, period_type)
 VALUES (3177247, 5, '2025-01-01', 'day');
 INSERT INTO toplist_items_2025 (gallery_id, rank, list_date, period_type)
 VALUES (3176723, 6, '2025-01-01', 'day');
+INSERT INTO toplist_items_2025 (gallery_id, rank, list_date, period_type)
+VALUES (3177985, 7, '2025-01-01', 'day');
+INSERT INTO toplist_items_2025 (gallery_id, rank, list_date, period_type)
+VALUES (3176542, 8, '2025-01-01', 'day');
+INSERT INTO toplist_items_2025 (gallery_id, rank, list_date, period_type)
+VALUES (3176507, 9, '2025-01-01', 'day');
+INSERT INTO toplist_items_2025 (gallery_id, rank, list_date, period_type)
+VALUES (3177297, 10, '2025-01-01', 'day');

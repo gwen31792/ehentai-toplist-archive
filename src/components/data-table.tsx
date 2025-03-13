@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 
 import Link from 'next/link'
+import Image from 'next/image'
 
 import {
   Table,
@@ -25,6 +26,27 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Language, QueryResponseItem, ContentType } from '@/lib/types'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ImageWithSkeleton } from '@/components/image-with-skeleton'
+
+// 隐藏图片预加载组件
+const PreloadImage = ({ src }: { src: string }) => {
+  return (
+    <div className="pointer-events-none absolute opacity-0" style={{ width: 0, height: 0, overflow: 'hidden' }}>
+      <Image
+        src={src}
+        alt="预加载图片"
+        width={0}
+        height={0}
+        style={{ 
+          width: '100%', 
+          height: 'auto',
+        }}
+        sizes='100vw'
+        quality={100}
+        className='m-0'
+      />
+    </div>
+  )
+}
 
 // 定义列宽度配置
 const columnWidths = {
@@ -155,6 +177,7 @@ export function DataTable({ data, language, loading }: DataTableProps) {
                                   >
                                     {item[column]}
                                   </Link>
+                                  <PreloadImage src={item.preview_url} />
                                 </div>
                               </HoverCardTrigger>
                               <HoverCardContent side='left' className="p-1">
