@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
 import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/hover-card'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Language, QueryResponseItem, ContentType } from '@/lib/types'
@@ -51,6 +52,7 @@ const PreloadImage = ({ src }: { src: string }) => {
 // 定义列宽度配置
 const columnWidths = {
   rank: 'w-[60px] min-w-[60px]',
+  preview: 'w-[200px] min-w-[200px]',
   gallery_name: 'w-[25%] min-w-[150px]',
   gallery_type: 'w-[10%] min-w-[80px]',
   published_time: 'w-[15%] min-w-[100px]',
@@ -77,6 +79,7 @@ export function DataTable({ data, language, loading }: DataTableProps) {
       page: 'Page',
       of: 'of',
       description: 'Description',
+      showPreview: 'show preview directly',
     },
     zh: {
       headers: {
@@ -90,11 +93,13 @@ export function DataTable({ data, language, loading }: DataTableProps) {
       page: '页',
       of: '/',
       description: '描述',
+      showPreview: '直接显示预览图',
     },
   }
 
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(10)
+  const [showPreview, setShowPreview] = useState(false)
 
   const indexOfLastItem = currentPage * itemsPerPage
   const indexOfFirstItem = indexOfLastItem - itemsPerPage
@@ -111,7 +116,11 @@ export function DataTable({ data, language, loading }: DataTableProps) {
     setCurrentPage(1)
   }
 
-  const columns: (keyof QueryResponseItem)[] = ['rank', 'gallery_name', 'gallery_type', 'published_time', 'tags'];
+  // 根据showPreview状态动态设置columns
+  const baseColumns: (keyof QueryResponseItem)[] = ['rank', 'gallery_name', 'gallery_type', 'published_time', 'tags'];
+  const columns = showPreview 
+    ? ['rank', 'preview', ...baseColumns.slice(1)] 
+    : baseColumns;
 
   // 加载状态下的骨架屏行
   const SkeletonRow = () => (
@@ -126,6 +135,23 @@ export function DataTable({ data, language, loading }: DataTableProps) {
 
   return (
     <div className="mx-auto mt-8 w-full max-w-[80%]">
+      {/* 预览图开关 */}
+      <div className="mb-4 flex items-center">
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="show-preview"
+            checked={showPreview}
+            onCheckedChange={setShowPreview}
+          />
+          <label
+            htmlFor="show-preview"
+            className="text-sm font-medium text-zinc-700 dark:text-zinc-300 cursor-pointer"
+          >
+            {content[language].showPreview}
+          </label>
+        </div>
+      </div>
+      
       {/* 表格容器 - 自适应布局 */}
       <div className="w-full">
         <Table className="w-full">
@@ -136,7 +162,9 @@ export function DataTable({ data, language, loading }: DataTableProps) {
                   key={column}
                   className={`${columnWidths[column as keyof typeof columnWidths]} break-words`}
                 >
-                  {content[language].headers[column]}
+                  {column === 'preview' 
+                    ? (language === 'zh' ? '预览图' : 'Preview') 
+                    : content[language].headers[column as keyof typeof content[typeof language]['headers']]}
                 </TableHead>
               ))}
             </TableRow>
@@ -152,7 +180,7 @@ export function DataTable({ data, language, loading }: DataTableProps) {
               </>) :
               currentItems.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center">
+                  <TableCell colSpan={columns.length} className="h-24 text-center">
                     {language === 'zh' ? '无数据' : 'No Data'}
                   </TableCell>
                 </TableRow>
@@ -165,32 +193,51 @@ export function DataTable({ data, language, loading }: DataTableProps) {
                           key={column}
                           className={`${columnWidths[column as keyof typeof columnWidths]} break-words align-top`}
                         >
-                          {column === 'gallery_name' ? (
-                            <HoverCard openDelay={50} closeDelay={100}>
-                              <HoverCardTrigger asChild>
-                                <div className="w-full">
-                                  <Link 
-                                    href={item.gallery_url} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer" 
-                                    className="block w-full break-words"
-                                  >
-                                    {item[column]}
-                                  </Link>
-                                  <PreloadImage src={item.preview_url} />
-                                </div>
-                              </HoverCardTrigger>
-                              <HoverCardContent side='left' className="p-1">
-                                <ImageWithSkeleton 
-                                  src={item.preview_url} 
-                                  alt={item.gallery_name} 
-                                />
-                              </HoverCardContent>
-                            </HoverCard>
+                          {column === 'preview' ? (
+                            <div className="w-full h-full min-h-[150px]">
+                              <ImageWithSkeleton 
+                                src={item.preview_url} 
+                                alt={item.gallery_name}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          ) : column === 'gallery_name' ? (
+                            showPreview ? (
+                              <Link 
+                                href={item.gallery_url} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="block w-full break-words"
+                              >
+                                {item[column]}
+                              </Link>
+                            ) : (
+                              <HoverCard openDelay={50} closeDelay={100}>
+                                <HoverCardTrigger asChild>
+                                  <div className="w-full">
+                                    <Link 
+                                      href={item.gallery_url} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer" 
+                                      className="block w-full break-words"
+                                    >
+                                      {item[column]}
+                                    </Link>
+                                    <PreloadImage src={item.preview_url} />
+                                  </div>
+                                </HoverCardTrigger>
+                                <HoverCardContent side='left' className="p-1">
+                                  <ImageWithSkeleton 
+                                    src={item.preview_url} 
+                                    alt={item.gallery_name} 
+                                  />
+                                </HoverCardContent>
+                              </HoverCard>
+                            )
                           ) : column === 'tags' ? (
-                            <div className="whitespace-normal break-words">{item[column]}</div>
+                            <div className="whitespace-normal break-words">{item[column as keyof QueryResponseItem]}</div>
                           ) : (
-                            item[column]
+                            item[column as keyof QueryResponseItem]
                           )}
                         </TableCell>
                       ))}

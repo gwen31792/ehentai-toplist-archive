@@ -28,6 +28,7 @@ export interface ContentType {
         page: string;
         of: string;
         description: string;
+        showPreview: string;
     };
     zh: {
         headers: {
@@ -37,5 +38,6 @@ export interface ContentType {
         page: string;
         of: string;
         description: string;
+        showPreview: string;
     };
 }
