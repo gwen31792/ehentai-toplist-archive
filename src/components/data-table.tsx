@@ -181,7 +181,7 @@ export function DataTable({ data, language, loading }: DataTableProps) {
               currentItems.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={columns.length} className="h-24 text-center">
-                    {language === 'zh' ? '无数据' : 'No Data'}
+                    {language === 'zh' ? '无数据，请换个日期再试' : 'No Data, please try another date'}
                   </TableCell>
                 </TableRow>
               ) :

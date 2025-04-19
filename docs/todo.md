@@ -20,6 +20,7 @@
 - [ ] 检查 CLS 问题，see also: https://liudon.com/posts/fix-blog-cls/
 - [ ] 检查 ipv6 支持
 - [ ] 迁移到 @opennextjs/cloudflare，see also: https://blog.cloudflare.com/deploying-nextjs-apps-to-cloudflare-workers-with-the-opennext-adapter/
+- [ ] tag 中文翻译
 
 ## 实在闲得没事再做
 - [ ] shadcn/ui 升级，试了一下，tailwind css 升级到 v4 本身不复杂，但是需要在 `globals.css` 里面改一堆，而且没有什么收益，先不管了
