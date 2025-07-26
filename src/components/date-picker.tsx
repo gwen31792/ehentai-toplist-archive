@@ -87,7 +87,7 @@ export function DatePicker({ onDateChange, language }: DatePickerProps) {
     <Popover>
       <PopoverTrigger asChild>
         <Button
-          variant={'outline'}
+          variant={'outline-solid'}
           className={cn(
             'w-[280px] justify-start text-left font-normal bg-zinc-50 dark:bg-zinc-800',
             !date && 'text-muted-foreground',

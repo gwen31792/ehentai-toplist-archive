@@ -262,10 +262,10 @@ export function DataTable({ data, language, loading }: DataTableProps) {
               <SelectValue placeholder={itemsPerPage.toString()} />
             </SelectTrigger>
             <SelectContent className='bg-zinc-50 dark:bg-zinc-800'>
-              <SelectItem value="10" className="dark:hover:bg-zinc-700 dark:data-[highlighted]:bg-zinc-700">10</SelectItem>
-              <SelectItem value="20" className="dark:hover:bg-zinc-700 dark:data-[highlighted]:bg-zinc-700">20</SelectItem>
-              <SelectItem value="50" className="dark:hover:bg-zinc-700 dark:data-[highlighted]:bg-zinc-700">50</SelectItem>
-              <SelectItem value="100" className="dark:hover:bg-zinc-700 dark:data-[highlighted]:bg-zinc-700">100</SelectItem>
+              <SelectItem value="10" className="dark:hover:bg-zinc-700 dark:data-highlighted:bg-zinc-700">10</SelectItem>
+              <SelectItem value="20" className="dark:hover:bg-zinc-700 dark:data-highlighted:bg-zinc-700">20</SelectItem>
+              <SelectItem value="50" className="dark:hover:bg-zinc-700 dark:data-highlighted:bg-zinc-700">50</SelectItem>
+              <SelectItem value="100" className="dark:hover:bg-zinc-700 dark:data-highlighted:bg-zinc-700">100</SelectItem>
             </SelectContent>
           </Select>
         </div>

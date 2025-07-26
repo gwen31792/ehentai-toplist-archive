@@ -67,7 +67,7 @@ function Calendar({
         caption_label: 'text-sm font-medium',
         nav: 'space-x-1 flex items-center',
         nav_button: cn(
-          buttonVariants({ variant: 'outline' }),
+          buttonVariants({ variant: 'outline-solid' }),
           'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100',
         ),
         nav_button_previous: 'absolute left-1',
@@ -107,7 +107,7 @@ function Calendar({
                 onClick={handlePreviousYear}
                 disabled={isPrevYearDisabled}
                 className={cn(
-                  buttonVariants({ variant: 'outline' }),
+                  buttonVariants({ variant: 'outline-solid' }),
                   'h-7 w-7 bg-transparent p-0',
                   isPrevYearDisabled ? 'opacity-50 cursor-not-allowed' : 'opacity-100 hover:opacity-100',
                 )}
@@ -119,7 +119,7 @@ function Calendar({
                 onClick={handlePreviousMonth}
                 disabled={isPrevMonthDisabled}
                 className={cn(
-                  buttonVariants({ variant: 'outline' }),
+                  buttonVariants({ variant: 'outline-solid' }),
                   'h-7 w-7 bg-transparent p-0',
                   isPrevMonthDisabled ? 'opacity-50 cursor-not-allowed' : 'opacity-100 hover:opacity-100',
                 )}
@@ -137,7 +137,7 @@ function Calendar({
                 onClick={handleNextMonth}
                 disabled={isNextMonthDisabled}
                 className={cn(
-                  buttonVariants({ variant: 'outline' }),
+                  buttonVariants({ variant: 'outline-solid' }),
                   'h-7 w-7 bg-transparent p-0',
                   isNextMonthDisabled ? 'opacity-50 cursor-not-allowed' : 'opacity-100 hover:opacity-100',
                 )}
@@ -149,7 +149,7 @@ function Calendar({
                 onClick={handleNextYear}
                 disabled={isNextYearDisabled}
                 className={cn(
-                  buttonVariants({ variant: 'outline' }),
+                  buttonVariants({ variant: 'outline-solid' }),
                   'h-7 w-7 bg-transparent p-0',
                   isNextYearDisabled ? 'opacity-50 cursor-not-allowed' : 'opacity-100 hover:opacity-100',
                 )}
