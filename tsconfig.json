@@ -28,7 +28,7 @@
       ],
     },
     "types": [
-      "./.wrangler/types/runtime"
+      "./worker-configuration"
     ],
   },
   "include": [

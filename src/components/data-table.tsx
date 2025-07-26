@@ -53,10 +53,10 @@ const PreloadImage = ({ src }: { src: string }) => {
 const columnWidths = {
   rank: 'w-[60px] min-w-[60px]',
   preview: 'w-[200px] min-w-[200px]',
-  gallery_name: 'w-[25%] min-w-[150px]',
+  gallery_name: 'w-[15%] min-w-[100px]',
   gallery_type: 'w-[10%] min-w-[80px]',
   published_time: 'w-[15%] min-w-[100px]',
-  tags: 'w-[40%] min-w-[150px]',
+  tags: 'w-[50%] min-w-[150px]',
 }
 
 interface DataTableProps {
