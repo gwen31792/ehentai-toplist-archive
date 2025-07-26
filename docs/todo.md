@@ -23,7 +23,6 @@
 - [ ] tag 中文翻译
 
 ## 实在闲得没事再做
-- [ ] shadcn/ui 升级，试了一下，tailwind css 升级到 v4 本身不复杂，但是需要在 `globals.css` 里面改一堆，而且没有什么收益，先不管了
 - [ ] 国际化路由，see also: https://blog.cloudflare.com/cloudflare-radar-localization-journey/, 没尝试只是看了一下，性价比不高，未来没有添加更多语言的计划，目前硬编码也挺好
 
 # 专项
@@ -46,3 +45,4 @@ WebP Cloud Services 这里感觉可以不做了，公网连接怎么也不会有
 - [x] 限流器，防止额度被刷没了，用 durable object 写令牌桶太麻烦了，直接用 cloudflare 自带的 waf 了
 - [x] 日历关闭后再打开的默认月份
 - [x] 图片在空闲时后台加载
+- [x] shadcn/ui 升级，试了一下，tailwind css 升级到 v4 本身不复杂，但是需要在 `globals.css` 里面改一堆，而且没有什么收益，先不管了
