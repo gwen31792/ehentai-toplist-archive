@@ -21,7 +21,6 @@ const eslintConfig = [...compat.extends(
   'plugin:json/recommended-with-comments-legacy',
   'plugin:@typescript-eslint/recommended',
   'plugin:next-on-pages/recommended',
-  'plugin:tailwindcss/recommended',
 ), {
   plugins: {
     'next-on-pages': nextOnPages,
@@ -35,9 +34,9 @@ const eslintConfig = [...compat.extends(
   },
 
   rules: {
-    quotes: ['error', 'single'],
+    // quotes: ['error', 'single'],
     indent: ['error', 2],
-    'comma-dangle': ['error', 'always-multiline'],
+    // 'comma-dangle': ['error', 'always-multiline'],
   },
 }];
 
