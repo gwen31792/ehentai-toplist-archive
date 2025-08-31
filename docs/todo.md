@@ -22,6 +22,7 @@
 - [ ] 迁移到 @opennextjs/cloudflare，see also: https://blog.cloudflare.com/deploying-nextjs-apps-to-cloudflare-workers-with-the-opennext-adapter/
 - [ ] tag 中文翻译
 - [ ] 等 eslint-plugin-tailwindcss 支持 Tailwind CSS v4 后重新添加到项目中
+- [ ] galleries 表回扫详细数据，比如 Rating
 
 ## 实在闲得没事再做
 - [ ] 国际化路由，see also: https://blog.cloudflare.com/cloudflare-radar-localization-journey/, 没尝试只是看了一下，性价比不高，未来没有添加更多语言的计划，目前硬编码也挺好

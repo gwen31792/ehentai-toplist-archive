@@ -113,3 +113,23 @@ INSERT INTO toplist_items_2025 (gallery_id, rank, list_date, period_type)
 VALUES (3176507, 9, '2025-01-01', 'day');
 INSERT INTO toplist_items_2025 (gallery_id, rank, list_date, period_type)
 VALUES (3177297, 10, '2025-01-01', 'day');
+INSERT INTO toplist_items_2025 (gallery_id, rank, list_date, period_type)
+VALUES (3176443, 11, '2025-01-01', 'day');
+INSERT INTO toplist_items_2025 (gallery_id, rank, list_date, period_type)
+VALUES (3176494, 12, '2025-01-01', 'day');
+INSERT INTO toplist_items_2025 (gallery_id, rank, list_date, period_type)
+VALUES (3176518, 13, '2025-01-01', 'day');
+INSERT INTO toplist_items_2025 (gallery_id, rank, list_date, period_type)
+VALUES (3177735, 14, '2025-01-01', 'day');
+INSERT INTO toplist_items_2025 (gallery_id, rank, list_date, period_type)
+VALUES (3177247, 15, '2025-01-01', 'day');
+INSERT INTO toplist_items_2025 (gallery_id, rank, list_date, period_type)
+VALUES (3176723, 16, '2025-01-01', 'day');
+INSERT INTO toplist_items_2025 (gallery_id, rank, list_date, period_type)
+VALUES (3177985, 17, '2025-01-01', 'day');
+INSERT INTO toplist_items_2025 (gallery_id, rank, list_date, period_type)
+VALUES (3176542, 18, '2025-01-01', 'day');
+INSERT INTO toplist_items_2025 (gallery_id, rank, list_date, period_type)
+VALUES (3176507, 19, '2025-01-01', 'day');
+INSERT INTO toplist_items_2025 (gallery_id, rank, list_date, period_type)
+VALUES (3177297, 20, '2025-01-01', 'day');

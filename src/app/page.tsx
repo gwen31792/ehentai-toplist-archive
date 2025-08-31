@@ -78,7 +78,11 @@ export default function Home() {
           <DatePicker onDateChange={setSelectedDate} language={language} />
           <TypeSelect type={selectedType} onSelectChange={setSelectedType} language={language} />
         </div>
-        <DataTable data={data} language={language} loading={loading} />
+        <div className="w-full space-y-12">
+          <div className="w-full">
+            <DataTable data={data} language={language} loading={loading} />
+          </div>
+        </div>
       </div>
 
     </div>
