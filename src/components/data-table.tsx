@@ -6,10 +6,12 @@ import {
   useReactTable,
   getCoreRowModel,
   getPaginationRowModel,
+  getFilteredRowModel,
   createColumnHelper,
   flexRender,
   VisibilityState,
   ColumnSizingState,
+  ColumnFiltersState,
 } from '@tanstack/react-table'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -21,19 +23,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Button } from '@/components/ui/button'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
-import { Switch } from '@/components/ui/switch'
 import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/hover-card'
-import { Settings } from 'lucide-react'
 import { Language, QueryResponseItem } from '@/lib/types'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ImageWithSkeleton } from '@/components/image-with-skeleton'
 import { TablePagination } from '@/components/table-pagination'
+import { TableHeaderControls } from '@/components/table-header-controls'
 
 interface DataTableProps {
   data: QueryResponseItem[]
@@ -84,8 +79,6 @@ const CONTENT = {
     itemsPerPage: 'Items per page',
     page: 'Page',
     of: 'of',
-    columns: 'Columns',
-    toggleColumns: 'Toggle columns',
   },
   zh: {
     headers: {
@@ -105,8 +98,6 @@ const CONTENT = {
     itemsPerPage: '每页项目数',
     page: '页',
     of: '/',
-    columns: '列设置',
-    toggleColumns: '选择显示的列',
   },
 } as const
 
@@ -117,11 +108,53 @@ export function DataTable({ data, language, loading }: DataTableProps) {
   })
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({})
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set())
+  const [allTags, setAllTags] = useState<string[]>([])
+  type TagFilterMode = 'or' | 'and'
+  const [tagFilterMode, setTagFilterMode] = useState<TagFilterMode>('or')
   
   // 基于语言进行 memo，保持引用稳定
   const content = useMemo(() => CONTENT[language], [language])
   // 对数据引用进行 memo
   const memoData = useMemo(() => data, [data])
+  
+  // 提取所有唯一标签
+  const extractedTags = useMemo(() => {
+    const tagSet = new Set<string>()
+    data.forEach(item => {
+      if (item.tags) {
+  item.tags.split(/\s*,\s*/).forEach(tag => {
+          if (tag.trim()) {
+            tagSet.add(tag.trim())
+          }
+        })
+      }
+    })
+    return Array.from(tagSet).sort()
+  }, [data])
+  
+  // 初始化标签状态
+  useEffect(() => {
+    setAllTags(extractedTags)
+    if (extractedTags.length > 0 && selectedTags.size === 0) {
+      setSelectedTags(new Set(extractedTags))
+    }
+  }, [extractedTags])
+  
+  // 更新列过滤器（加入模式与全选状态，切换 OR/AND/全选都会触发重算）
+  useEffect(() => {
+    setColumnFilters([
+      {
+        id: 'tags',
+        value: {
+          values: Array.from(selectedTags),
+    allSelected: selectedTags.size > 0 && selectedTags.size === extractedTags.length,
+          mode: tagFilterMode,
+        },
+      },
+    ])
+  }, [selectedTags, tagFilterMode, extractedTags.length])
   // 数据变化时重置页码，避免跨数据集残留页码
   useEffect(() => {
     setPagination((p) => ({ ...p, pageIndex: 0 }))
@@ -218,6 +251,26 @@ export function DataTable({ data, language, loading }: DataTableProps) {
     savePageSize(pagination.pageSize)
   }, [pagination.pageSize, savePageSize])
 
+  // 初始化与持久化：标签筛选模式（OR/AND），默认 OR
+  useEffect(() => {
+    const saved = localStorage.getItem('table-tag-filter-mode')
+    if (saved === 'or' || saved === 'and') {
+      setTagFilterMode(saved)
+    }
+  }, [])
+
+  const saveTagFilterMode = useDebouncedCallback((mode: TagFilterMode) => {
+    try {
+      localStorage.setItem('table-tag-filter-mode', mode)
+    } catch {
+      console.warn('Failed to save tag filter mode')
+    }
+  }, 200)
+
+  useEffect(() => {
+    saveTagFilterMode(tagFilterMode)
+  }, [tagFilterMode, saveTagFilterMode])
+
   const CellWrapper = ({ children }: { children: React.ReactNode }) => (
     <div className="whitespace-normal break-words text-sm">
       {children}
@@ -307,6 +360,34 @@ export function DataTable({ data, language, loading }: DataTableProps) {
       header: () => content.headers.tags,
       cell: info => <CellWrapper>{info.getValue()}</CellWrapper>,
       size: 300,
+      filterFn: (row, columnId, filterValue: { values: string[]; allSelected: boolean; mode: 'or' | 'and' }) => {
+        const tags = row.getValue(columnId) as string
+        if (!tags) return false
+
+        const itemTags = tags
+          .split(/\s*,\s*/)
+          .map(tag => tag.trim())
+          .filter(tag => tag)
+
+        const selected = new Set(filterValue.values)
+
+        // 全选：显示所有行；空选：不显示任何行
+        if (filterValue.allSelected) return true
+        if (selected.size === 0) return false
+
+        if (filterValue.mode === 'or') {
+          // 这一行的标签里，有任意一个被选中就展示这一行
+          for (const t of itemTags) {
+            if (selected.has(t)) return true
+          }
+          return false
+        }
+        // AND：这一行的标签里，全部被选中才展示这一行
+        for (const t of itemTags) {
+          if (!selected.has(t)) return false
+        }
+        return true
+      },
     }),
     columnHelper.accessor('published_time', {
       header: () => content.headers.published_time,
@@ -352,15 +433,18 @@ export function DataTable({ data, language, loading }: DataTableProps) {
     data: memoData,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onPaginationChange: setPagination,
     onColumnVisibilityChange: setColumnVisibility,
     onColumnSizingChange: setColumnSizing,
+    onColumnFiltersChange: setColumnFilters,
     columnResizeMode: 'onChange',
     state: {
       pagination,
       columnVisibility,
       columnSizing,
+      columnFilters,
     },
     manualPagination: false,
   })
@@ -377,44 +461,15 @@ export function DataTable({ data, language, loading }: DataTableProps) {
 
   return (
     <div className="mx-auto mt-8 w-full max-w-[95%]">
-      <div className="mb-4 flex justify-end">
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className="bg-zinc-50 dark:bg-zinc-800"
-            >
-              <Settings className="mr-2 h-4 w-4" />
-              {content.columns}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent align="end" className="w-[200px] bg-zinc-50 dark:bg-zinc-800">
-            <div className="space-y-2">
-              <h4 className="font-medium leading-none text-zinc-900 dark:text-zinc-100">
-                {content.toggleColumns}
-              </h4>
-              <div className="space-y-2">
-                {table.getAllColumns().filter(column => column.getCanHide()).map(column => (
-                  <div key={column.id} className="flex items-center space-x-2">
-                    <Switch
-                      id={column.id}
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                      className="data-[state=checked]:bg-zinc-900 dark:data-[state=checked]:bg-zinc-100"
-                    />
-                    <label
-                      htmlFor={column.id}
-                      className="text-sm font-normal text-zinc-700 dark:text-zinc-300 cursor-pointer"
-                    >
-                      {content.headers[column.id as keyof typeof content.headers]}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
-      </div>
+      <TableHeaderControls
+        table={table}
+        language={language}
+        selectedTags={selectedTags}
+        allTags={allTags}
+        tagFilterMode={tagFilterMode}
+        onSelectedTagsChange={setSelectedTags}
+        onTagFilterModeChange={setTagFilterMode}
+      />
       
       <div className="w-full overflow-x-auto">
         <Table className="w-full" style={{ tableLayout: 'fixed' }}>
@@ -466,7 +521,7 @@ export function DataTable({ data, language, loading }: DataTableProps) {
                 <SkeletonRow />
                 <SkeletonRow />
               </>
-            ) : data.length === 0 ? (
+            ) : table.getFilteredRowModel().rows.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={table.getVisibleLeafColumns().length} className="h-24 text-center">
                   {language === 'zh' ? '无数据，请换个日期再试' : 'No data, please try another date'}
