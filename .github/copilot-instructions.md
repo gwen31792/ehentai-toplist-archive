@@ -1,74 +1,46 @@
-# AI Coding Agent Instructions
+# AI Coding Agent Guide
 
-## Project Overview
-This is an E-Hentai toplist archive website built with React 19 + Next.js 15, deployed on Cloudflare Pages with Edge Runtime. It displays historical E-Hentai gallery rankings with bilingual support (English/Chinese).
+This repo is a React 19 + Next.js 15 app on Cloudflare Pages (Edge). It archives E‑Hentai toplists with bilingual UI (en/zh).
 
-## Architecture & Key Patterns
+## Non‑negotiables
+- Edge only: every page and API route exports `export const runtime = 'edge'` (see `src/app/**` and `src/app/api/data/route.ts`).
+- Worker environment: no Node APIs (fs, net). Use `@cloudflare/next-on-pages` and `getRequestContext().env.DB` for D1.
+- Do not edit base shadcn/ui in `src/components/ui/**`; add or wrap via `src/components/**`.
 
-### Edge Runtime Requirement
-**CRITICAL**: All App Router pages and API routes MUST export `runtime = 'edge'` for Cloudflare Workers compatibility:
-```typescript
-export const runtime = 'edge';
-```
+## Run, build, deploy
+- Dev (recreates local DB and CF types): `pnpm dev`
+- Fix lint: `pnpm lint:fix`
+- Preview Cloudflare build locally: `pnpm preview`
+- Deploy to Cloudflare Pages: `pnpm deploy`
+- One‑offs: `pnpm generate-db` (executes `src/db/mock.sql` to D1 local), `pnpm generate-types` (Workers types), `pnpm pages:build` (adapter build)
 
-### Database Design
-- **Cloudflare D1 (SQLite)** with Drizzle ORM
-- **Year-partitioned tables**: `toplist_items_2023`, `toplist_items_2024`, `toplist_items_2025`
-- **Dynamic table selection** in API routes based on date year (see `src/app/api/data/route.ts`)
-- **Join pattern**: toplist tables link to `galleries` table via `gallery_id`
+## Data model and queries
+- Cloudflare D1 (SQLite) + Drizzle ORM.
+- Year‑partitioned toplist tables: `toplist_items_2023|2024|2025`; gallery master: `galleries`.
+- API picks the toplist table by year from `list_date` (YYYY‑MM‑DD) via `tableMap` and joins `galleries` on `gallery_id`.
+- Use `getTableColumns(table)` to spread columns; exclude `list_date`/`period_type` from select when joining; order by `rank`.
+	- Reference: `src/app/api/data/route.ts`, `src/db/schema.ts`.
 
-### Development Workflow
-```bash
-# Essential dev setup (regenerates DB + types)
-pnpm dev
+## API contract (read‑only)
+- GET `/api/data?list_date=YYYY-MM-DD&period_type=day|month|year|all`
+- Returns array of `{...Gallery, rank}` (see `src/lib/types.ts`: `Gallery`, `QueryResponseItem`).
+- Responses are cached on the client fetch with `{ cache: 'force-cache' }`.
 
-# Before any DB work
-pnpm generate-db  # Creates local D1 with mock data
+## App data flow and UI
+- Client components only (no SSR for listing). `src/app/page.tsx` stores `language` in `localStorage`, fetches data on date/type change, and renders `DataTable`.
+- Key components: `DatePicker`, `TypeSelect`, `DataTable`, `LanguageSelector`, `ThemeToggle`, `GitHubLink`, `ImageWithSkeleton`.
+- Tailwind CSS v4 + shadcn/ui. Remote images allowed: `https://ehgt.org` (`next.config.mjs`).
 
-# Before deployment
-pnpm generate-types  # Updates Cloudflare Workers types
-```
+## Add support for a new year
+1) Add `toplistItems{YEAR}Table` in `src/db/schema.ts`.
+2) Add that table to `tableMap` in `src/app/api/data/route.ts`.
+3) Seed local dev by extending `src/db/mock.sql`, then run `pnpm generate-db`.
 
-### Cloudflare Integration
-- Uses `@cloudflare/next-on-pages` adapter
-- D1 database binding accessed via `getRequestContext().env.DB`
-- Development platform auto-setup in `next.config.mjs`
-- Force cache API responses: `{ cache: 'force-cache' }`
+## File map to start from
+- API: `src/app/api/data/route.ts` (Edge handler; D1 via `drizzle(getRequestContext().env.DB)`)
+- Schema and seed: `src/db/schema.ts`, `src/db/mock.sql`
+- Types: `src/lib/types.ts` (`Language`, `ToplistType`, `Gallery`, `QueryResponseItem`)
+- App shell and pages: `src/app/layout.tsx`, `src/app/page.tsx`, `src/app/about/page.tsx`
+- UI: `src/components/**` (business) vs `src/components/ui/**` (base)
 
-### Component Patterns
-- **Bilingual state**: Language stored in localStorage, passed down as props
-- **Data fetching**: Client-side fetch with loading states (no SSR due to dynamic filtering)
-- **Image optimization**: `ImageWithSkeleton` component handles E-Hentai image loading
-- **Background preloading**: Hidden `PreloadImage` components for performance
-
-### shadcn/ui Integration
-- Tailwind CSS v4 + shadcn/ui components in `src/components/ui/`
-- Custom components wrap shadcn/ui: `DataTable`, `DatePicker`, `TypeSelect`
-- Theme toggle with dark mode support
-
-## File Structure Rules
-- `src/app/` - Next.js App Router (all files need `runtime = 'edge'`)
-- `src/components/ui/` - shadcn/ui base components (DO NOT modify)
-- `src/components/` - Custom business components
-- `src/db/schema.ts` - Drizzle table definitions (year-based tables)
-- `src/lib/types.ts` - TypeScript interfaces for Gallery and UI types
-
-## Common Tasks
-
-### Adding New Year Support
-1. Add table in `src/db/schema.ts`: `toplistItems{YEAR}Table`
-2. Update `tableMap` in `src/app/api/data/route.ts`
-3. Update `src/db/mock.sql` with sample data
-
-### Component Development
-- Always support both `en` and `zh` languages
-- Use `Language` and content objects for translations
-- Wrap external images with `ImageWithSkeleton`
-- Follow existing pagination patterns in `DataTable`
-
-### Database Queries
-- Use Drizzle's `getTableColumns()` to exclude fields from selection
-- Always join with `galleriesTable` for complete data
-- Order by `rank` for toplist results
-
-Never modify shadcn/ui components directly - create wrapper components instead.
+Tip: if data appears empty, ensure the year in `list_date` maps to a defined toplist table and the mock data covers that date.
