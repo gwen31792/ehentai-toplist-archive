@@ -1,4 +1,3 @@
-import nextOnPages from 'eslint-plugin-next-on-pages';
 import tsParser from '@typescript-eslint/parser';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -20,10 +19,8 @@ const eslintConfig = [...compat.extends(
   'eslint:recommended',
   'plugin:json/recommended-with-comments-legacy',
   'plugin:@typescript-eslint/recommended',
-  'plugin:next-on-pages/recommended',
 ), {
   plugins: {
-    'next-on-pages': nextOnPages,
     'json': json,
   },
 }, {

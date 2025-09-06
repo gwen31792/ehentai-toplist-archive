@@ -17,6 +17,7 @@
 # next.js
 /.next/
 /out/
+.open-next
 
 # production
 /build
@@ -44,3 +45,4 @@ next-env.d.ts
 .wrangler/
 .dev.vars
 worker-configuration.d.ts
+cloudflare-env.d.ts

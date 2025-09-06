@@ -28,7 +28,7 @@
       ],
     },
     "types": [
-      "./worker-configuration"
+      "./cloudflare-env"
     ],
   },
   "include": [
@@ -36,7 +36,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "next.config.mjs"
+    "next.config.ts"
   ],
   "exclude": [
     "node_modules"

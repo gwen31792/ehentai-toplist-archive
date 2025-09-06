@@ -6,6 +6,7 @@
 - [ ] 重构后端爬虫，从 AWS Lambda 迁移到 Cloudflare Workers
 - [ ] 筛选 tags
 - [ ] 里站排行榜
+- [ ] 使用远程绑定, see also: https://opennext.js.org/cloudflare/bindings#remote-bindings
 
 ## 低优先级
 - [ ] hover card 点击时会闪烁，用各种 ai 试了，都不行，以后慢慢研究，chakra-ui 的 hover card 似乎点击不会闪烁
@@ -15,7 +16,6 @@
 - [ ] SEO 优化，see also: https://vercel.com/blog/how-core-web-vitals-affect-seo
 - [ ] 检查 CLS 问题，see also: https://liudon.com/posts/fix-blog-cls/
 - [ ] 检查 ipv6 支持
-- [ ] 迁移到 @opennextjs/cloudflare，see also: https://blog.cloudflare.com/deploying-nextjs-apps-to-cloudflare-workers-with-the-opennext-adapter/
 - [ ] tag 中文翻译
 - [ ] 等 eslint-plugin-tailwindcss 支持 Tailwind CSS v4 后重新添加到项目中
 - [ ] galleries 表回扫详细数据，比如 Rating
@@ -48,3 +48,4 @@ WebP Cloud Services 这里感觉可以不做了，公网连接怎么也不会有
 - [x] No Data 不居中，不过这个情况也没几个人能看到
 - [x] 定制列
 - [x] skeleton 时列宽收窄
+- [x] 迁移到 @opennextjs/cloudflare，see also: https://blog.cloudflare.com/deploying-nextjs-apps-to-cloudflare-workers-with-the-opennext-adapter/
