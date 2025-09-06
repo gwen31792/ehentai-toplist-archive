@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "pnpm cf-typegen && next dev --turbopack",
+    "dev": "next dev --turbopack",
     "lint:fix": "eslint ./src --fix",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",

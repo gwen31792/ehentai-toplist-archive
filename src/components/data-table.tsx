@@ -162,11 +162,28 @@ export function DataTable({ data, language, loading }: DataTableProps) {
   // 初始化：列可见性
   useEffect(() => {
     const saved = localStorage.getItem('table-column-visibility')
-    if (!saved) return
-    try {
-      setColumnVisibility(JSON.parse(saved))
-    } catch {
-      console.warn('Failed to parse saved column visibility')
+    if (saved) {
+      try {
+        setColumnVisibility(JSON.parse(saved))
+      } catch {
+        console.warn('Failed to parse saved column visibility')
+      }
+    } else {
+      // 设置默认显示的列：排名、预览图、名称、标签
+      const defaultVisibility: VisibilityState = {
+        rank: true,
+        gallery_id: false,
+        preview_url: true,
+        gallery_name: true,
+        gallery_type: false,
+        tags: true,
+        published_time: false,
+        uploader: false,
+        gallery_length: false,
+        points: false,
+        torrents_url: false,
+      }
+      setColumnVisibility(defaultVisibility)
     }
   }, [])
 
@@ -330,7 +347,7 @@ export function DataTable({ data, language, loading }: DataTableProps) {
               href={info.getValue()} 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="text-blue-600 dark:text-blue-400 hover:underline"
+              className="link-hover-underline text-blue-600 dark:text-blue-400"
             >
               {content.headers.torrents_url}
             </Link>
