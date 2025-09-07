@@ -25,19 +25,19 @@ pnpm dev
 # 生成数据库模拟数据
 pnpm generate-db
 
-# 生成 Cloudflare Workers 类型
-pnpm generate-types
+# 生成 Cloudflare Workers 类型（环境变量类型定义）
+pnpm cf-typegen
 
 # 代码检查和修复
 pnpm lint:fix
 
-# 构建 Cloudflare Pages 版本
-pnpm pages:build
+# 构建项目
+pnpm build
 
-# 本地预览部署版本
+# 构建并预览 Cloudflare Pages 版本
 pnpm preview
 
-# 部署到 Cloudflare Pages
+# 构建并部署到 Cloudflare Pages
 pnpm deploy
 ```
 
@@ -65,21 +65,24 @@ src/
 ```
 
 ### 数据库结构
-- `galleries`: 画廊主表，存储画廊的基本信息
-- `toplist_items_[year]`: 各年份的排行榜记录表，按年份分表存储
+- `galleries`: 画廊主表，存储画廊的基本信息（ID、标题、类型、标签、发布时间、上传者等）
+- `toplist_items_2023/2024/2025`: 按年份分表的排行榜记录表，存储每日/月/年/全部排行榜数据
 
 ### 关键组件说明
-- **DataTable**: 主要的数据展示组件，支持分页和多语言
+- **DataTable**: 主要的数据展示组件，使用 @tanstack/react-table，支持分页和多语言
 - **DatePicker**: 日期选择器，用于选择查看特定日期的排行榜
 - **TypeSelect**: 排行榜类型选择器（日/月/年/全部）
 - **LanguageSelector**: 语言切换器（中英文）
+- **TablePagination**: 独立的分页控制组件
+- **TableHeaderControls**: 表格头部控制组件（包含日期选择和类型选择）
 
 ## 开发注意事项
 
 ### Cloudflare 特殊配置
 - 项目配置为 Edge Runtime，兼容 Cloudflare Workers
-- 使用 `@cloudflare/next-on-pages` 进行适配
-- 开发环境会自动设置 Cloudflare 开发平台
+- 使用 `@opennextjs/cloudflare` 适配器进行构建和部署
+- 开发环境使用 Turbopack 加速构建
+- 数据库绑定通过 D1 binding: "DB"
 
 ### 数据库操作
 - 使用 Drizzle ORM 进行数据库操作

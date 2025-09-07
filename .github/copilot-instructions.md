@@ -1,46 +1,49 @@
-# AI Coding Agent Guide
+## AI Coding Agent Guide
 
-This repo is a React 19 + Next.js 15 app on Cloudflare Pages (Edge). It archives E‑Hentai toplists with bilingual UI (en/zh).
+This is a React 19 + Next.js 15 app running on Cloudflare Pages (Edge) via OpenNext Cloudflare. It archives E‑Hentai toplists with a bilingual UI (en/zh).
 
 ## Non‑negotiables
-- Edge only: every page and API route exports `export const runtime = 'edge'` (see `src/app/**` and `src/app/api/data/route.ts`).
-- Worker environment: no Node APIs (fs, net). Use `@cloudflare/next-on-pages` and `getRequestContext().env.DB` for D1.
-- Do not edit base shadcn/ui in `src/components/ui/**`; add or wrap via `src/components/**`.
+- Edge runtime only. Assume Cloudflare Workers environment; avoid Node built‑ins (fs, net). `wrangler.toml` binds D1 as `DB`.
+- Use `@opennextjs/cloudflare` in server code. Access D1 with `drizzle(getCloudflareContext().env.DB)` (see `src/app/api/data/route.ts`).
+- Do not modify base shadcn/ui in `src/components/ui/**`; add new components or wrappers in `src/components/**`.
+- Images must match `next.config.ts` remote pattern (`ehgt.org`).
 
-## Run, build, deploy
-- Dev (recreates local DB and CF types): `pnpm dev`
-- Fix lint: `pnpm lint:fix`
+## Dev, build, deploy
+- Start dev (OpenNext dev + Next): `pnpm dev`
+- Lint fix (src only): `pnpm lint:fix`
+- Seed local D1 from `src/db/mock.sql`: `pnpm generate-db`
+- Generate Cloudflare Workers types to `cloudflare-env.d.ts`: `pnpm cf-typegen`
 - Preview Cloudflare build locally: `pnpm preview`
 - Deploy to Cloudflare Pages: `pnpm deploy`
-- One‑offs: `pnpm generate-db` (executes `src/db/mock.sql` to D1 local), `pnpm generate-types` (Workers types), `pnpm pages:build` (adapter build)
 
-## Data model and queries
-- Cloudflare D1 (SQLite) + Drizzle ORM.
-- Year‑partitioned toplist tables: `toplist_items_2023|2024|2025`; gallery master: `galleries`.
-- API picks the toplist table by year from `list_date` (YYYY‑MM‑DD) via `tableMap` and joins `galleries` on `gallery_id`.
-- Use `getTableColumns(table)` to spread columns; exclude `list_date`/`period_type` from select when joining; order by `rank`.
-	- Reference: `src/app/api/data/route.ts`, `src/db/schema.ts`.
+## Data model and query pattern
+- Storage: Cloudflare D1 (SQLite) + Drizzle ORM (`drizzle-orm/d1`).
+- Tables: `galleries` (master) and year‑partitioned `toplist_items_2023|2024|2025`.
+- Selection pattern (see `src/app/api/data/route.ts`):
+	- Pick toplist table by year from `list_date` via `tableMap`.
+	- Spread columns with `getTableColumns(toplistTable)` and drop `list_date`/`period_type` when joining:
+		`const { list_date, period_type, ...rest } = getTableColumns(toplistTable)`.
+	- Join `galleries` on `gallery_id`, filter by `list_date` and `period_type`, order by `rank`.
 
-## API contract (read‑only)
+## API contract
 - GET `/api/data?list_date=YYYY-MM-DD&period_type=day|month|year|all`
-- Returns array of `{...Gallery, rank}` (see `src/lib/types.ts`: `Gallery`, `QueryResponseItem`).
-- Responses are cached on the client fetch with `{ cache: 'force-cache' }`.
+- Returns array of `{...Gallery, rank}` (`src/lib/types.ts`: `Gallery`, `QueryResponseItem`).
+- Client fetch uses `{ cache: 'force-cache' }` for simple caching.
 
-## App data flow and UI
-- Client components only (no SSR for listing). `src/app/page.tsx` stores `language` in `localStorage`, fetches data on date/type change, and renders `DataTable`.
-- Key components: `DatePicker`, `TypeSelect`, `DataTable`, `LanguageSelector`, `ThemeToggle`, `GitHubLink`, `ImageWithSkeleton`.
-- Tailwind CSS v4 + shadcn/ui. Remote images allowed: `https://ehgt.org` (`next.config.mjs`).
+## App data flow and UI patterns
+- Client‑only listing: `src/app/page.tsx` manages state, stores `language` in `localStorage`, and fetches `/api/data` on date/type changes.
+- Key components: `DatePicker`, `TypeSelect`, `DataTable` (TanStack Table), `LanguageSelector`, `ThemeToggle`, `GitHubLink`, `ImageWithSkeleton`.
+- Keep business components under `src/components/**`; don’t change primitives in `src/components/ui/**`.
 
-## Add support for a new year
-1) Add `toplistItems{YEAR}Table` in `src/db/schema.ts`.
-2) Add that table to `tableMap` in `src/app/api/data/route.ts`.
-3) Seed local dev by extending `src/db/mock.sql`, then run `pnpm generate-db`.
+## Add a new toplist year
+1) Define `toplistItems{YEAR}Table` in `src/db/schema.ts`.
+2) Add it to `tableMap` in `src/app/api/data/route.ts`.
+3) Extend `src/db/mock.sql`, then run `pnpm generate-db`.
 
-## File map to start from
-- API: `src/app/api/data/route.ts` (Edge handler; D1 via `drizzle(getRequestContext().env.DB)`)
-- Schema and seed: `src/db/schema.ts`, `src/db/mock.sql`
+## Useful references
+- API: `src/app/api/data/route.ts`
+- Schema/seed: `src/db/schema.ts`, `src/db/mock.sql`
 - Types: `src/lib/types.ts` (`Language`, `ToplistType`, `Gallery`, `QueryResponseItem`)
-- App shell and pages: `src/app/layout.tsx`, `src/app/page.tsx`, `src/app/about/page.tsx`
-- UI: `src/components/**` (business) vs `src/components/ui/**` (base)
+- App shell/pages: `src/app/layout.tsx`, `src/app/page.tsx`, `src/app/about/page.tsx`
 
-Tip: if data appears empty, ensure the year in `list_date` maps to a defined toplist table and the mock data covers that date.
+Tip: If results are empty, check that `list_date` year maps to an existing table and the mock data covers that date.
