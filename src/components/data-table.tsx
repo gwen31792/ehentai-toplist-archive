@@ -110,9 +110,9 @@ export function DataTable({ data, language, loading }: DataTableProps) {
   const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({})
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set())
-  const [allTags, setAllTags] = useState<string[]>([])
   type TagFilterMode = 'or' | 'and'
   const [tagFilterMode, setTagFilterMode] = useState<TagFilterMode>('or')
+  const [hasUserInteracted, setHasUserInteracted] = useState(false)
   
   // 基于语言进行 memo，保持引用稳定
   const content = useMemo(() => CONTENT[language], [language])
@@ -124,7 +124,7 @@ export function DataTable({ data, language, loading }: DataTableProps) {
     const tagSet = new Set<string>()
     data.forEach(item => {
       if (item.tags) {
-  item.tags.split(/\s*,\s*/).forEach(tag => {
+        item.tags.split(/\s*,\s*/).forEach(tag => {
           if (tag.trim()) {
             tagSet.add(tag.trim())
           }
@@ -134,13 +134,21 @@ export function DataTable({ data, language, loading }: DataTableProps) {
     return Array.from(tagSet).sort()
   }, [data])
   
-  // 初始化标签状态
+  // 初始化标签状态（只在数据第一次加载或数据源改变时执行）
   useEffect(() => {
-    setAllTags(extractedTags)
-    if (extractedTags.length > 0 && selectedTags.size === 0) {
+    if (extractedTags.length > 0 && selectedTags.size === 0 && !hasUserInteracted) {
       setSelectedTags(new Set(extractedTags))
     }
-  }, [extractedTags])
+    // 数据源改变时重置用户交互状态
+    setHasUserInteracted(false)
+  }, [extractedTags, hasUserInteracted, selectedTags.size])
+  
+  // 当用户操作时标记已交互
+  useEffect(() => {
+    if (selectedTags.size > 0 || hasUserInteracted) {
+      setHasUserInteracted(true)
+    }
+  }, [selectedTags, hasUserInteracted])
   
   // 更新列过滤器（加入模式与全选状态，切换 OR/AND/全选都会触发重算）
   useEffect(() => {
@@ -149,7 +157,7 @@ export function DataTable({ data, language, loading }: DataTableProps) {
         id: 'tags',
         value: {
           values: Array.from(selectedTags),
-    allSelected: selectedTags.size > 0 && selectedTags.size === extractedTags.length,
+          allSelected: selectedTags.size > 0 && selectedTags.size === extractedTags.length,
           mode: tagFilterMode,
         },
       },
@@ -465,7 +473,7 @@ export function DataTable({ data, language, loading }: DataTableProps) {
         table={table}
         language={language}
         selectedTags={selectedTags}
-        allTags={allTags}
+        extractedTags={extractedTags}
         tagFilterMode={tagFilterMode}
         onSelectedTagsChange={setSelectedTags}
         onTagFilterModeChange={setTagFilterMode}
@@ -554,8 +562,8 @@ export function DataTable({ data, language, loading }: DataTableProps) {
           itemsPerPage: content.itemsPerPage,
           page: content.page,
           of: content.of,
-  }} 
-  allowedPageSizes={allowedPageSizes}
+        }} 
+        allowedPageSizes={allowedPageSizes}
       />
     </div>
   )

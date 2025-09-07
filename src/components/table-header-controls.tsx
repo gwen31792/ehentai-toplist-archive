@@ -20,7 +20,7 @@ interface TableHeaderControlsProps<TData> {
   table: Table<TData>
   language: Language
   selectedTags: Set<string>
-  allTags: string[]
+  extractedTags: string[]
   tagFilterMode: TagFilterMode
   onSelectedTagsChange: (tags: Set<string>) => void
   onTagFilterModeChange: (mode: TagFilterMode) => void
@@ -85,7 +85,7 @@ export function TableHeaderControls<TData>({
   table,
   language,
   selectedTags,
-  allTags,
+  extractedTags,
   tagFilterMode,
   onSelectedTagsChange,
   onTagFilterModeChange,
@@ -164,7 +164,7 @@ export function TableHeaderControls<TData>({
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => onSelectedTagsChange(new Set(allTags))}
+                    onClick={() => onSelectedTagsChange(new Set(extractedTags))}
                     className="h-6 text-xs"
                   >
                     {content.selectAllTags}
@@ -180,7 +180,7 @@ export function TableHeaderControls<TData>({
                 </div>
               </div>
               <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                {allTags.map(tag => (
+                {extractedTags.map(tag => (
                   <div key={tag} className="flex items-center space-x-2">
                     <Checkbox
                       id={`tag-${tag}`}
