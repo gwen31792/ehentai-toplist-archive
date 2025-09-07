@@ -134,14 +134,13 @@ export function DataTable({ data, language, loading }: DataTableProps) {
     return Array.from(tagSet).sort()
   }, [data])
   
-  // 初始化标签状态（只在数据第一次加载或数据源改变时执行）
+  // 初始化标签状态（每次数据变化时重置为全选）
   useEffect(() => {
-    if (extractedTags.length > 0 && selectedTags.size === 0 && !hasUserInteracted) {
+    if (extractedTags.length > 0) {
       setSelectedTags(new Set(extractedTags))
+      setHasUserInteracted(false)
     }
-    // 数据源改变时重置用户交互状态
-    setHasUserInteracted(false)
-  }, [extractedTags, hasUserInteracted, selectedTags.size])
+  }, [extractedTags])
   
   // 当用户操作时标记已交互
   useEffect(() => {
