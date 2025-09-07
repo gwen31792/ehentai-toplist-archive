@@ -9,7 +9,7 @@
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
-    "generate-db": "pnpm wrangler d1 execute ehentai-toplist-archive --local --file=./src/db/mock.sql"
+    "generate-db": "wrangler d1 execute ehentai-toplist-archive --local --file=./src/db/mock.sql"
   },
   "dependencies": {
     "@opennextjs/cloudflare": "^1.8.0",
