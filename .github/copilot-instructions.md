@@ -3,7 +3,7 @@
 This is a React 19 + Next.js 15 app running on Cloudflare Pages (Edge) via OpenNext Cloudflare. It archives E‑Hentai toplists with a bilingual UI (en/zh).
 
 ## Non‑negotiables
-- Edge runtime only. Assume Cloudflare Workers environment; avoid Node built‑ins (fs, net). `wrangler.toml` binds D1 as `DB`.
+- Assume Cloudflare Workers environment; `wrangler.toml` binds D1 as `DB`.
 - Use `@opennextjs/cloudflare` in server code. Access D1 with `drizzle(getCloudflareContext().env.DB)` (see `src/app/api/data/route.ts`).
 - Do not modify base shadcn/ui in `src/components/ui/**`; add new components or wrappers in `src/components/**`.
 - Images must match `next.config.ts` remote pattern (`ehgt.org`).

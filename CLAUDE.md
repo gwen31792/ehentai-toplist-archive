@@ -79,7 +79,7 @@ src/
 ## 开发注意事项
 
 ### Cloudflare 特殊配置
-- 项目配置为 Edge Runtime，兼容 Cloudflare Workers
+- 兼容 Cloudflare Workers
 - 使用 `@opennextjs/cloudflare` 适配器进行构建和部署
 - 开发环境使用 Turbopack 加速构建
 - 数据库绑定通过 D1 binding: "DB"

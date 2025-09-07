@@ -2,13 +2,15 @@
 ## 高优先级
 
 ## 中优先级
-- [ ] 对数据库查询的缓存，从 F12 看，相同内容还是会重发请求
-- [ ] 重构后端爬虫，从 AWS Lambda 迁移到 Cloudflare Workers
-- [ ] 筛选 tags
+- [ ] i18n, next-intl
+- [ ] 重构后端爬虫，从 AWS Lambda 迁移到 Cloudflare Workers，增加爬取数量
 - [ ] 里站排行榜
 - [ ] 使用远程绑定, see also: https://opennext.js.org/cloudflare/bindings#remote-bindings
+- [ ] tag 中文翻译
+- [ ] 保持 tags 的过滤，这样能只看某个 tags 的所有的排行
 
 ## 低优先级
+- [ ] 对数据库查询的缓存，从 F12 看，相同内容还是会重发请求
 - [ ] hover card 点击时会闪烁，用各种 ai 试了，都不行，以后慢慢研究，chakra-ui 的 hover card 似乎点击不会闪烁
 - [ ] 解决 dark mode 下刷新的闪烁问题 FOUC
 - [ ] 多月整合的排行榜，推荐系统
@@ -16,13 +18,9 @@
 - [ ] SEO 优化，see also: https://vercel.com/blog/how-core-web-vitals-affect-seo
 - [ ] 检查 CLS 问题，see also: https://liudon.com/posts/fix-blog-cls/
 - [ ] 检查 ipv6 支持
-- [ ] tag 中文翻译
 - [ ] 等 eslint-plugin-tailwindcss 支持 Tailwind CSS v4 后重新添加到项目中
 - [ ] galleries 表回扫详细数据，比如 Rating
 - [ ] eslint, eslint-config-next, typescript 5.9 升级
-
-## 实在闲得没事再做
-- [ ] 国际化路由，see also: https://blog.cloudflare.com/cloudflare-radar-localization-journey/, 没尝试只是看了一下，性价比不高，未来没有添加更多语言的计划，目前硬编码也挺好
 
 # 专项
 ## 图片加载速度解决方案
@@ -50,3 +48,4 @@ WebP Cloud Services 这里感觉可以不做了，公网连接怎么也不会有
 - [x] 定制列
 - [x] skeleton 时列宽收窄
 - [x] 迁移到 @opennextjs/cloudflare，see also: https://blog.cloudflare.com/deploying-nextjs-apps-to-cloudflare-workers-with-the-opennext-adapter/
+- [x] 筛选 tags
