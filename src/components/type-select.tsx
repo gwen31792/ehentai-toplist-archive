@@ -8,9 +8,9 @@ import {
 import { Language, ToplistType } from '@/lib/types'
 
 interface TypeSelectProps {
-    type: ToplistType
-    onSelectChange: (type: ToplistType) => void
-    language: Language
+  type: ToplistType
+  onSelectChange: (type: ToplistType) => void
+  language: Language
 }
 
 export function TypeSelect({ type, onSelectChange, language = 'en' }: TypeSelectProps) {

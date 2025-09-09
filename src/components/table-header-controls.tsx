@@ -185,11 +185,12 @@ export function TableHeaderControls<TData>({
                     <Checkbox
                       id={`tag-${tag}`}
                       checked={selectedTags.has(tag)}
-                      onCheckedChange={(checked: boolean | "indeterminate") => {
+                      onCheckedChange={(checked: boolean | 'indeterminate') => {
                         const newSelectedTags = new Set(selectedTags)
                         if (checked === true) {
                           newSelectedTags.add(tag)
-                        } else {
+                        }
+                        else {
                           newSelectedTags.delete(tag)
                         }
                         onSelectedTagsChange(newSelectedTags)
@@ -230,7 +231,7 @@ export function TableHeaderControls<TData>({
                     <Switch
                       id={column.id}
                       checked={column.getIsVisible()}
-                      onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                      onCheckedChange={value => column.toggleVisibility(!!value)}
                       className="data-[state=checked]:bg-zinc-900 dark:data-[state=checked]:bg-zinc-100"
                     />
                     <label

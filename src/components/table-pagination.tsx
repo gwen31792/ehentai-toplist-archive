@@ -40,7 +40,7 @@ export function TablePagination<T = unknown>({ table, content, allowedPageSizes 
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="bg-zinc-50 dark:bg-zinc-800">
-            {allowedPageSizes.map((size) => (
+            {allowedPageSizes.map(size => (
               <SelectItem
                 key={size}
                 value={String(size)}
@@ -63,7 +63,13 @@ export function TablePagination<T = unknown>({ table, content, allowedPageSizes 
           <ChevronLeft className="size-4" />
         </Button>
         <span className="text-sm text-zinc-700 dark:text-zinc-300">
-          {content.page} {table.getState().pagination.pageIndex + 1} {content.of} {table.getPageCount()}
+          {content.page}
+          {' '}
+          {table.getState().pagination.pageIndex + 1}
+          {' '}
+          {content.of}
+          {' '}
+          {table.getPageCount()}
         </span>
         <Button
           variant="outline"

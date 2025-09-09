@@ -45,13 +45,13 @@ const PreloadImage = ({ src }: { src: string }) => {
         alt="预加载图片"
         width={0}
         height={0}
-        style={{ 
-          width: '100%', 
+        style={{
+          width: '100%',
           height: 'auto',
         }}
-        sizes='100vw'
+        sizes="100vw"
         quality={100}
-        className='m-0'
+        className="m-0"
       />
     </div>
   )
@@ -113,18 +113,18 @@ export function DataTable({ data, language, loading }: DataTableProps) {
   type TagFilterMode = 'or' | 'and'
   const [tagFilterMode, setTagFilterMode] = useState<TagFilterMode>('or')
   const [hasUserInteracted, setHasUserInteracted] = useState(false)
-  
+
   // 基于语言进行 memo，保持引用稳定
   const content = useMemo(() => CONTENT[language], [language])
   // 对数据引用进行 memo
   const memoData = useMemo(() => data, [data])
-  
+
   // 提取所有唯一标签
   const extractedTags = useMemo(() => {
     const tagSet = new Set<string>()
-    data.forEach(item => {
+    data.forEach((item) => {
       if (item.tags) {
-        item.tags.split(/\s*,\s*/).forEach(tag => {
+        item.tags.split(/\s*,\s*/).forEach((tag) => {
           if (tag.trim()) {
             tagSet.add(tag.trim())
           }
@@ -133,7 +133,7 @@ export function DataTable({ data, language, loading }: DataTableProps) {
     })
     return Array.from(tagSet).sort()
   }, [data])
-  
+
   // 初始化标签状态（每次数据变化时重置为全选）
   useEffect(() => {
     if (extractedTags.length > 0) {
@@ -141,14 +141,14 @@ export function DataTable({ data, language, loading }: DataTableProps) {
       setHasUserInteracted(false)
     }
   }, [extractedTags])
-  
+
   // 当用户操作时标记已交互
   useEffect(() => {
     if (selectedTags.size > 0 || hasUserInteracted) {
       setHasUserInteracted(true)
     }
   }, [selectedTags, hasUserInteracted])
-  
+
   // 更新列过滤器（加入模式与全选状态，切换 OR/AND/全选都会触发重算）
   useEffect(() => {
     setColumnFilters([
@@ -164,16 +164,17 @@ export function DataTable({ data, language, loading }: DataTableProps) {
   }, [selectedTags, tagFilterMode, extractedTags.length])
   // 数据变化时重置页码，避免跨数据集残留页码
   useEffect(() => {
-    setPagination((p) => ({ ...p, pageIndex: 0 }))
+    setPagination(p => ({ ...p, pageIndex: 0 }))
   }, [memoData])
-  
+
   // 初始化列宽
   useEffect(() => {
     const savedSizing = localStorage.getItem('table-column-sizing')
     if (savedSizing) {
       try {
         setColumnSizing(JSON.parse(savedSizing))
-      } catch {
+      }
+      catch {
         console.warn('Failed to parse saved column sizing')
       }
     }
@@ -183,7 +184,8 @@ export function DataTable({ data, language, loading }: DataTableProps) {
   const saveColumnSizing = useDebouncedCallback((sizing: ColumnSizingState) => {
     try {
       localStorage.setItem('table-column-sizing', JSON.stringify(sizing))
-    } catch {
+    }
+    catch {
       console.warn('Failed to save column sizing')
     }
   }, 200)
@@ -199,10 +201,12 @@ export function DataTable({ data, language, loading }: DataTableProps) {
     if (saved) {
       try {
         setColumnVisibility(JSON.parse(saved))
-      } catch {
+      }
+      catch {
         console.warn('Failed to parse saved column visibility')
       }
-    } else {
+    }
+    else {
       // 设置默认显示的列：排名、预览图、名称、标签
       const defaultVisibility: VisibilityState = {
         rank: true,
@@ -225,7 +229,8 @@ export function DataTable({ data, language, loading }: DataTableProps) {
   const saveColumnVisibility = useDebouncedCallback((visibility: VisibilityState) => {
     try {
       localStorage.setItem('table-column-visibility', JSON.stringify(visibility))
-    } catch {
+    }
+    catch {
       console.warn('Failed to save column visibility')
     }
   }, 200)
@@ -249,7 +254,8 @@ export function DataTable({ data, language, loading }: DataTableProps) {
   const savePageSize = useDebouncedCallback((pageSize: number) => {
     try {
       localStorage.setItem('table-page-size', String(pageSize))
-    } catch {
+    }
+    catch {
       console.warn('Failed to save page size')
     }
   }, 200)
@@ -269,7 +275,8 @@ export function DataTable({ data, language, loading }: DataTableProps) {
   const saveTagFilterMode = useDebouncedCallback((mode: TagFilterMode) => {
     try {
       localStorage.setItem('table-tag-filter-mode', mode)
-    } catch {
+    }
+    catch {
       console.warn('Failed to save tag filter mode')
     }
   }, 200)
@@ -312,33 +319,33 @@ export function DataTable({ data, language, loading }: DataTableProps) {
     }),
     columnHelper.accessor('gallery_name', {
       header: () => content.headers.gallery_name,
-      cell: info => {
+      cell: (info) => {
         const isPreviewColumnVisible = info.table.getColumn('preview_url')?.getIsVisible() ?? true
         const previewUrl = info.row.original.preview_url
-        
+
         if (isPreviewColumnVisible || !previewUrl) {
           return (
             <CellWrapper>
-              <Link 
-                href={info.row.original.gallery_url} 
-                target="_blank" 
-                rel="noopener noreferrer" 
+              <Link
+                href={info.row.original.gallery_url}
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 {info.getValue()}
               </Link>
             </CellWrapper>
           )
         }
-        
+
         return (
           <CellWrapper>
             <HoverCard openDelay={50} closeDelay={100}>
               <HoverCardTrigger asChild>
                 <div className="w-full">
-                  <Link 
-                    href={info.row.original.gallery_url} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
+                  <Link
+                    href={info.row.original.gallery_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="block w-full break-words"
                   >
                     {info.getValue()}
@@ -346,10 +353,10 @@ export function DataTable({ data, language, loading }: DataTableProps) {
                   <PreloadImage src={previewUrl} />
                 </div>
               </HoverCardTrigger>
-              <HoverCardContent side='left' className="p-1">
-                <ImageWithSkeleton 
-                  src={previewUrl} 
-                  alt={info.getValue()} 
+              <HoverCardContent side="left" className="p-1">
+                <ImageWithSkeleton
+                  src={previewUrl}
+                  alt={info.getValue()}
                 />
               </HoverCardContent>
             </HoverCard>
@@ -367,7 +374,7 @@ export function DataTable({ data, language, loading }: DataTableProps) {
       header: () => content.headers.tags,
       cell: info => <CellWrapper>{info.getValue()}</CellWrapper>,
       size: 300,
-      filterFn: (row, columnId, filterValue: { values: string[]; allSelected: boolean; mode: 'or' | 'and' }) => {
+      filterFn: (row, columnId, filterValue: { values: string[], allSelected: boolean, mode: 'or' | 'and' }) => {
         const tags = row.getValue(columnId) as string
         if (!tags) return false
 
@@ -420,16 +427,18 @@ export function DataTable({ data, language, loading }: DataTableProps) {
       header: () => content.headers.torrents_url,
       cell: info => (
         <CellWrapper>
-          {info.getValue() ? (
-            <Link 
-              href={info.getValue()} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="link-hover-underline text-blue-600 dark:text-blue-400"
-            >
-              {content.headers.torrents_url}
-            </Link>
-          ) : '-'}
+          {info.getValue()
+            ? (
+                <Link
+                  href={info.getValue()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="link-hover-underline text-blue-600 dark:text-blue-400"
+                >
+                  {content.headers.torrents_url}
+                </Link>
+              )
+            : '-'}
         </CellWrapper>
       ),
       size: 80,
@@ -458,7 +467,7 @@ export function DataTable({ data, language, loading }: DataTableProps) {
 
   const SkeletonRow = () => (
     <TableRow>
-      {table.getVisibleLeafColumns().map((col) => (
+      {table.getVisibleLeafColumns().map(col => (
         <TableCell key={col.id}>
           <Skeleton className="h-4 w-full bg-zinc-200 dark:bg-zinc-800" />
         </TableCell>
@@ -477,15 +486,15 @@ export function DataTable({ data, language, loading }: DataTableProps) {
         onSelectedTagsChange={setSelectedTags}
         onTagFilterModeChange={setTagFilterMode}
       />
-      
+
       <div className="w-full overflow-x-auto">
         <Table className="w-full" style={{ tableLayout: 'fixed' }}>
           <TableHeader>
             {table.getHeaderGroups().map(headerGroup => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map(header => (
-                  <TableHead 
-                    key={header.id} 
+                  <TableHead
+                    key={header.id}
                     className="whitespace-nowrap relative select-none"
                     style={{
                       width: header.getSize(),
@@ -496,9 +505,9 @@ export function DataTable({ data, language, loading }: DataTableProps) {
                         {header.isPlaceholder
                           ? null
                           : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
                       </span>
                       {header.column.getCanResize() && (
                         <div
@@ -520,48 +529,52 @@ export function DataTable({ data, language, loading }: DataTableProps) {
             ))}
           </TableHeader>
           <TableBody>
-            {loading ? (
-              <>
-                <SkeletonRow />
-                <SkeletonRow />
-                <SkeletonRow />
-                <SkeletonRow />
-                <SkeletonRow />
-              </>
-            ) : table.getFilteredRowModel().rows.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={table.getVisibleLeafColumns().length} className="h-24 text-center">
-                  {language === 'zh' ? '无数据，请换个日期再试' : 'No data, please try another date'}
-                </TableCell>
-              </TableRow>
-            ) : (
-              table.getRowModel().rows.map(row => (
-                <TableRow key={row.id} className="dark:hover:bg-zinc-700">
-                  {row.getVisibleCells().map(cell => (
-                    <TableCell 
-                      key={cell.id} 
-                      className="align-top py-2"
-                      style={{
-                        width: cell.column.getSize(),
-                      }}
-                    >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            )}
+            {loading
+              ? (
+                  <>
+                    <SkeletonRow />
+                    <SkeletonRow />
+                    <SkeletonRow />
+                    <SkeletonRow />
+                    <SkeletonRow />
+                  </>
+                )
+              : table.getFilteredRowModel().rows.length === 0
+                ? (
+                    <TableRow>
+                      <TableCell colSpan={table.getVisibleLeafColumns().length} className="h-24 text-center">
+                        {language === 'zh' ? '无数据，请换个日期再试' : 'No data, please try another date'}
+                      </TableCell>
+                    </TableRow>
+                  )
+                : (
+                    table.getRowModel().rows.map(row => (
+                      <TableRow key={row.id} className="dark:hover:bg-zinc-700">
+                        {row.getVisibleCells().map(cell => (
+                          <TableCell
+                            key={cell.id}
+                            className="align-top py-2"
+                            style={{
+                              width: cell.column.getSize(),
+                            }}
+                          >
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                  )}
           </TableBody>
         </Table>
       </div>
-      
-      <TablePagination<QueryResponseItem> 
-        table={table} 
+
+      <TablePagination<QueryResponseItem>
+        table={table}
         content={{
           itemsPerPage: content.itemsPerPage,
           page: content.page,
           of: content.of,
-        }} 
+        }}
         allowedPageSizes={allowedPageSizes}
       />
     </div>

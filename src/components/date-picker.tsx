@@ -16,14 +16,14 @@ import {
 import { Language } from '@/lib/types'
 
 interface DatePickerProps {
-    onDateChange: (date: Date) => void,
-    language: Language
+  onDateChange: (date: Date) => void
+  language: Language
 }
 
 const localeMap = {
   en: enUS,
   zh: zhCN,
-};
+}
 
 export function DatePicker({ onDateChange, language }: DatePickerProps) {
   const [date, setDate] = useState<Date>()
@@ -32,18 +32,14 @@ export function DatePicker({ onDateChange, language }: DatePickerProps) {
   const dateText = {
     en: 'Pick a date',
     zh: '选择日期',
-  };
+  }
 
   // 当选择日期变化时，同步更新月份显示
   useEffect(() => {
     if (date) {
-      setMonth(date);
+      setMonth(date)
     }
-  }, [date]);
-
-
-
-
+  }, [date])
 
   return (
     <Popover>
@@ -62,7 +58,8 @@ export function DatePicker({ onDateChange, language }: DatePickerProps) {
       <PopoverContent
         className="w-auto bg-zinc-50 p-0 dark:bg-zinc-800"
         side="bottom"
-        align="start">
+        align="start"
+      >
         <Calendar
           mode="single"
           selected={date}
@@ -86,4 +83,3 @@ export function DatePicker({ onDateChange, language }: DatePickerProps) {
     </Popover>
   )
 }
-

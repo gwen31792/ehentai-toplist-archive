@@ -62,11 +62,19 @@ export default function About() {
 
             <h2 className="mb-4 text-2xl font-bold tracking-wide">Description</h2>
             <p className="mb-4 leading-relaxed tracking-wide">This application gathers its data from E-Hentai&apos;s toplists. I scrape the toplist data once a day (minimizing the impact on the server&apos;s load) and store it in a database. You can use this app to access historical toplist data.</p>
-            <p className='mb-4 leading-relaxed tracking-wide '>The app only provides historical toplist data that E-Hentai itself does not offer. It does not affect E-Hentai&apos;s regular traffic. Users still need to visit the official E-Hentai website to browse specific galleries.</p>
-            <p className='mb-4 leading-relaxed tracking-wide'>For technical details about this application, including the tech stack, the underlying infrastructure, the frontend-backend interaction architecture, and changelog, please refer to the <Link href="https://github.com/gwen31792/ehentai-toplist-archive" className='link-hover-underline text-blue-600 dark:text-blue-400'>GitHub repository</Link>.</p>
+            <p className="mb-4 leading-relaxed tracking-wide ">The app only provides historical toplist data that E-Hentai itself does not offer. It does not affect E-Hentai&apos;s regular traffic. Users still need to visit the official E-Hentai website to browse specific galleries.</p>
+            <p className="mb-4 leading-relaxed tracking-wide">
+              For technical details about this application, including the tech stack, the underlying infrastructure, the frontend-backend interaction architecture, and changelog, please refer to the
+              <Link href="https://github.com/gwen31792/ehentai-toplist-archive" className="link-hover-underline text-blue-600 dark:text-blue-400">GitHub repository</Link>
+              .
+            </p>
 
             <h2 className="mb-4 text-2xl font-bold tracking-wide">Feedback</h2>
-            <p className='mb-4 leading-relaxed tracking-wide'>If you have any questions or suggestions for features, feel free to submit them via <Link href="https://github.com/gwen31792/ehentai-toplist-archive/issues" className='link-hover-underline text-blue-600 dark:text-blue-400'>GitHub Issues</Link>.</p>
+            <p className="mb-4 leading-relaxed tracking-wide">
+              If you have any questions or suggestions for features, feel free to submit them via
+              <Link href="https://github.com/gwen31792/ehentai-toplist-archive/issues" className="link-hover-underline text-blue-600 dark:text-blue-400">GitHub Issues</Link>
+              .
+            </p>
           </div>
         )}
         {language === 'zh' && (
@@ -78,11 +86,21 @@ export default function About() {
 
             <h2 className="mb-4 text-2xl font-bold tracking-wide">说明</h2>
             <p className="mb-4 leading-relaxed tracking-wide">这个应用的数据来源是 E-Hentai 的排行榜，我会每天爬取一次排行榜数据（所以对服务器的负载影响极小），然后存储在数据库中，你可以在这个应用中查看过去的排行榜数据</p>
-            <p className='mb-4 leading-relaxed tracking-wide '>本应用仅提供 E-Hentai 官方未提供的历史排行榜数据，不会影响其正常流量。用户浏览具体画廊时仍需访问 E-Hentai 官网</p>
-            <p className='mb-4 leading-relaxed tracking-wide'>关于本应用的技术相关的内容，包括技术栈，依赖的互联网基础设施，前后端交互架构以及更新说明，请到 <Link href="https://github.com/gwen31792/ehentai-toplist-archive" className='link-hover-underline text-blue-600 dark:text-blue-400'>GitHub</Link> 上查看</p>
+            <p className="mb-4 leading-relaxed tracking-wide ">本应用仅提供 E-Hentai 官方未提供的历史排行榜数据，不会影响其正常流量。用户浏览具体画廊时仍需访问 E-Hentai 官网</p>
+            <p className="mb-4 leading-relaxed tracking-wide">
+              关于本应用的技术相关的内容，包括技术栈，依赖的互联网基础设施，前后端交互架构以及更新说明，请到
+              <Link href="https://github.com/gwen31792/ehentai-toplist-archive" className="link-hover-underline text-blue-600 dark:text-blue-400">GitHub</Link>
+              {' '}
+              上查看
+            </p>
 
             <h2 className="mb-4 text-2xl font-bold tracking-wide">反馈</h2>
-            <p className='mb-4 leading-relaxed tracking-wide'>如果你有任何问题或者功能上的建议，欢迎在 <Link href="https://github.com/gwen31792/ehentai-toplist-archive/issues" className='link-hover-underline text-blue-600 dark:text-blue-400'>GitHub Issues</Link> 上提出</p>
+            <p className="mb-4 leading-relaxed tracking-wide">
+              如果你有任何问题或者功能上的建议，欢迎在
+              <Link href="https://github.com/gwen31792/ehentai-toplist-archive/issues" className="link-hover-underline text-blue-600 dark:text-blue-400">GitHub Issues</Link>
+              {' '}
+              上提出
+            </p>
 
           </div>
         )}

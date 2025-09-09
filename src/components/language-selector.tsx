@@ -5,8 +5,8 @@ import { Languages } from 'lucide-react'
 import { Language } from '@/lib/types'
 
 interface LanguageSelectorProps {
-    onLanguageChange: (lang: Language) => void
-    currentLang: Language
+  onLanguageChange: (lang: Language) => void
+  currentLang: Language
 }
 
 export function LanguageSelector({ onLanguageChange, currentLang }: LanguageSelectorProps) {
@@ -51,18 +51,17 @@ export function LanguageSelector({ onLanguageChange, currentLang }: LanguageSele
             }`}
             onClick={() => selectLanguage('en')}
           >
-                        English
+            English
           </button>
           <button
             className={`block w-full px-4 py-2 text-left text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-700 ${currentLang === 'zh' ? 'bg-zinc-100 dark:bg-zinc-700' : ''
             }`}
             onClick={() => selectLanguage('zh')}
           >
-                        中文
+            中文
           </button>
         </div>
       )}
     </div>
   )
 }
-
