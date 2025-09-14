@@ -10,3 +10,4 @@ assets.binding = "ASSETS"
 binding = "DB"
 database_name = "ehentai-toplist-archive"
 database_id = "48fbbd89-2ea8-4543-b6b8-cb5ca5d6d805"
+remote = true

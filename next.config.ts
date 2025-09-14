@@ -1,4 +1,6 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
+import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare'
+
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
@@ -8,9 +10,10 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-};
+}
 
-export default nextConfig;
+export default nextConfig
 
-import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
-initOpenNextCloudflareForDev();
+initOpenNextCloudflareForDev({
+  experimental: { remoteBindings: true },
+})

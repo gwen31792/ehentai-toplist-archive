@@ -11,13 +11,22 @@ export async function GET(request: NextRequest) {
 
   const db = drizzle(getCloudflareContext().env.DB)
 
-  // 根据传入的年份，选择对应的表
-  const tableMap = {
-    2023: toplistItems2023Table,
-    2024: toplistItems2024Table,
-    2025: toplistItems2025Table,
+  // 根据传入的年份选择表
+  const yearPart = list_date_param.slice(0, 4)
+  let toplistItemsTable
+  switch (yearPart) {
+    case '2023':
+      toplistItemsTable = toplistItems2023Table
+      break
+    case '2024':
+      toplistItemsTable = toplistItems2024Table
+      break
+    case '2025':
+      toplistItemsTable = toplistItems2025Table
+      break
+    default:
+      return Response.json({ error: 'Unsupported year', year: yearPart }, { status: 400 })
   }
-  const toplistItemsTable = tableMap[list_date_param.split('-')[0] as keyof typeof tableMap]
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { list_date, period_type, ...rest } = getTableColumns(toplistItemsTable)
