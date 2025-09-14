@@ -5,4 +5,4 @@
 - ORM 框架：Drizzle ORM
 - 语言：Typescript
 - 数据库：Cloudflare D1
-- 部署：Cloudflare Pages
+- 部署：Cloudflare Workers

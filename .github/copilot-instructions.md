@@ -1,49 +1,58 @@
-## AI Coding Agent Guide
+## AI Coding Agent Guide (Concise, Project‑Specific)
 
-This is a React 19 + Next.js 15 app running on Cloudflare Pages (Edge) via OpenNext Cloudflare. It archives E‑Hentai toplists with a bilingual UI (en/zh).
+Edge‑deployed Next.js 15 + React 19 app archiving E‑Hentai toplists with bilingual (en/zh) UI. Runs on Cloudflare Workers via `@opennextjs/cloudflare`; data in D1 (SQLite) accessed through Drizzle.
 
-## Non‑negotiables
-- Assume Cloudflare Workers environment; `wrangler.toml` binds D1 as `DB`.
-- Use `@opennextjs/cloudflare` in server code. Access D1 with `drizzle(getCloudflareContext().env.DB)` (see `src/app/api/data/route.ts`).
-- Do not modify base shadcn/ui in `src/components/ui/**`; add new components or wrappers in `src/components/**`.
-- Images must match `next.config.ts` remote pattern (`ehgt.org`).
+### 1. Environment & Hard Rules
+- Always assume Cloudflare Workers runtime; D1 bound as `DB` (see `wrangler.toml`).
+- DB access pattern (server only): `const db = drizzle(getCloudflareContext().env.DB)`.
+- Never edit base shadcn/ui primitives in `src/components/ui/**`; add wrappers/new components beside them.
+- Remote images must match `next.config.ts` (`ehgt.org`). Reject/avoid other domains.
+- Edge runtime only: avoid Node APIs (fs, crypto random callbacks, etc.).
 
-## Dev, build, deploy
-- Start dev (OpenNext dev + Next): `pnpm dev`
-- Lint fix (src only): `pnpm lint:fix`
-- Seed local D1 from `src/db/mock.sql`: `pnpm generate-db`
-- Generate Cloudflare Workers types to `cloudflare-env.d.ts`: `pnpm cf-typegen`
-- Preview Cloudflare build locally: `pnpm preview`
-- Deploy to Cloudflare Pages: `pnpm deploy`
+### 2. Dev Workflow
+- Start dev (OpenNext adapter + Next): `pnpm dev`.
+- Lint & autofix (src only): `pnpm lint:fix`.
+- Seed / reset local D1 from `src/db/mock.sql`: `pnpm generate-db` (idempotent for dev refresh).
+- Generate Cloudflare env types -> `cloudflare-env.d.ts`: `pnpm cf-typegen` (run after binding changes).
+- Preview Worker build locally: `pnpm preview`.
+- Deploy (Cloudflare Worker): `pnpm deploy`.
 
-## Data model and query pattern
-- Storage: Cloudflare D1 (SQLite) + Drizzle ORM (`drizzle-orm/d1`).
-- Tables: `galleries` (master) and year‑partitioned `toplist_items_2023|2024|2025`.
-- Selection pattern (see `src/app/api/data/route.ts`):
-	- Pick toplist table by year from `list_date` via `tableMap`.
-	- Spread columns with `getTableColumns(toplistTable)` and drop `list_date`/`period_type` when joining:
-		`const { list_date, period_type, ...rest } = getTableColumns(toplistTable)`.
-	- Join `galleries` on `gallery_id`, filter by `list_date` and `period_type`, order by `rank`.
+### 3. Data & Query Pattern
+- Tables: master `galleries`; year‑partitioned `toplist_items_2023|2024|2025` (one per calendar year for toplist rows).
+- Query (see `src/app/api/data/route.ts`): derive year from `list_date`; switch to select correct table; destructure columns to omit duplicate join keys:
+  `const { list_date, period_type, ...rest } = getTableColumns(toplistItemsTable)` then join with `galleries` on `gallery_id`, filter by `list_date` & `period_type`, order by `rank`.
+- Returned shape merges gallery fields plus `rank`; types: `Gallery`, `QueryResponseItem` in `src/lib/types.ts`.
 
-## API contract
-- GET `/api/data?list_date=YYYY-MM-DD&period_type=day|month|year|all`
-- Returns array of `{...Gallery, rank}` (`src/lib/types.ts`: `Gallery`, `QueryResponseItem`).
-- Client fetch uses `{ cache: 'force-cache' }` for simple caching.
+### 4. API Contract
+Endpoint: `GET /api/data?list_date=YYYY-MM-DD&period_type=day|month|year|all` → JSON array of merged records. Client fetch uses `{ cache: 'force-cache' }` in `src/app/page.tsx` for light caching.
 
-## App data flow and UI patterns
-- Client‑only listing: `src/app/page.tsx` manages state, stores `language` in `localStorage`, and fetches `/api/data` on date/type changes.
-- Key components: `DatePicker`, `TypeSelect`, `DataTable` (TanStack Table), `LanguageSelector`, `ThemeToggle`, `GitHubLink`, `ImageWithSkeleton`.
-- Keep business components under `src/components/**`; don’t change primitives in `src/components/ui/**`.
+### 5. UI / State Flow
+- `page.tsx` is client component orchestrating: selected date, toplist type, language (persisted in `localStorage`).
+- Core components: `DatePicker`, `TypeSelect`, `DataTable` (TanStack), `LanguageSelector`, `ThemeToggle`, `GitHubLink`, `ImageWithSkeleton`, plus table helpers (`table-header-controls`, `table-pagination`).
+- Do not embed DB logic in components; keep data access inside API routes.
 
-## Add a new toplist year
-1) Define `toplistItems{YEAR}Table` in `src/db/schema.ts`.
-2) Add it to `tableMap` in `src/app/api/data/route.ts`.
-3) Extend `src/db/mock.sql`, then run `pnpm generate-db`.
+### 6. Adding a New Year Partition
+1. Add `toplistItems{YEAR}Table` in `src/db/schema.ts` mirroring existing shape.
+2. Extend switch in `src/app/api/data/route.ts` for that year.
+3. Append seed rows to `src/db/mock.sql`; run `pnpm generate-db`.
+4. (Optional) Backfill production D1 separately (manual / external ingestion not in this repo).
 
-## Useful references
-- API: `src/app/api/data/route.ts`
-- Schema/seed: `src/db/schema.ts`, `src/db/mock.sql`
-- Types: `src/lib/types.ts` (`Language`, `ToplistType`, `Gallery`, `QueryResponseItem`)
-- App shell/pages: `src/app/layout.tsx`, `src/app/page.tsx`, `src/app/about/page.tsx`
+### 7. Conventions & Gotchas
+- Year derived strictly from `list_date` string prefix (YYYY-); ensure input validation upstream if extending API.
+- `period_type` limited to `all|year|month|day`; keep enum in sync if introducing new period types.
+- Avoid leaking `list_date` / `period_type` duplicates in select: always strip them when spreading toplist columns.
+- Keep any future caching layer outside UI first (edge cache / KV) — current code trusts simple fetch caching.
+- For new image handling, respect remotePatterns; otherwise build will warn/fail at runtime fetch.
 
-Tip: If results are empty, check that `list_date` year maps to an existing table and the mock data covers that date.
+### 8. Key Files
+- API route: `src/app/api/data/route.ts`
+- DB schema & seed: `src/db/schema.ts`, `src/db/mock.sql`
+- Types: `src/lib/types.ts`
+- Root layout & main page: `src/app/layout.tsx`, `src/app/page.tsx`
+- UI primitives (do not modify): `src/components/ui/**`
+
+### 9. When Data Seems Empty
+Check: (a) `list_date` year has corresponding partition table; (b) seed contains that date+period row; (c) correct `period_type` spelling.
+
+---
+If adding tooling, infra bindings, or a new period granularity, document it here after implementation so future agents remain accurate.
