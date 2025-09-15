@@ -7,16 +7,10 @@ import {
   ChevronRightIcon,
 } from "lucide-react"
 import { DayButton, DayPicker, getDefaultClassNames } from "react-day-picker"
-import { zhCN, enUS } from "date-fns/locale"
-import { Language } from "@/lib/types"
+import type { Locale } from "date-fns"
 
 import { cn } from "@/lib/utils"
 import { Button, buttonVariants } from "@/components/ui/button"
-
-const localeMap = {
-  en: enUS,
-  zh: zhCN,
-};
 
 function Calendar({
   className,
@@ -26,15 +20,15 @@ function Calendar({
   buttonVariant = "ghost",
   formatters,
   components,
-  language = "en",
   startMonth,
   endMonth,
+  locale,
   ...props
 }: React.ComponentProps<typeof DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>["variant"]
-  language?: Language
   startMonth?: Date
   endMonth?: Date
+  locale: Locale
 }) {
   const defaultClassNames = getDefaultClassNames()
 
@@ -52,10 +46,10 @@ function Calendar({
       endMonth={endMonth}
       formatters={{
         formatMonthDropdown: (date) =>
-          date.toLocaleString(localeMap[language]?.code || "default", { month: "short" }),
+          date.toLocaleString(locale?.code || "default", { month: "short" }),
         ...formatters,
       }}
-      locale={localeMap[language]}
+      locale={locale}
       classNames={{
         root: cn("w-fit", defaultClassNames.root),
         months: cn(

@@ -59,6 +59,7 @@ export function DatePicker({ onDateChange }: DatePickerProps) {
       >
         <Calendar
           mode="single"
+          className="bg-zinc-50 dark:bg-zinc-800"
           selected={date}
           captionLayout="dropdown"
           required={true} // 防止取消点击传输 undefined 日期
@@ -73,6 +74,7 @@ export function DatePicker({ onDateChange }: DatePickerProps) {
           onMonthChange={setMonth}
           startMonth={new Date(2023, 10, 15)} // 2023-11-15
           endMonth={new Date()}
+          locale={localeMap[locale]}
           fixedWeeks
         />
       </PopoverContent>

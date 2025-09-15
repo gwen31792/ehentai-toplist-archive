@@ -1,4 +1,3 @@
-export type Language = 'en' | 'zh'
 export type ToplistType = 'day' | 'month' | 'year' | 'all'
 
 export interface Gallery {
