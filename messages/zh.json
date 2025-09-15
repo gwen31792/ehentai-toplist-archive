@@ -1,0 +1,77 @@
+{
+  "common": {
+    "loading": "加载中...",
+    "noData": "无数据",
+    "learnMore": "了解更多"
+  },
+  "pages": {
+    "home": {
+      "title": "E 站排行榜存档",
+      "description": "浏览过去的 E-Hentai 画廊排行榜。在<link>关于页面</link>了解更多。"
+    },
+    "about": {
+      "title": "关于我们的应用",
+      "backLink": "返回首页",
+      "sections": {
+        "background": {
+          "title": "背景",
+          "paragraph1": "E-Hentai 并没有提供查看过去的排行榜的功能，你只能在当下查看昨天、过去一个月、过去一年、所有时间的排行榜单，但是，有时你可能想查看某个特定时间点的排行榜",
+          "paragraph2": "例如，当你想查看上上个月的排行榜时，过去一个月的榜单无法覆盖这个时间段，而过去一年的榜单又包含了太多其他月份的数据，使得目标月份的作品需要与其他 11 个月的作品竞争排名",
+          "paragraph3": "这就是我写这个应用的最初动机，我希望不用担心错过某些排行榜，在几个月后仍然能找回之前的状态"
+        },
+        "description": {
+          "title": "说明",
+          "paragraph1": "这个应用的数据来源是 E-Hentai 的排行榜，我会每天爬取一次排行榜数据（所以对服务器的负载影响极小），然后存储在数据库中，你可以在这个应用中查看过去的排行榜数据",
+          "paragraph2": "本应用仅提供 E-Hentai 官方未提供的历史排行榜数据，不会影响其正常流量。用户浏览具体画廊时仍需访问 E-Hentai 官网",
+          "paragraph3": "关于本应用的技术相关的内容，包括技术栈，依赖的互联网基础设施，前后端交互架构以及更新说明，请到 <link>GitHub</link>"
+        },
+        "feedback": {
+          "title": "反馈",
+          "paragraph1": "如果你有任何问题或者功能上的建议，欢迎在 <link>GitHub Issues</link> 上提出"
+        }
+      }
+    }
+  },
+  "components": {
+    "dataTable": {
+      "headers": {
+        "rank": "排名",
+        "gallery_id": "ID",
+        "gallery_name": "名称",
+        "gallery_type": "类型",
+        "tags": "标签",
+        "published_time": "上传日期",
+        "uploader": "上传者",
+        "gallery_length": "长度",
+        "points": "积分",
+        "preview_url": "预览图",
+        "gallery_url": "链接",
+        "torrents_url": "种子"
+      },
+      "itemsPerPage": "每页项目数",
+      "page": "页",
+      "of": "/",
+      "noData": "无数据，请换个日期再试",
+      "columns": "列设置",
+      "toggleColumns": "选择显示的列",
+      "tagFilter": "标签筛选",
+      "selectAllTags": "全选",
+      "deselectAllTags": "全不选",
+      "tagsSelected": "个标签已选择",
+      "matchAnyShort": "并集",
+      "matchAllShort": "交集",
+      "matchAnyHint": "并集：命中任意选中标签即显示",
+      "matchAllHint": "交集：必须包含全部选中标签才显示"
+    },
+    "datePicker": {
+      "selectDate": "选择日期"
+    },
+    "typeSelect": {
+      "placeholder": "选择排行榜类型",
+      "day": "昨天",
+      "month": "过去一个月",
+      "year": "过去一年",
+      "all": "所有时间"
+    }
+  }
+}

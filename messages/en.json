@@ -1,0 +1,77 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "noData": "No data available",
+    "learnMore": "Learn more on the"
+  },
+  "pages": {
+    "home": {
+      "title": "E-Hentai Toplist Archive",
+      "description": "browse past gallery toplists of e-hentai. Learn more on the <link>about page</link>."
+    },
+    "about": {
+      "title": "About Our App",
+      "backLink": "Back to Home",
+      "sections": {
+        "background": {
+          "title": "Background",
+          "paragraph1": "E-Hentai does not provide a feature to view past toplists. You can only check the toplists for yesterday, the past month, the past year, or all time. However, there are times when you might want to look at the toplist from a specific point in time.",
+          "paragraph2": "For instance, if you want to view the toplist from two months ago, the past month toplist won't cover that period, while the past year toplist includes too much data from other months. This makes it difficult for galleries from the target month to stand out among those from the other 11 months.",
+          "paragraph3": "This was my initial motivation for creating this application. I wanted a way to ensure I wouldn't miss certain toplists and still be able to revisit them months later."
+        },
+        "description": {
+          "title": "Description",
+          "paragraph1": "This application gathers its data from E-Hentai's toplists. I scrape the toplist data once a day (minimizing the impact on the server's load) and store it in a database. You can use this app to access historical toplist data.",
+          "paragraph2": "The app only provides historical toplist data that E-Hentai itself does not offer. It does not affect E-Hentai's regular traffic. Users still need to visit the official E-Hentai website to browse specific galleries.",
+          "paragraph3": "For technical details about this application, including the tech stack, the underlying infrastructure, the frontend-backend interaction architecture, and changelog, please refer to the <link>GitHub repository</link>."
+        },
+        "feedback": {
+          "title": "Feedback",
+          "paragraph1": "If you have any questions or suggestions for features, feel free to submit them via <link>GitHub Issues</link>."
+        }
+      }
+    }
+  },
+  "components": {
+    "dataTable": {
+      "headers": {
+        "rank": "Rank",
+        "gallery_id": "ID",
+        "gallery_name": "Name",
+        "gallery_type": "Type",
+        "tags": "Tags",
+        "published_time": "Published Date",
+        "uploader": "Uploader",
+        "gallery_length": "Length",
+        "points": "Points",
+        "preview_url": "Preview",
+        "gallery_url": "URL",
+        "torrents_url": "Torrents"
+      },
+      "itemsPerPage": "Items per page",
+      "page": "Page",
+      "of": "of",
+      "noData": "No data, please try another date",
+      "columns": "Columns",
+      "toggleColumns": "Toggle columns",
+      "tagFilter": "Tag Filter",
+      "selectAllTags": "Select All",
+      "deselectAllTags": "Deselect All",
+      "tagsSelected": "tags selected",
+      "matchAnyShort": "Union",
+      "matchAllShort": "Intersection",
+      "matchAnyHint": "Union: show rows that match any selected tag",
+      "matchAllHint": "Intersection: show rows that match all selected tags"
+    },
+    "datePicker": {
+      "selectDate": "Pick a date"
+    },
+    "typeSelect": {
+      "placeholder": "select toplist type",
+      "day": "Yesterday",
+      "month": "Past Month",
+      "year": "Past Year",
+      "all": "All-Time"
+    }
+  }
+}

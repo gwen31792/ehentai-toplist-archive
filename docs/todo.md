@@ -2,7 +2,6 @@
 ## 高优先级
 
 ## 中优先级
-- [ ] i18n, next-intl
 - [ ] 重构后端爬虫，从 AWS Lambda 迁移到 Cloudflare Workers，增加爬取数量
 - [ ] 里站排行榜
 - [ ] tag 中文翻译
@@ -49,3 +48,4 @@ WebP Cloud Services 这里感觉可以不做了，公网连接怎么也不会有
 - [x] 迁移到 @opennextjs/cloudflare，see also: https://blog.cloudflare.com/deploying-nextjs-apps-to-cloudflare-workers-with-the-opennext-adapter/
 - [x] 筛选 tags
 - [x] 使用远程绑定, see also: https://opennext.js.org/cloudflare/bindings#remote-bindings
+- [x] i18n, next-intl

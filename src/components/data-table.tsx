@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react'
 import { useDebouncedCallback } from 'use-debounce'
+import { useTranslations } from 'next-intl'
 import {
   useReactTable,
   getCoreRowModel,
@@ -24,7 +25,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/hover-card'
-import { Language, QueryResponseItem } from '@/lib/types'
+import { QueryResponseItem } from '@/lib/types'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ImageWithSkeleton } from '@/components/image-with-skeleton'
 import { TablePagination } from '@/components/table-pagination'
@@ -32,7 +33,6 @@ import { TableHeaderControls } from '@/components/table-header-controls'
 
 interface DataTableProps {
   data: QueryResponseItem[]
-  language: Language
   loading: boolean
 }
 
@@ -60,48 +60,8 @@ const PreloadImage = ({ src }: { src: string }) => {
 const columnHelper = createColumnHelper<QueryResponseItem>()
 const allowedPageSizes = [10, 20, 50, 100]
 
-const CONTENT = {
-  en: {
-    headers: {
-      rank: 'Rank',
-      gallery_id: 'ID',
-      gallery_name: 'Name',
-      gallery_type: 'Type',
-      tags: 'Tags',
-      published_time: 'Published Date',
-      uploader: 'Uploader',
-      gallery_length: 'Length',
-      points: 'Points',
-      preview_url: 'Preview',
-      gallery_url: 'URL',
-      torrents_url: 'Torrents',
-    },
-    itemsPerPage: 'Items per page',
-    page: 'Page',
-    of: 'of',
-  },
-  zh: {
-    headers: {
-      rank: '排名',
-      gallery_id: 'ID',
-      gallery_name: '名称',
-      gallery_type: '类型',
-      tags: '标签',
-      published_time: '上传日期',
-      uploader: '上传者',
-      gallery_length: '长度',
-      points: '积分',
-      preview_url: '预览图',
-      gallery_url: '链接',
-      torrents_url: '种子',
-    },
-    itemsPerPage: '每页项目数',
-    page: '页',
-    of: '/',
-  },
-} as const
-
-export function DataTable({ data, language, loading }: DataTableProps) {
+export function DataTable({ data, loading }: DataTableProps) {
+  const t = useTranslations('components.dataTable')
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
@@ -114,8 +74,6 @@ export function DataTable({ data, language, loading }: DataTableProps) {
   const [tagFilterMode, setTagFilterMode] = useState<TagFilterMode>('or')
   const [hasUserInteracted, setHasUserInteracted] = useState(false)
 
-  // 基于语言进行 memo，保持引用稳定
-  const content = useMemo(() => CONTENT[language], [language])
   // 对数据引用进行 memo
   const memoData = useMemo(() => data, [data])
 
@@ -293,17 +251,17 @@ export function DataTable({ data, language, loading }: DataTableProps) {
 
   const columns = useMemo(() => ([
     columnHelper.accessor('rank', {
-      header: () => content.headers.rank,
+      header: () => t('headers.rank'),
       cell: info => <CellWrapper>{info.getValue()}</CellWrapper>,
       size: 80,
     }),
     columnHelper.accessor('gallery_id', {
-      header: () => content.headers.gallery_id,
+      header: () => t('headers.gallery_id'),
       cell: info => <CellWrapper>{info.getValue()}</CellWrapper>,
       size: 100,
     }),
     columnHelper.accessor('preview_url', {
-      header: () => content.headers.preview_url,
+      header: () => t('headers.preview_url'),
       cell: info => (
         <CellWrapper>
           <div className="w-full">
@@ -318,7 +276,7 @@ export function DataTable({ data, language, loading }: DataTableProps) {
       size: 120,
     }),
     columnHelper.accessor('gallery_name', {
-      header: () => content.headers.gallery_name,
+      header: () => t('headers.gallery_name'),
       cell: (info) => {
         const isPreviewColumnVisible = info.table.getColumn('preview_url')?.getIsVisible() ?? true
         const previewUrl = info.row.original.preview_url
@@ -366,12 +324,12 @@ export function DataTable({ data, language, loading }: DataTableProps) {
       size: 250,
     }),
     columnHelper.accessor('gallery_type', {
-      header: () => content.headers.gallery_type,
+      header: () => t('headers.gallery_type'),
       cell: info => <CellWrapper>{info.getValue()}</CellWrapper>,
       size: 100,
     }),
     columnHelper.accessor('tags', {
-      header: () => content.headers.tags,
+      header: () => t('headers.tags'),
       cell: info => <CellWrapper>{info.getValue()}</CellWrapper>,
       size: 300,
       filterFn: (row, columnId, filterValue: { values: string[], allSelected: boolean, mode: 'or' | 'and' }) => {
@@ -404,27 +362,27 @@ export function DataTable({ data, language, loading }: DataTableProps) {
       },
     }),
     columnHelper.accessor('published_time', {
-      header: () => content.headers.published_time,
+      header: () => t('headers.published_time'),
       cell: info => <CellWrapper>{info.getValue()}</CellWrapper>,
       size: 120,
     }),
     columnHelper.accessor('uploader', {
-      header: () => content.headers.uploader,
+      header: () => t('headers.uploader'),
       cell: info => <CellWrapper>{info.getValue()}</CellWrapper>,
       size: 120,
     }),
     columnHelper.accessor('gallery_length', {
-      header: () => content.headers.gallery_length,
+      header: () => t('headers.gallery_length'),
       cell: info => <CellWrapper>{info.getValue()}</CellWrapper>,
       size: 80,
     }),
     columnHelper.accessor('points', {
-      header: () => content.headers.points,
+      header: () => t('headers.points'),
       cell: info => <CellWrapper>{info.getValue()}</CellWrapper>,
       size: 80,
     }),
     columnHelper.accessor('torrents_url', {
-      header: () => content.headers.torrents_url,
+      header: () => t('headers.torrents_url'),
       cell: info => (
         <CellWrapper>
           {info.getValue()
@@ -435,7 +393,7 @@ export function DataTable({ data, language, loading }: DataTableProps) {
                   rel="noopener noreferrer"
                   className="link-hover-underline text-blue-600 dark:text-blue-400"
                 >
-                  {content.headers.torrents_url}
+                  {t('headers.torrents_url')}
                 </Link>
               )
             : '-'}
@@ -443,7 +401,7 @@ export function DataTable({ data, language, loading }: DataTableProps) {
       ),
       size: 80,
     }),
-  ]), [content])
+  ]), [t])
 
   const table = useReactTable({
     data: memoData,
@@ -479,7 +437,6 @@ export function DataTable({ data, language, loading }: DataTableProps) {
     <div className="mx-auto mt-8 w-full max-w-[95%]">
       <TableHeaderControls
         table={table}
-        language={language}
         selectedTags={selectedTags}
         extractedTags={extractedTags}
         tagFilterMode={tagFilterMode}
@@ -543,7 +500,7 @@ export function DataTable({ data, language, loading }: DataTableProps) {
                 ? (
                     <TableRow>
                       <TableCell colSpan={table.getVisibleLeafColumns().length} className="h-24 text-center">
-                        {language === 'zh' ? '无数据，请换个日期再试' : 'No data, please try another date'}
+                        {t('noData')}
                       </TableCell>
                     </TableRow>
                   )
@@ -571,9 +528,9 @@ export function DataTable({ data, language, loading }: DataTableProps) {
       <TablePagination<QueryResponseItem>
         table={table}
         content={{
-          itemsPerPage: content.itemsPerPage,
-          page: content.page,
-          of: content.of,
+          itemsPerPage: t('itemsPerPage'),
+          page: t('page'),
+          of: t('of'),
         }}
         allowedPageSizes={allowedPageSizes}
       />

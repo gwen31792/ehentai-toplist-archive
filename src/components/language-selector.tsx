@@ -2,21 +2,25 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { Languages } from 'lucide-react'
-import { Language } from '@/lib/types'
+import { usePathname, useRouter } from '@/lib/navigation'
+import { useLocale } from 'next-intl'
+import { locales } from '@/i18n/routing'
 
-interface LanguageSelectorProps {
-  onLanguageChange: (lang: Language) => void
-  currentLang: Language
-}
-
-export function LanguageSelector({ onLanguageChange, currentLang }: LanguageSelectorProps) {
+export function LanguageSelector() {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const pathname = usePathname()
+  const router = useRouter()
+  const currentLocale = useLocale()
 
   const toggleDropdown = () => setIsOpen(!isOpen)
 
-  const selectLanguage = (lang: Language) => {
-    onLanguageChange(lang)
+  const selectLanguage = (locale: string) => {
+    // Store user's language preference in both localStorage and cookie
+    // 使用 next-intl 官方默认的 cookie 键名 NEXT_LOCALE
+    localStorage.setItem('preferred-language', locale)
+    document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=${60 * 60 * 24 * 365}` // 1 year
+    router.replace(pathname, { locale })
     setIsOpen(false)
   }
 
@@ -33,6 +37,11 @@ export function LanguageSelector({ onLanguageChange, currentLang }: LanguageSele
     }
   }, [])
 
+  const languageNames = {
+    en: 'English',
+    zh: '中文',
+  }
+
   return (
     <div className="relative" ref={dropdownRef}>
       <button
@@ -46,20 +55,16 @@ export function LanguageSelector({ onLanguageChange, currentLang }: LanguageSele
       </button>
       {isOpen && (
         <div className="absolute right-0 z-20 mt-2 min-w-[120px] whitespace-nowrap rounded-md bg-white py-2 shadow-xl dark:bg-zinc-800">
-          <button
-            className={`block w-full px-4 py-2 text-left text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-700 ${currentLang === 'en' ? 'bg-zinc-100 dark:bg-zinc-700' : ''
-            }`}
-            onClick={() => selectLanguage('en')}
-          >
-            English
-          </button>
-          <button
-            className={`block w-full px-4 py-2 text-left text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-700 ${currentLang === 'zh' ? 'bg-zinc-100 dark:bg-zinc-700' : ''
-            }`}
-            onClick={() => selectLanguage('zh')}
-          >
-            中文
-          </button>
+          {locales.map(locale => (
+            <button
+              key={locale}
+              className={`block w-full px-4 py-2 text-left text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-700 ${currentLocale === locale ? 'bg-zinc-100 dark:bg-zinc-700' : ''
+              }`}
+              onClick={() => selectLanguage(locale)}
+            >
+              {languageNames[locale as keyof typeof languageNames]}
+            </button>
+          ))}
         </div>
       )}
     </div>

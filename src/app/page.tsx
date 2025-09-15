@@ -1,90 +1,32 @@
-'use client'
+import { redirect } from 'next/navigation'
+import { routing, type Locale } from '@/i18n/routing'
+import { cookies, headers } from 'next/headers'
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { ThemeToggle } from '@/components/theme-toggle'
-import { GitHubLink } from '@/components/github-link'
-import { LanguageSelector } from '@/components/language-selector'
-import { TypeSelect } from '@/components/type-select'
-import { DatePicker } from '@/components/date-picker'
-import { DataTable } from '@/components/data-table'
-import { Language, QueryResponseItem, ToplistType } from '@/lib/types'
-import { format } from 'date-fns'
+// 根页面的语言检测和重定向
+// Next.js 15: cookies() / headers() / params / searchParams 都是异步 Dynamic APIs
+export default async function RootPage() {
+  const [cookieStore, headersList] = await Promise.all([cookies(), headers()])
 
-export default function Home() {
-  const [language, setLanguage] = useState<Language>('en')
+  const preferredLanguage = cookieStore.get('NEXT_LOCALE')?.value
+  const acceptLanguage = headersList.get('accept-language')
 
-  useEffect(() => {
-    const storedLang = localStorage.getItem('language') as Language
-    if (storedLang) {
-      setLanguage(storedLang)
+  let locale: Locale = routing.defaultLocale
+
+  // 优先使用用户存储的偏好
+  if (preferredLanguage && routing.locales.includes(preferredLanguage as Locale)) {
+    locale = preferredLanguage as Locale
+  }
+  else if (acceptLanguage) {
+    // 检测浏览器语言偏好
+    const languages = acceptLanguage.split(',').map(lang => lang.split(';')[0].trim())
+    for (const lang of languages) {
+      const browserLocale = lang.split('-')[0].toLowerCase()
+      if (routing.locales.includes(browserLocale as Locale)) {
+        locale = browserLocale as Locale
+        break
+      }
     }
-  }, [])
-
-  const handleLanguageChange = (newLang: Language) => {
-    setLanguage(newLang)
-    localStorage.setItem('language', newLang)
   }
 
-  const content = {
-    en: {
-      title: 'E-Hentai Toplist Archive',
-      description: 'browse past gallery toplists of e-hentai. Learn more on the ',
-      aboutLink: 'about page',
-    },
-    zh: {
-      title: 'E 站排行榜存档',
-      description: '浏览过去的 E-Hentai 画廊排行榜。在',
-      aboutLink: '关于页面',
-    },
-  }
-
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
-  const [selectedType, setSelectedType] = useState<ToplistType>('day')
-
-  const [data, setData] = useState<QueryResponseItem[]>([])
-  const [loading, setLoading] = useState(true)
-  useEffect(() => {
-    async function func() {
-      setLoading(true)
-      const dateString = format(selectedDate, 'yyyy-MM-dd')
-      const res = await fetch(`/api/data?list_date=${dateString}&period_type=${selectedType}`, { cache: 'force-cache' })
-      setData(await res.json())
-      setLoading(false)
-    }
-    func()
-  }, [selectedDate, selectedType])
-  return (
-    <div className="flex min-h-[calc(100vh+50px)] flex-col items-center justify-start bg-zinc-100 transition-colors dark:bg-zinc-900">
-      <div className="absolute right-4 top-4 flex items-center space-x-2">
-        <LanguageSelector onLanguageChange={handleLanguageChange} currentLang={language} />
-        <GitHubLink />
-        <ThemeToggle />
-      </div>
-      <div className="max-w-2xl px-4 py-8 text-center">
-        <h1 className="mb-4 text-4xl font-bold text-zinc-800 dark:text-zinc-200">
-          {content[language].title}
-        </h1>
-        <p className="text-lg font-medium text-zinc-600 dark:text-zinc-400">
-          {content[language].description}
-          <Link href="/about" className="link-hover-underline text-blue-600 dark:text-blue-400">
-            {content[language].aboutLink}
-          </Link>
-          {language === 'zh' && '了解更多'}
-        </p>
-      </div>
-      <div className="flex flex-col items-center space-y-4">
-        <div className="flex space-x-4">
-          <DatePicker onDateChange={setSelectedDate} language={language} />
-          <TypeSelect type={selectedType} onSelectChange={setSelectedType} language={language} />
-        </div>
-        <div className="w-full space-y-12">
-          <div className="w-full">
-            <DataTable data={data} language={language} loading={loading} />
-          </div>
-        </div>
-      </div>
-
-    </div>
-  )
+  redirect(`/${locale}`)
 }

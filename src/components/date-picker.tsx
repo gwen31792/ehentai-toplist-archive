@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
 import { CalendarIcon } from 'lucide-react'
 import { zhCN, enUS } from 'date-fns/locale'
+import { useTranslations, useLocale } from 'next-intl'
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -13,11 +14,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { Language } from '@/lib/types'
 
 interface DatePickerProps {
   onDateChange: (date: Date) => void
-  language: Language
 }
 
 const localeMap = {
@@ -25,14 +24,12 @@ const localeMap = {
   zh: zhCN,
 }
 
-export function DatePicker({ onDateChange, language }: DatePickerProps) {
+export function DatePicker({ onDateChange }: DatePickerProps) {
   const [date, setDate] = useState<Date>()
   // 设置初始月份为当前日期或选中日期
   const [month, setMonth] = useState<Date>(date || new Date())
-  const dateText = {
-    en: 'Pick a date',
-    zh: '选择日期',
-  }
+  const t = useTranslations('components.datePicker')
+  const locale = useLocale() as 'en' | 'zh'
 
   // 当选择日期变化时，同步更新月份显示
   useEffect(() => {
@@ -52,7 +49,7 @@ export function DatePicker({ onDateChange, language }: DatePickerProps) {
           )}
         >
           <CalendarIcon className="mr-2 size-4" />
-          {date ? format(date, 'PPP', { locale: localeMap[language] }) : <span>{dateText[language]}</span>}
+          {date ? format(date, 'PPP', { locale: localeMap[locale] }) : <span>{t('selectDate')}</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent
@@ -77,7 +74,6 @@ export function DatePicker({ onDateChange, language }: DatePickerProps) {
           startMonth={new Date(2023, 10, 15)} // 2023-11-15
           endMonth={new Date()}
           fixedWeeks
-          language={language}
         />
       </PopoverContent>
     </Popover>
