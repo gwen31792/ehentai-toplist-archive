@@ -4,133 +4,128 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目概述
 
-这是一个 E-Hentai 排行榜存档网站，用于展示 E-Hentai 排行榜的历史数据。项目使用 React 19 + Next.js 15 构建，通过 @opennextjs/cloudflare 适配器部署在 Cloudflare Workers 上。
+这是一个基于 Next.js 15 + React 19 的 E-Hentai Toplist 历史数据展示网站，使用 Nx monorepo 架构管理。项目部署在 Cloudflare Workers 上，使用 D1 数据库存储数据。
 
-## 技术栈
+## 开发环境设置
 
-- **前端框架**: React 19 + Next.js 15 (Edge Runtime)
-- **样式**: Tailwind CSS v4 + shadcn/ui 组件
-- **类型系统**: TypeScript
-- **数据库**: Cloudflare D1 (SQLite)
-- **ORM**: Drizzle ORM
-- **适配器**: @opennextjs/cloudflare
-- **部署**: Cloudflare Workers + Wrangler
-- **包管理器**: pnpm
-
-## 常用开发命令
-
+### 根级别命令（使用 NX）
 ```bash
-# 开发环境启动（使用 Turbopack 加速）
+# 运行开发服务器
+nx dev web
+
+# 构建应用
+nx build web
+
+# 运行 lint 检查
+nx lint web
+
+# 类型检查
+nx typecheck web
+```
+
+### Web 应用特定命令（在 apps/web 目录下）
+```bash
+# 开发模式（使用 Turbopack）
 pnpm dev
 
-# 代码检查和修复
-pnpm lint:fix
-
-# 生成数据库模拟数据
-pnpm generate-db
-
-# 生成 Cloudflare Workers 类型定义
-pnpm cf-typegen
-
-# 构建项目
+# 构建生产版本
 pnpm build
 
-# 本地预览 Cloudflare Workers 构建版本
+# Lint 并自动修复
+pnpm lint:fix
+
+# 预览 Cloudflare Worker 构建
 pnpm preview
 
-# 部署到 Cloudflare Workers
+# 部署到 Cloudflare
 pnpm deploy
+
+# 生成 Cloudflare 环境类型
+pnpm cf-typegen
+
+# 生成本地 D1 数据库（使用 mock 数据）
+pnpm generate-db
 ```
 
-## 核心架构约束
+## 项目架构
 
-- **必须在 Cloudflare Workers 环境下运行**：`wrangler.toml` 将 D1 数据库绑定为 `DB`
-- **服务端数据库访问**：使用 `drizzle(getCloudflareContext().env.DB)` 访问 D1 数据库（参考 `src/app/api/data/route.ts`）
-- **shadcn/ui 组件规则**：**严禁修改** `src/components/ui/**` 下的基础组件，新组件应创建在 `src/components/**` 下
-- **图片资源约束**：图片 URL 必须符合 `next.config.ts` 中的远程模式配置（仅允许 `ehgt.org`）
-- **静态资源处理**：通过 wrangler.toml 中的 assets 配置管理静态文件
+### Monorepo 结构
+- 使用 Nx 管理 monorepo
+- 主要应用在 `apps/web/`
+- 项目配置在根目录的 `nx.json`
 
-## 代码架构
+### 技术栈
+- **前端**: React 19 + Next.js 15
+- **样式**: Tailwind CSS + shadcn/ui
+- **状态管理**: React hooks + localStorage
+- **数据库**: Cloudflare D1 (SQLite)
+- **ORM**: Drizzle ORM
+- **国际化**: next-intl (支持中英文)
+- **部署**: Cloudflare Workers (通过 @opennextjs/cloudflare)
+- **构建工具**: Nx + Next.js + Turbopack
 
-### 目录结构
+### 关键目录结构
 ```
-src/
-├── app/                    # Next.js App Router
-│   ├── api/data/          # API 路由（数据查询）
-│   ├── about/             # 关于页面
-│   ├── layout.tsx         # 根布局
-│   └── page.tsx           # 首页
-├── components/            # React 组件
-│   ├── ui/                # shadcn/ui 基础组件
-│   ├── data-table.tsx     # 数据表格组件
-│   ├── date-picker.tsx    # 日期选择器
-│   └── ...                # 其他功能组件
-├── db/                    # 数据库相关
-│   ├── schema.ts          # Drizzle ORM 数据库表结构
-│   └── mock.sql           # 模拟数据
-└── lib/                   # 工具库
-    ├── types.ts           # TypeScript 类型定义
-    └── utils.ts           # 工具函数
+apps/web/src/
+├── app/              # Next.js App Router
+├── components/       # React 组件
+│   └── ui/          # shadcn/ui 基础组件（不要修改）
+├── db/              # 数据库 schema 和 mock 数据
+├── i18n/            # 国际化配置
+└── lib/             # 工具函数和类型定义
 ```
 
-### 数据库结构
-- **galleries**: 画廊主表，存储画廊的基本信息（ID、标题、类型、标签、发布时间、上传者等）
-- **toplist_items_2023/2024/2025**: 按年份分表的排行榜记录表，存储每日/月/年/全部排行榜数据
+## 数据库架构
 
-### 关键组件说明
-- **DataTable**: 主要的数据展示组件，使用 @tanstack/react-table，支持分页和多语言
-- **DatePicker**: 日期选择器，用于选择查看特定日期的排行榜
-- **TypeSelect**: 排行榜类型选择器（日/月/年/全部）
-- **LanguageSelector**: 语言切换器（中英文）
-- **TablePagination**: 独立的分页控制组件
-- **TableHeaderControls**: 表格头部控制组件（包含日期选择和类型选择）
+### 表结构
+- `galleries`: 主要画廊信息表
+- `toplist_items_YYYY`: 按年分区的排行榜数据表（如 `toplist_items_2023`, `toplist_items_2024`）
 
-## 数据库操作模式
-
-使用 Drizzle ORM 配合 `drizzle-orm/d1`，数据结构为 `galleries`（主表）+ 按年份分表的 `toplist_items_2023/2024/2025`。
-
-### 标准查询模式（参考 `src/app/api/data/route.ts`）
-
-```javascript
-// 1. 根据 list_date 年份选择对应的排行榜表
-const yearPart = list_date_param.slice(0, 4)
-let toplistItemsTable = tableMap[yearPart] // 2023/2024/2025
-
-// 2. 使用 getTableColumns 展开列，排除连接时的重复字段
-const { list_date, period_type, ...rest } = getTableColumns(toplistItemsTable)
-
-// 3. 连接查询
-const result = await db.select({ ...rest, ...getTableColumns(galleriesTable) })
-  .from(toplistItemsTable)
-  .where(and(
-    eq(toplistItemsTable.list_date, list_date_param),
-    eq(toplistItemsTable.period_type, period_type_param)
-  ))
-  .innerJoin(galleriesTable, eq(toplistItemsTable.gallery_id, galleriesTable.gallery_id))
-  .orderBy(toplistItemsTable.rank)
+### 数据访问模式
+```typescript
+// 在服务器端组件或 API 路由中
+const db = drizzle(getCloudflareContext().env.DB)
 ```
 
-## API 契约
+### 添加新年份分区
+1. 在 `src/db/schema.ts` 中添加新的年份表定义
+2. 在 `src/app/api/data/route.ts` 中扩展年份切换逻辑
+3. 在 `src/db/mock.sql` 中添加种子数据
+4. 运行 `pnpm generate-db` 重新生成本地数据库
 
-- **端点**: `GET /api/data?list_date=YYYY-MM-DD&period_type=day|month|year|all`
-- **返回**: `{...Gallery, rank}[]` 数组（类型定义见 `src/lib/types.ts`）
-- **缓存**: 客户端使用 `{ cache: 'force-cache' }` 简单缓存
+## 重要开发约定
 
-## 应用数据流
+### 组件开发
+- 不要修改 `src/components/ui/` 下的 shadcn/ui 基础组件
+- 需要自定义时，创建包装组件或新组件
+- 遵循现有的组件结构和命名约定
 
-- **状态管理**: `src/app/page.tsx` 管理客户端状态，`language` 存储在 `localStorage`
-- **数据获取**: 日期/类型变化时重新获取 `/api/data`
-- **核心组件**: `DatePicker`、`TypeSelect`、`DataTable`（TanStack Table）、`LanguageSelector`
+### API 开发
+- 数据查询逻辑只能在 API 路由中实现，不要在组件中直接访问数据库
+- API 端点: `GET /api/data?list_date=YYYY-MM-DD&period_type=day|month|year|all`
+- 使用 `{ cache: 'force-cache' }` 进行客户端缓存
 
-## 添加新年份支持
+### 类型安全
+- 运行 `pnpm cf-typegen` 生成 Cloudflare 环境类型
+- 类型定义在 `src/lib/types.ts`
 
-1. 在 `src/db/schema.ts` 中定义新的 `toplistItems{YEAR}Table`
-2. 在 `src/app/api/data/route.ts` 的 switch 语句中添加对应的 case
-3. 扩展 `src/db/mock.sql` 模拟数据，然后运行 `pnpm generate-db`
+### 图片处理
+- 远程图片必须匹配 `next.config.ts` 中的 `remotePatterns` 配置
+- 当前只允许 `ehgt.org` 域名
 
-## 重要参考文件
+## 常见问题排查
 
-- **API 实现**: `src/app/api/data/route.ts`
-- **数据库模式**: `src/db/schema.ts`
-- **类型定义**: `src/lib/types.ts` (`Language`, `ToplistType`, `Gallery`, `QueryResponseItem`)
-- **应用入口**: `src/app/layout.tsx`, `src/app/page.tsx`
+### 数据为空
+1. 检查 `list_date` 年份是否有对应的分区表
+2. 检查种子数据是否包含该日期和周期的记录
+3. 确认 `period_type` 拼写正确（all|year|month|day）
+
+### 开发环境问题
+- 如果本地 D1 数据库有问题，运行 `pnpm generate-db` 重置
+- 如果 TypeScript 报错，运行 `pnpm cf-typegen` 更新类型定义
+
+## 部署注意事项
+
+- 项目部署在 Cloudflare Workers，只能使用 Edge Runtime
+- 避免使用 Node.js 特定 API（如 fs, crypto 回调等）
+- 数据库绑定名称为 `DB`（参见 `wrangler.toml`）

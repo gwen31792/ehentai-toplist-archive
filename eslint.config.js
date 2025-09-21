@@ -1,3 +1,4 @@
+import nx from '@nx/eslint-plugin'
 import js from '@eslint/js'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
@@ -14,9 +15,16 @@ export default [
       '**/build/**',
       '**/.next/**',
       '**/coverage/**',
-      'src/components/ui/**', // shadcn/ui 组件库
+      '**/src/components/ui/**', // shadcn/ui 组件库
+      '**/.nx/**',
+      '**/.open-next/**',
+      '**/.wrangler/**',
+      '**/*.d.ts',
     ],
   },
+  ...nx.configs['flat/base'],
+  ...nx.configs['flat/typescript'],
+  ...nx.configs['flat/javascript'],
   js.configs.recommended, // JavaScript 推荐规则
   ...tseslint.configs.recommended, // TypeScript 推荐规则
   // 通用语言选项与基础规则

@@ -1,8 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
-/.pnp
+node_modules
+.pnp
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -12,21 +12,30 @@
 .pnpm-store
 
 # testing
-/coverage
+coverage
 
 # next.js
-/.next/
-/out/
+.next/
+out/
 .open-next
 
 # production
-/build
+build
+dist
+tmp
+out-tsc
 
 # misc
 .DS_Store
+Thumbs.db
 *.pem
+/.sass-cache
+/connect.lock
+/libpeerconnection.log
+testem.log
+/typings
 
-# debug
+# debug & logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -42,7 +51,30 @@ yarn-error.log*
 next-env.d.ts
 
 # cloudflare
-.wrangler/
+.wrangler
 .dev.vars
 worker-configuration.d.ts
 cloudflare-env.d.ts
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# nx
+.nx/cache
+.nx/workspace-data
+.cursor/rules/nx-rules.mdc
+.github/instructions/nx.instructions.md
+

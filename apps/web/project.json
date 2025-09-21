@@ -1,0 +1,18 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "@ehentai-toplist-archive/web",
+  "projectType": "application",
+  "root": "apps/web",
+  "sourceRoot": "apps/web/src",
+  "targets": {
+    "preview": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm preview",
+        "cwd": "apps/web"
+      },
+      "cache": true
+    }
+  },
+  "tags": []
+}
