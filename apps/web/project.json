@@ -1,6 +1,6 @@
 {
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "name": "@ehentai-toplist-archive/web",
+  "name": "web",
   "projectType": "application",
   "root": "apps/web",
   "sourceRoot": "apps/web/src",
