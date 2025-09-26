@@ -2,5 +2,12 @@
   "name": "crawler",
   "version": "0.0.1",
   "private": true,
-  "dependencies": {}
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.12"
+  },
+  "devDependencies": {}
 }
