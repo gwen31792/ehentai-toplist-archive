@@ -4,7 +4,7 @@
     "outDir": "dist",
     "module": "nodenext",
     "types": [
-      "node"
+      "./worker-configuration"
     ],
     "rootDir": "src",
     "moduleResolution": "nodenext",

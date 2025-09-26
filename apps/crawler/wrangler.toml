@@ -1,0 +1,4 @@
+name = "ehentai-toplist-archive-crawler"
+main = "src/index.ts"
+compatibility_date = "2025-09-17"
+compatibility_flags = ["nodejs_compat"]
