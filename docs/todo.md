@@ -2,8 +2,7 @@
 ## 高优先级
 
 ## 中优先级
-- [ ] 重构后端爬虫，从 AWS Lambda 迁移到 Cloudflare Workers，增加爬取数量
-- [ ] 里站排行榜
+- [ ] 爬虫 ip 被 ban 后自动调起一次新的执行
 - [ ] tag 中文翻译
 - [ ] 保持 tags 的过滤，这样能只看某个 tags 的所有的排行
 
@@ -49,3 +48,4 @@ WebP Cloud Services 这里感觉可以不做了，公网连接怎么也不会有
 - [x] 筛选 tags
 - [x] 使用远程绑定, see also: https://opennext.js.org/cloudflare/bindings#remote-bindings
 - [x] i18n, next-intl
+- [ ] 重构后端爬虫，从 AWS Lambda 迁移到 Cloudflare Workers，增加爬取数量

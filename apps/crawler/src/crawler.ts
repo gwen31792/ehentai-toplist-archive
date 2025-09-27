@@ -1,5 +1,11 @@
 import * as cheerio from 'cheerio'
 
+import {
+  createDbClient,
+  galleriesTable,
+  getToplistItemsTableByYear,
+} from '@ehentai-toplist-archive/db'
+
 interface GalleryItem {
   gallery_id: number
   gallery_name: string
@@ -23,7 +29,12 @@ interface ToplistItem {
   period_type: PeriodType
 }
 
-export async function getToplistSingle(period_type: PeriodType, url: string): Promise<void> {
+interface CrawlResult {
+  galleries: GalleryItem[]
+  toplistItems: ToplistItem[]
+}
+
+export async function getToplistSingle(env: Env, period_type: PeriodType, url: string): Promise<void> {
   try {
     const response = await fetch(url, {
       method: 'GET',
@@ -34,7 +45,15 @@ export async function getToplistSingle(period_type: PeriodType, url: string): Pr
     }
 
     const data = await response.text()
-    await getToplistSingleFromResponse(data, period_type, null)
+
+    if (data.includes('This IP address has been temporarily banned')) {
+      console.error(
+        'Received temporary ban response while crawling toplist. Response body:',
+        data,
+      )
+    }
+    const { galleries, toplistItems } = await getToplistSingleFromResponse(data, period_type, null)
+    await persistToplistData(env, galleries, toplistItems)
   }
   catch (error) {
     console.error('Error fetching toplist:', error)
@@ -45,7 +64,7 @@ export async function getToplistSingleFromResponse(
   data: string,
   period_type: PeriodType,
   date: string | null,
-): Promise<void> {
+): Promise<CrawlResult> {
   const $ = cheerio.load(data)
   const galleries: GalleryItem[] = []
   const toplist_items: ToplistItem[] = []
@@ -147,8 +166,61 @@ export async function getToplistSingleFromResponse(
     }
   })
 
-  // 输出爬取结果
-  console.log(`Successfully crawled ${galleries.length} items for ${period_type} period`)
-  console.log('Sample gallery:', galleries[0])
-  console.log('Sample toplist item:', toplist_items[0])
+  return {
+    galleries,
+    toplistItems: toplist_items,
+  }
+}
+
+async function persistToplistData(env: Env, galleries: GalleryItem[], toplistItems: ToplistItem[]): Promise<void> {
+  if (galleries.length === 0 && toplistItems.length === 0) {
+    console.log('No data to persist; skipping database writes.')
+    return
+  }
+
+  const db = createDbClient(env)
+
+  for (const gallery of galleries) {
+    if (!gallery.gallery_id) {
+      console.warn('Skipping gallery with missing ID:', gallery)
+      continue
+    }
+    try {
+      await db.insert(galleriesTable).values(gallery).onConflictDoUpdate({
+        target: galleriesTable.gallery_id,
+        set: {
+          gallery_name: gallery.gallery_name,
+          gallery_type: gallery.gallery_type,
+          tags: gallery.tags,
+          published_time: gallery.published_time,
+          uploader: gallery.uploader,
+          gallery_length: gallery.gallery_length,
+          points: gallery.points,
+          torrents_url: gallery.torrents_url,
+          preview_url: gallery.preview_url,
+          gallery_url: gallery.gallery_url,
+        },
+      })
+    }
+    catch (error) {
+      console.error(`Failed to upsert gallery ${gallery.gallery_id}:`, error)
+    }
+  }
+
+  for (const item of toplistItems) {
+    if (!item.gallery_id) {
+      console.warn('Skipping toplist item with missing gallery ID:', item)
+      continue
+    }
+    try {
+      const table = getToplistItemsTableByYear(item.list_date)
+
+      await db.insert(table).values(item).onConflictDoNothing()
+    }
+    catch (error) {
+      console.error(`Failed to upsert toplist item for gallery ${item.gallery_id} on ${item.list_date} (${item.period_type}):`, error)
+    }
+  }
+
+  console.log(`Persisted ${galleries.length} galleries and ${toplistItems.length} toplist rows.`)
 }
