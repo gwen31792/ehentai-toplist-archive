@@ -41,5 +41,27 @@
     "@types/react-dom": "^19.1.9",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.13"
+  },
+  "nx": {
+    "implicitDependencies": [
+      "@ehentai-toplist-archive/db"
+    ],
+    "targets": {
+      "build": {
+        "dependsOn": [
+          "^build"
+        ]
+      },
+      "preview": {
+        "dependsOn": [
+          "^build"
+        ]
+      },
+      "deploy": {
+        "dependsOn": [
+          "^build"
+        ]
+      }
+    }
   }
 }

@@ -9,12 +9,28 @@
   "exports": {
     "./package.json": "./package.json",
     ".": {
-  "types": "./dist/src/index.d.ts",
-  "import": "./dist/src/index.js",
-  "default": "./dist/src/index.js"
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js",
+      "default": "./dist/src/index.js"
     }
   },
   "dependencies": {
     "tslib": "^2.3.0"
+  },
+  "nx": {
+    "sourceRoot": "packages/db/src",
+    "projectType": "library",
+    "tags": [],
+    "targets": {
+      "build": {
+        "executor": "@nx/js:tsc",
+        "outputs": ["{projectRoot}/dist"],
+        "options": {
+          "tsConfig": "packages/db/tsconfig.lib.json",
+          "main": "packages/db/src/index.ts",
+          "outputPath": "packages/db/dist"
+        }
+      }
+    }
   }
 }
