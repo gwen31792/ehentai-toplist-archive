@@ -66,6 +66,17 @@
         "default",
         "^default"
       ]
+    },
+    "@nx/js:tsc": {
+      "cache": true,
+      "inputs": [
+        "default",
+        "^default"
+      ],
+      "outputs": [
+        "{projectRoot}/dist",
+        "{projectRoot}/dist/**"
+      ]
     }
   }
 }

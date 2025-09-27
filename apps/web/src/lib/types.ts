@@ -1,22 +1,5 @@
-export type ToplistType = 'day' | 'month' | 'year' | 'all'
-
-export interface Gallery {
-  gallery_id: number
-  gallery_name: string
-  gallery_type: string
-  tags: string
-  published_time: string
-  uploader: string
-  gallery_length: number
-  points: number
-  torrents_url: string
-  preview_url: string
-  gallery_url: string
-}
-
-export interface QueryResponseItem extends Gallery {
-  rank: number
-}
+export type { Gallery, QueryResponseItem, ToplistType } from '@ehentai-toplist-archive/db'
+export { TOPLIST_PERIOD_TYPES } from '@ehentai-toplist-archive/db'
 
 export interface ContentType {
   en: {

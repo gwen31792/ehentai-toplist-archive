@@ -1,5 +1,6 @@
 packages:
   - "apps/*"
-
+  - "db"
+  - "packages/*"
 autoInstallPeers: true
 strictPeerDependencies: false

@@ -17,7 +17,11 @@
     "@nx/node": "21.5.3",
     "@nx/workspace": "21.5.3",
     "@stylistic/eslint-plugin": "^5.4.0",
+    "@swc-node/register": "~1.9.1",
+    "@swc/core": "~1.5.7",
+    "@swc/helpers": "~0.5.11",
     "@types/node": "^20.19.17",
+    "drizzle-kit": "^0.31.5",
     "esbuild": "^0.25.10",
     "eslint": "^9.36.0",
     "eslint-plugin-react": "^7.37.5",
@@ -29,5 +33,8 @@
     "typescript": "~5.8.0",
     "typescript-eslint": "^8.44.1",
     "wrangler": "^4.40.2"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.44.5"
   }
 }

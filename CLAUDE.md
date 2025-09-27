@@ -42,9 +42,6 @@ pnpm deploy
 
 # 生成 Cloudflare 环境类型
 pnpm cf-typegen
-
-# 生成本地 D1 数据库（使用 mock 数据）
-pnpm generate-db
 ```
 
 ## 项目架构
@@ -70,7 +67,7 @@ apps/web/src/
 ├── app/              # Next.js App Router
 ├── components/       # React 组件
 │   └── ui/          # shadcn/ui 基础组件（不要修改）
-├── db/              # 数据库 schema 和 mock 数据
+├── db/              # （已弃用）保留兼容层，实际 schema 位于 packages/db
 ├── i18n/            # 国际化配置
 └── lib/             # 工具函数和类型定义
 ```
@@ -82,16 +79,19 @@ apps/web/src/
 - `toplist_items_YYYY`: 按年分区的排行榜数据表（如 `toplist_items_2023`, `toplist_items_2024`）
 
 ### 数据访问模式
+`@ehentai-toplist-archive/db` 包提供 `createDbClient` helper：
+
 ```typescript
-// 在服务器端组件或 API 路由中
-const db = drizzle(getCloudflareContext().env.DB)
+import { createDbClient } from '@ehentai-toplist-archive/db'
+
+const db = createDbClient(getCloudflareContext().env)
 ```
 
 ### 添加新年份分区
-1. 在 `src/db/schema.ts` 中添加新的年份表定义
-2. 在 `src/app/api/data/route.ts` 中扩展年份切换逻辑
-3. 在 `src/db/mock.sql` 中添加种子数据
-4. 运行 `pnpm generate-db` 重新生成本地数据库
+1. 在 `packages/db/src/schema/toplist-items.ts` 中扩展 `SUPPORTED_TOPLIST_YEARS`
+2. 更新 `packages/db/src/schema/toplist-items.ts` 中的表映射，并在必要时增加种子抓取脚本
+3. 重新构建共享包：`pnpm nx build db`
+4. 确认 `apps/web/src/app/api/data/route.ts` 能通过 `getToplistItemsTableByYear` 读取新年份
 
 ## 重要开发约定
 
@@ -121,7 +121,6 @@ const db = drizzle(getCloudflareContext().env.DB)
 3. 确认 `period_type` 拼写正确（all|year|month|day）
 
 ### 开发环境问题
-- 如果本地 D1 数据库有问题，运行 `pnpm generate-db` 重置
 - 如果 TypeScript 报错，运行 `pnpm cf-typegen` 更新类型定义
 
 ## 部署注意事项

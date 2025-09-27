@@ -1,32 +1,40 @@
-import { drizzle } from 'drizzle-orm/d1'
-import { galleriesTable, toplistItems2023Table, toplistItems2024Table, toplistItems2025Table } from '@/db/schema'
 import { eq, and, getTableColumns } from 'drizzle-orm'
 import type { NextRequest } from 'next/server'
 import { getCloudflareContext } from '@opennextjs/cloudflare'
+import {
+  TOPLIST_PERIOD_TYPES,
+  createDbClient,
+  galleriesTable,
+  getToplistItemsTableByYear,
+  type ToplistType,
+} from '@ehentai-toplist-archive/db'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
-  const list_date_param = searchParams.get('list_date') as string
-  const period_type_param = searchParams.get('period_type') as string
+  const listDateParam = searchParams.get('list_date')
+  const periodTypeParam = searchParams.get('period_type')
 
-  const db = drizzle(getCloudflareContext().env.DB)
-
-  // 根据传入的年份选择表
-  const yearPart = list_date_param.slice(0, 4)
-  let toplistItemsTable
-  switch (yearPart) {
-    case '2023':
-      toplistItemsTable = toplistItems2023Table
-      break
-    case '2024':
-      toplistItemsTable = toplistItems2024Table
-      break
-    case '2025':
-      toplistItemsTable = toplistItems2025Table
-      break
-    default:
-      return Response.json({ error: 'Unsupported year', year: yearPart }, { status: 400 })
+  if (!listDateParam || !periodTypeParam) {
+    return Response.json({ error: 'Missing required query parameters.' }, { status: 400 })
   }
+
+  const isToplistType = (value: string): value is ToplistType =>
+    TOPLIST_PERIOD_TYPES.includes(value as ToplistType)
+
+  if (!isToplistType(periodTypeParam)) {
+    return Response.json({ error: 'Invalid period_type value.' }, { status: 400 })
+  }
+
+  let toplistItemsTable
+  try {
+    toplistItemsTable = getToplistItemsTableByYear(listDateParam)
+  }
+  catch (error) {
+    const message = error instanceof Error ? error.message : 'Unsupported year'
+    return Response.json({ error: message }, { status: 400 })
+  }
+
+  const db = createDbClient(getCloudflareContext().env)
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { list_date, period_type, ...rest } = getTableColumns(toplistItemsTable)
@@ -39,8 +47,8 @@ export async function GET(request: NextRequest) {
     .from(toplistItemsTable)
     .where(
       and(
-        eq(toplistItemsTable.list_date, list_date_param),
-        eq(toplistItemsTable.period_type, period_type_param),
+        eq(toplistItemsTable.list_date, listDateParam),
+        eq(toplistItemsTable.period_type, periodTypeParam),
       ))
     .innerJoin(galleriesTable, eq(toplistItemsTable.gallery_id, galleriesTable.gallery_id))
     .orderBy(toplistItemsTable.rank)

@@ -1,0 +1,17 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/db/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{projectRoot}/dist"],
+      "options": {
+        "tsConfig": "packages/db/tsconfig.lib.json",
+        "main": "packages/db/src/index.ts",
+        "outputPath": "packages/db/dist"
+      }
+    }
+  }
+}
