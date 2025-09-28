@@ -1,0 +1,27 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "ehentai-toplist-archive-crawler",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-09-17",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "workers_dev": false,
+  "triggers": {
+    "crons": [
+      "0 1 * * *",
+      "0 2 * * *"
+    ]
+  },
+  "observability": {
+    "enabled": true
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "ehentai-toplist-archive",
+      "database_id": "48fbbd89-2ea8-4543-b6b8-cb5ca5d6d805",
+      "remote": true
+    }
+  ]
+}
