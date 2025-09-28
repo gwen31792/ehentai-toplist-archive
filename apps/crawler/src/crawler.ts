@@ -1,10 +1,21 @@
 import * as cheerio from 'cheerio'
 
+import { DrizzleQueryError } from 'drizzle-orm/errors'
 import {
   createDbClient,
   galleriesTable,
   getToplistItemsTableByYear,
 } from '@ehentai-toplist-archive/db'
+
+let cachedDbClient: ReturnType<typeof createDbClient> | null = null
+
+function getDbClient(env: Env) {
+  if (cachedDbClient == null) {
+    cachedDbClient = createDbClient(env)
+  }
+
+  return cachedDbClient
+}
 
 interface GalleryItem {
   gallery_id: number
@@ -178,15 +189,11 @@ async function persistToplistData(env: Env, galleries: GalleryItem[], toplistIte
     return
   }
 
-  const db = createDbClient(env)
+  const db = getDbClient(env)
 
-  for (const gallery of galleries) {
-    if (!gallery.gallery_id) {
-      console.warn('Skipping gallery with missing ID:', gallery)
-      continue
-    }
-    try {
-      await db.insert(galleriesTable).values(gallery).onConflictDoUpdate({
+  if (galleries.length > 0) {
+    const galleryStatements = galleries.map(gallery =>
+      db.insert(galleriesTable).values(gallery).onConflictDoUpdate({
         target: galleriesTable.gallery_id,
         set: {
           gallery_name: gallery.gallery_name,
@@ -200,25 +207,63 @@ async function persistToplistData(env: Env, galleries: GalleryItem[], toplistIte
           preview_url: gallery.preview_url,
           gallery_url: gallery.gallery_url,
         },
-      })
+      }),
+    )
+
+    try {
+      // cloudflare workers subrequest limit is 1000
+      // 所以不能一条一条发请求，打包起来发能解决这个问题
+      await db.batch(galleryStatements)
     }
     catch (error) {
-      console.error(`Failed to upsert gallery ${gallery.gallery_id}:`, error)
+      if (error instanceof DrizzleQueryError) {
+        console.error(
+          `Failed to batch upsert ${galleryStatements.length} galleries:`,
+          error,
+          error.cause,
+        )
+      }
+      else {
+        console.error(`Failed to batch upsert ${galleryStatements.length} galleries:`, error)
+      }
     }
   }
 
-  for (const item of toplistItems) {
-    if (!item.gallery_id) {
-      console.warn('Skipping toplist item with missing gallery ID:', item)
-      continue
-    }
-    try {
-      const table = getToplistItemsTableByYear(item.list_date)
+  if (toplistItems.length > 0) {
+    let table: ReturnType<typeof getToplistItemsTableByYear>
 
-      await db.insert(table).values(item).onConflictDoNothing()
+    try {
+      table = getToplistItemsTableByYear(toplistItems[0].list_date)
     }
     catch (error) {
-      console.error(`Failed to upsert toplist item for gallery ${item.gallery_id} on ${item.list_date} (${item.period_type}):`, error)
+      console.error(`Unable to resolve toplist table for date ${toplistItems[0].list_date}:`, error)
+      return
+    }
+
+    const toplistStatements = toplistItems.map(item =>
+      db.insert(table).values(item).onConflictDoNothing(),
+    )
+
+    if (toplistStatements.length > 0) {
+      try {
+        await db.batch(toplistStatements)
+      }
+      catch (error) {
+        const sample = toplistItems[0]
+        if (error instanceof DrizzleQueryError) {
+          console.error(
+            `Failed to batch insert ${toplistStatements.length} toplist items for ${sample?.list_date ?? 'unknown date'} (${sample?.period_type ?? 'unknown period'}):`,
+            error,
+            error.cause,
+          )
+        }
+        else {
+          console.error(
+            `Failed to batch insert ${toplistStatements.length} toplist items for ${sample?.list_date ?? 'unknown date'} (${sample?.period_type ?? 'unknown period'}):`,
+            error,
+          )
+        }
+      }
     }
   }
 
