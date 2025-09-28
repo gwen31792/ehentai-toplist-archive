@@ -10,5 +10,22 @@
     "cheerio": "^1.1.2",
     "@ehentai-toplist-archive/db": "workspace:^"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "nx": {
+    "implicitDependencies": [
+      "@ehentai-toplist-archive/db"
+    ],
+    "targets": {
+      "dev": {
+        "dependsOn": [
+          "^build"
+        ]
+      },
+      "deploy": {
+        "dependsOn": [
+          "^build"
+        ]
+      }
+    }
+  }
 }
