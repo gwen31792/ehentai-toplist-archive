@@ -16,6 +16,17 @@
   "observability": {
     "enabled": true
   },
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "FETCH_DO",
+        "class_name": "FetchProxy"
+      }
+    ]
+  },
+  "migrations": [
+    { "tag": "0001_add_fetch_proxy", "new_classes": ["FetchProxy"] }
+  ],
   "d1_databases": [
     {
       "binding": "DB",

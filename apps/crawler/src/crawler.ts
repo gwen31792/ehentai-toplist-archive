@@ -59,13 +59,11 @@ export class AbortCrawlError extends Error {
 
 export async function getToplistSingle(env: Env, period_type: PeriodType, url: string): Promise<void> {
   try {
-    const response = await fetch(url, {
-      method: 'GET',
-    })
+    const response = await cfFetch(env, url, { method: 'GET' })
 
     if (response.status === 451) {
       // Cloudflare 会在 451 时返回受限地区信息，额外记录 trace 以判断是否因英国地区触发的封锁。
-      const traceInfo = await logCloudflareExecutionInfo(response.clone(), url)
+      const traceInfo = await logCloudflareExecutionInfo(env, response.clone(), url)
 
       if (traceInfo?.loc?.toUpperCase() === 'GB') {
         console.warn('Trace location resolved to GB after receiving 451; aborting remaining crawl tasks.', {
@@ -305,7 +303,7 @@ async function persistToplistData(env: Env, galleries: GalleryItem[], toplistIte
 }
 
 // 451 响应不会附带详细错误信息，这里通过 Cloudflare trace 接口补充请求上下文，便于定位封锁来源。
-async function logCloudflareExecutionInfo(response: Response, requestUrl: string): Promise<Record<string, string> | null> {
+async function logCloudflareExecutionInfo(env: Env, response: Response, requestUrl: string): Promise<Record<string, string> | null> {
   const blockedHeaders = {
     cfRay: response.headers.get('cf-ray'),
     cfCacheStatus: response.headers.get('cf-cache-status'),
@@ -316,12 +314,7 @@ async function logCloudflareExecutionInfo(response: Response, requestUrl: string
   let traceInfo: Record<string, string> | null = null
 
   try {
-    const traceResponse = await fetch('https://cloudflare.com/cdn-cgi/trace', {
-      cf: {
-        cacheTtl: 0,
-        cacheEverything: false,
-      },
-    })
+    const traceResponse = await cfFetch(env, 'https://cloudflare.com/cdn-cgi/trace', { method: 'GET' })
 
     if (traceResponse.ok) {
       const traceText = await traceResponse.text()
@@ -362,4 +355,12 @@ async function logCloudflareExecutionInfo(response: Response, requestUrl: string
   })
 
   return traceInfo
+}
+
+// 使用 Durable Object 代理发起外部请求，强制从 APAC 机房出站，减少 451 触发概率。
+async function cfFetch(env: Env, url: string, init?: RequestInit): Promise<Response> {
+  const id = env.FETCH_DO.idFromName('fetch-proxy')
+  const stub = env.FETCH_DO.get(id, { locationHint: 'apac' })
+  const proxyUrl = `https://internal/fetch-proxy?to=${encodeURIComponent(url)}`
+  return stub.fetch(proxyUrl, init)
 }
