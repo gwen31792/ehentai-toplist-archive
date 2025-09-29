@@ -1,4 +1,4 @@
-import { getToplistSingle } from './crawler'
+import { AbortCrawlError, getToplistSingle } from './crawler'
 
 export default {
   async fetch(): Promise<Response> {
@@ -34,12 +34,23 @@ async function handleToplistCrawling(env: Env): Promise<void> {
     ['day', 'https://e-hentai.org/toplist.php?tl=15&p=3'],
   ] as const
 
-  for (let i = 0; i < tasks.length; i++) {
-    const [type, url] = tasks[i]
-    await getToplistSingle(env, type, url)
-    // 每个任务之间等待 1 秒，最后一个任务后不再等待
-    if (i < tasks.length - 1) {
-      await delay(1000)
+  try {
+    for (let i = 0; i < tasks.length; i++) {
+      const [type, url] = tasks[i]
+      await getToplistSingle(env, type, url)
+      // 每个任务之间等待 1 秒，最后一个任务后不再等待
+      if (i < tasks.length - 1) {
+        await delay(1000)
+      }
     }
+  }
+  catch (error) {
+    if (error instanceof AbortCrawlError) {
+      // 命中英国地区触发的 Cloudflare 451 封锁时，立即终止剩余任务以避免继续命中限制。
+      console.warn('Toplist crawling terminated early due to GB-based Cloudflare block.', error.context)
+      return
+    }
+
+    throw error
   }
 }

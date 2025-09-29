@@ -45,11 +45,41 @@ interface CrawlResult {
   toplistItems: ToplistItem[]
 }
 
+// 用于在检测到需要立即停止后续请求的场景（例如被 Cloudflare 针对特定地区封锁）时抛出，
+// 以便调用方可以按需中断整个爬取流程。
+export class AbortCrawlError extends Error {
+  constructor(
+    message: string,
+    public readonly context: Record<string, unknown> = {},
+  ) {
+    super(message)
+    this.name = 'AbortCrawlError'
+  }
+}
+
 export async function getToplistSingle(env: Env, period_type: PeriodType, url: string): Promise<void> {
   try {
     const response = await fetch(url, {
       method: 'GET',
     })
+
+    if (response.status === 451) {
+      // Cloudflare 会在 451 时返回受限地区信息，额外记录 trace 以判断是否因英国地区触发的封锁。
+      const traceInfo = await logCloudflareExecutionInfo(response.clone(), url)
+
+      if (traceInfo?.loc?.toUpperCase() === 'GB') {
+        console.warn('Trace location resolved to GB after receiving 451; aborting remaining crawl tasks.', {
+          requestUrl: url,
+          traceInfo,
+        })
+
+        throw new AbortCrawlError('Cloudflare block originates from GB location.', {
+          requestUrl: url,
+          traceInfo,
+          status: response.status,
+        })
+      }
+    }
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
@@ -68,6 +98,10 @@ export async function getToplistSingle(env: Env, period_type: PeriodType, url: s
   }
   catch (error) {
     console.error('Error fetching toplist:', error)
+
+    if (error instanceof AbortCrawlError) {
+      throw error
+    }
   }
 }
 
@@ -268,4 +302,64 @@ async function persistToplistData(env: Env, galleries: GalleryItem[], toplistIte
   }
 
   console.log(`Persisted ${galleries.length} galleries and ${toplistItems.length} toplist rows.`)
+}
+
+// 451 响应不会附带详细错误信息，这里通过 Cloudflare trace 接口补充请求上下文，便于定位封锁来源。
+async function logCloudflareExecutionInfo(response: Response, requestUrl: string): Promise<Record<string, string> | null> {
+  const blockedHeaders = {
+    cfRay: response.headers.get('cf-ray'),
+    cfCacheStatus: response.headers.get('cf-cache-status'),
+    server: response.headers.get('server'),
+    date: response.headers.get('date'),
+  }
+
+  let traceInfo: Record<string, string> | null = null
+
+  try {
+    const traceResponse = await fetch('https://cloudflare.com/cdn-cgi/trace', {
+      cf: {
+        cacheTtl: 0,
+        cacheEverything: false,
+      },
+    })
+
+    if (traceResponse.ok) {
+      const traceText = await traceResponse.text()
+      traceInfo = Object.fromEntries(
+        traceText
+          .trim()
+          .split('\n')
+          .map(line => line.split('='))
+          .filter((parts): parts is [string, string] => parts.length === 2),
+      )
+    }
+    else {
+      console.warn('Failed to fetch Cloudflare trace info.', {
+        status: traceResponse.status,
+        statusText: traceResponse.statusText,
+      })
+    }
+  }
+  catch (error) {
+    console.warn('Error while fetching Cloudflare trace info.', error)
+  }
+
+  let responseBodyPreview: string | null = null
+
+  try {
+    const text = await response.text()
+    responseBodyPreview = text.length > 500 ? `${text.slice(0, 500)}…` : text
+  }
+  catch (error) {
+    console.warn('Unable to read 451 response body for logging.', error)
+  }
+
+  console.error('Received 451 response when crawling toplist.', {
+    requestUrl,
+    blockedHeaders,
+    traceInfo,
+    responseBodyPreview,
+  })
+
+  return traceInfo
 }
