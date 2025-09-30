@@ -1,4 +1,4 @@
-import { AbortCrawlError, getToplistSingle } from './crawler'
+import { AbortCrawlError, crawlToplistPage } from './crawler'
 
 // 环境绑定：D1 数据库与 Durable Object 命名空间
 declare global {
@@ -45,7 +45,7 @@ async function handleToplistCrawling(env: Env): Promise<void> {
   try {
     for (let i = 0; i < tasks.length; i++) {
       const [type, url] = tasks[i]
-      await getToplistSingle(env, type, url)
+      await crawlToplistPage(env, type, url)
       // 每个任务之间等待 1 秒，最后一个任务后不再等待
       if (i < tasks.length - 1) {
         await delay(1000)

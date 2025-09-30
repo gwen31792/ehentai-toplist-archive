@@ -3,23 +3,13 @@ import * as cheerio from 'cheerio'
 import type { InferInsertModel } from 'drizzle-orm'
 import { DrizzleQueryError } from 'drizzle-orm/errors'
 import {
-  createDbClient,
   galleriesTable,
   getToplistItemsTableByYear,
   type ToplistType,
   // 注意：ToplistItemsTable 是一个联合的表类型（2023/2024/2025），便于统一推导字段。
   type ToplistItemsTable,
 } from '@ehentai-toplist-archive/db'
-
-let cachedDbClient: ReturnType<typeof createDbClient> | null = null
-
-function getDbClient(env: Env) {
-  if (cachedDbClient == null) {
-    cachedDbClient = createDbClient(env)
-  }
-
-  return cachedDbClient
-}
+import { cfFetch, getDbClient, logCloudflareExecutionInfo } from './utils'
 
 // 使用 Drizzle 推导的“插入模型”类型，避免与表结构漂移。
 type GalleryItem = InferInsertModel<typeof galleriesTable>
@@ -42,7 +32,7 @@ export class AbortCrawlError extends Error {
   }
 }
 
-export async function getToplistSingle(env: Env, period_type: ToplistType, url: string): Promise<void> {
+export async function crawlToplistPage(env: Env, period_type: ToplistType, url: string): Promise<void> {
   try {
     const response = await cfFetch(env, url, { method: 'GET' })
 
@@ -76,8 +66,8 @@ export async function getToplistSingle(env: Env, period_type: ToplistType, url: 
         data,
       )
     }
-    const { galleries, toplistItems } = await getToplistSingleFromResponse(data, period_type, null)
-    await persistToplistData(env, galleries, toplistItems)
+    const { galleries, toplistItems } = await parseToplistHtml(data, period_type, null)
+    await storeToplistData(env, galleries, toplistItems)
   }
   catch (error) {
     console.error('Error fetching toplist:', error)
@@ -88,7 +78,7 @@ export async function getToplistSingle(env: Env, period_type: ToplistType, url: 
   }
 }
 
-export async function getToplistSingleFromResponse(
+export async function parseToplistHtml(
   data: string,
   period_type: ToplistType,
   date: string | null,
@@ -200,7 +190,7 @@ export async function getToplistSingleFromResponse(
   }
 }
 
-async function persistToplistData(env: Env, galleries: GalleryItem[], toplistItems: ToplistItem[]): Promise<void> {
+async function storeToplistData(env: Env, galleries: GalleryItem[], toplistItems: ToplistItem[]): Promise<void> {
   if (galleries.length === 0 && toplistItems.length === 0) {
     console.log('No data to persist; skipping database writes.')
     return
@@ -285,67 +275,4 @@ async function persistToplistData(env: Env, galleries: GalleryItem[], toplistIte
   }
 
   console.log(`Persisted ${galleries.length} galleries and ${toplistItems.length} toplist rows.`)
-}
-
-// 451 响应不会附带详细错误信息，这里通过 Cloudflare trace 接口补充请求上下文，便于定位封锁来源。
-async function logCloudflareExecutionInfo(env: Env, response: Response, requestUrl: string): Promise<Record<string, string> | null> {
-  const blockedHeaders = {
-    cfRay: response.headers.get('cf-ray'),
-    cfCacheStatus: response.headers.get('cf-cache-status'),
-    server: response.headers.get('server'),
-    date: response.headers.get('date'),
-  }
-
-  let traceInfo: Record<string, string> | null = null
-
-  try {
-    const traceResponse = await cfFetch(env, 'https://cloudflare.com/cdn-cgi/trace', { method: 'GET' })
-
-    if (traceResponse.ok) {
-      const traceText = await traceResponse.text()
-      traceInfo = Object.fromEntries(
-        traceText
-          .trim()
-          .split('\n')
-          .map(line => line.split('='))
-          .filter((parts): parts is [string, string] => parts.length === 2),
-      )
-    }
-    else {
-      console.warn('Failed to fetch Cloudflare trace info.', {
-        status: traceResponse.status,
-        statusText: traceResponse.statusText,
-      })
-    }
-  }
-  catch (error) {
-    console.warn('Error while fetching Cloudflare trace info.', error)
-  }
-
-  let responseBodyPreview: string | null = null
-
-  try {
-    const text = await response.text()
-    responseBodyPreview = text.length > 500 ? `${text.slice(0, 500)}…` : text
-  }
-  catch (error) {
-    console.warn('Unable to read 451 response body for logging.', error)
-  }
-
-  console.error('Received 451 response when crawling toplist.', {
-    requestUrl,
-    blockedHeaders,
-    traceInfo,
-    responseBodyPreview,
-  })
-
-  return traceInfo
-}
-
-// 使用 Durable Object 代理发起外部请求，强制从 APAC 机房出站，减少 451 触发概率。
-async function cfFetch(env: Env, url: string, init?: RequestInit): Promise<Response> {
-  const id = env.FETCH_DO.idFromName('fetch-proxy')
-  const stub = env.FETCH_DO.get(id, { locationHint: 'apac' })
-  const proxyUrl = `https://internal/fetch-proxy?to=${encodeURIComponent(url)}`
-  return stub.fetch(proxyUrl, init)
 }
