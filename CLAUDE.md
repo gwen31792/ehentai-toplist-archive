@@ -8,47 +8,37 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 开发环境设置
 
-### 根级别命令（使用 NX）
+所有命令都在根目录执行，使用 `pnpm nx <target> <project>` 格式：
+
 ```bash
-# 运行开发服务器
-nx dev web
+# Web 应用开发
+pnpm nx dev web              # 运行开发服务器（使用 Turbopack）
+pnpm nx build web            # 构建生产版本
+pnpm nx lint web             # 运行 lint 检查
+pnpm nx typecheck web        # 类型检查
 
-# 构建应用
-nx build web
+# Crawler 应用开发
+pnpm nx dev crawler          # 运行爬虫开发服务器
+pnpm nx deploy crawler       # 部署爬虫到 Cloudflare
 
-# 运行 lint 检查
-nx lint web
+# 数据库包
+pnpm nx build db             # 构建 db 包（修改 schema 后必须执行）
 
-# 类型检查
-nx typecheck web
-```
-
-### Web 应用特定命令（在 apps/web 目录下）
-```bash
-# 开发模式（使用 Turbopack）
-pnpm dev
-
-# 构建生产版本
-pnpm build
-
-# Lint 并自动修复
-pnpm lint:fix
-
-# 预览 Cloudflare Worker 构建
-pnpm preview
-
-# 部署到 Cloudflare
-pnpm deploy
-
-# 生成 Cloudflare 环境类型
-pnpm cf-typegen
+# Web 应用特定命令（需要在 apps/web 目录下执行）
+cd apps/web
+pnpm cf-typegen              # 生成 Cloudflare 环境类型
+pnpm preview                 # 预览 Cloudflare Worker 构建
+pnpm deploy                  # 部署到 Cloudflare
+cd ../..
 ```
 
 ## 项目架构
 
 ### Monorepo 结构
-- 使用 Nx 管理 monorepo
-- 主要应用在 `apps/web/`
+- 使用 Nx 管理 monorepo，所有命令使用 `pnpm nx <target> <project>` 格式
+- `apps/web/`: Next.js 前端应用
+- `apps/crawler/`: Cloudflare Worker 爬虫应用
+- `packages/db/`: 共享数据库 schema 和客户端（TypeScript 库）
 - 项目配置在根目录的 `nx.json`
 
 ### 技术栈
@@ -79,7 +69,7 @@ apps/web/src/
 - `toplist_items_YYYY`: 按年分区的排行榜数据表（如 `toplist_items_2023`, `toplist_items_2024`）
 
 ### 数据访问模式
-`@ehentai-toplist-archive/db` 包提供 `createDbClient` helper：
+`@ehentai-toplist-archive/db` 包提供统一的数据库客户端和 schema：
 
 ```typescript
 import { createDbClient } from '@ehentai-toplist-archive/db'
@@ -87,10 +77,12 @@ import { createDbClient } from '@ehentai-toplist-archive/db'
 const db = createDbClient(getCloudflareContext().env)
 ```
 
+注意：`packages/db` 是 TypeScript 库包，修改后需要运行 `pnpm nx build db` 重新编译才能在 web 和 crawler 应用中生效。
+
 ### 添加新年份分区
-1. 在 `packages/db/src/schema/toplist-items.ts` 中扩展 `SUPPORTED_TOPLIST_YEARS`
-2. 更新 `packages/db/src/schema/toplist-items.ts` 中的表映射，并在必要时增加种子抓取脚本
-3. 重新构建共享包：`pnpm nx build db`
+1. 在 `packages/db/src/schema/toplist-items.ts` 中扩展 `SUPPORTED_TOPLIST_YEARS` 数组
+2. 在 `toplistItemsTables` 对象中添加新年份映射（如 `2026: createToplistItemsTable(2026)`）
+3. 重新构建 db 包：`pnpm nx build db`
 4. 确认 `apps/web/src/app/api/data/route.ts` 能通过 `getToplistItemsTableByYear` 读取新年份
 
 ## 重要开发约定
@@ -106,8 +98,9 @@ const db = createDbClient(getCloudflareContext().env)
 - 使用 `{ cache: 'force-cache' }` 进行客户端缓存
 
 ### 类型安全
-- 运行 `pnpm cf-typegen` 生成 Cloudflare 环境类型
-- 类型定义在 `src/lib/types.ts`
+- 数据库类型：修改 `packages/db` 后必须运行 `pnpm nx build db` 重新构建
+- Cloudflare 环境类型：在 `apps/web` 目录运行 `pnpm cf-typegen` 生成
+- 应用类型定义在 `apps/web/src/lib/types.ts`
 
 ### 图片处理
 - 远程图片必须匹配 `next.config.ts` 中的 `remotePatterns` 配置
@@ -125,6 +118,13 @@ const db = createDbClient(getCloudflareContext().env)
 
 ## 部署注意事项
 
-- 项目部署在 Cloudflare Workers，只能使用 Edge Runtime
+- Web 应用和 Crawler 均部署在 Cloudflare Workers，只能使用 Edge Runtime
 - 避免使用 Node.js 特定 API（如 fs, crypto 回调等）
-- 数据库绑定名称为 `DB`（参见 `wrangler.toml`）
+- 数据库绑定名称为 `DB`（配置在各应用的 `wrangler.toml`）
+- 部署前确保 db 包已构建：`pnpm nx build db`
+
+## 包依赖关系
+
+- `apps/web` 和 `apps/crawler` 都依赖 `packages/db`
+- 修改 `packages/db` 后必须运行 `pnpm nx build db` 才能在应用中生效
+- Nx 会自动处理构建依赖（`build` 和 `dev` 目标配置了 `dependsOn: ["^build"]`）
