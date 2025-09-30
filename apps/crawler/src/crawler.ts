@@ -1,10 +1,14 @@
 import * as cheerio from 'cheerio'
 
+import type { InferInsertModel } from 'drizzle-orm'
 import { DrizzleQueryError } from 'drizzle-orm/errors'
 import {
   createDbClient,
   galleriesTable,
   getToplistItemsTableByYear,
+  type ToplistType,
+  // 注意：ToplistItemsTable 是一个联合的表类型（2023/2024/2025），便于统一推导字段。
+  type ToplistItemsTable,
 } from '@ehentai-toplist-archive/db'
 
 let cachedDbClient: ReturnType<typeof createDbClient> | null = null
@@ -17,28 +21,9 @@ function getDbClient(env: Env) {
   return cachedDbClient
 }
 
-interface GalleryItem {
-  gallery_id: number
-  gallery_name: string
-  gallery_type: string
-  tags: string
-  published_time: string
-  uploader: string
-  gallery_length: number
-  points: number
-  preview_url: string
-  torrents_url: string
-  gallery_url: string
-}
-
-type PeriodType = 'all' | 'year' | 'month' | 'day'
-
-interface ToplistItem {
-  gallery_id: number
-  rank: number
-  list_date: string
-  period_type: PeriodType
-}
+// 使用 Drizzle 推导的“插入模型”类型，避免与表结构漂移。
+type GalleryItem = InferInsertModel<typeof galleriesTable>
+type ToplistItem = InferInsertModel<ToplistItemsTable>
 
 interface CrawlResult {
   galleries: GalleryItem[]
@@ -57,7 +42,7 @@ export class AbortCrawlError extends Error {
   }
 }
 
-export async function getToplistSingle(env: Env, period_type: PeriodType, url: string): Promise<void> {
+export async function getToplistSingle(env: Env, period_type: ToplistType, url: string): Promise<void> {
   try {
     const response = await cfFetch(env, url, { method: 'GET' })
 
@@ -105,7 +90,7 @@ export async function getToplistSingle(env: Env, period_type: PeriodType, url: s
 
 export async function getToplistSingleFromResponse(
   data: string,
-  period_type: PeriodType,
+  period_type: ToplistType,
   date: string | null,
 ): Promise<CrawlResult> {
   const $ = cheerio.load(data)
