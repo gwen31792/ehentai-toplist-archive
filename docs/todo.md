@@ -16,6 +16,7 @@
 - [ ] 等 eslint-plugin-tailwindcss 支持 Tailwind CSS v4 后重新添加到项目中
 - [ ] galleries 表回扫详细数据，比如 Rating
 - [ ] eslint, eslint-config-next, typescript 5.9 升级
+- [ ] 使用 <Activity>: https://react.dev/reference/react/Activity
 
 # 专项
 ## 图片加载速度解决方案
