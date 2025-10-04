@@ -9,8 +9,8 @@
   "workers_dev": false,
   "triggers": {
     "crons": [
-      "0 1 * * *",
-      "0 2 * * *"
+      "0 0 * * *"
+      // 队列的 Delivery delay 为 3600 秒
     ]
   },
   "observability": {
@@ -34,5 +34,18 @@
       "database_id": "48fbbd89-2ea8-4543-b6b8-cb5ca5d6d805",
       "remote": true
     }
-  ]
+  ],
+  "queues": {
+    "producers": [
+      {
+        "queue": "ehentai-toplist-archive",
+        "binding": "ehentai-toplist-archive"
+      }
+    ],
+    "consumers": [
+      {
+        "queue": "ehentai-toplist-archive"
+      }
+    ]
+  }
 }

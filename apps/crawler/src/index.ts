@@ -1,21 +1,38 @@
 import { AbortCrawlError, crawlToplistPage } from './crawler'
 
-// 环境绑定：D1 数据库与 Durable Object 命名空间
-declare global {
-  interface Env {
-    DB: D1Database
-    FETCH_DO: DurableObjectNamespace
-  }
-}
+const CRAWL_QUEUE_MESSAGE = 'crawl-toplists'
 
 export default {
   async fetch(): Promise<Response> {
     return new Response('Forbidden', { status: 403 })
   },
 
-  async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
-    // 定期执行爬取任务
-    ctx.waitUntil(handleToplistCrawling(env))
+  async scheduled(_controller: ScheduledController, env: Env): Promise<void> {
+    // 定期向队列投递爬取任务，由队列消费者串行执行抓取逻辑。
+    const enqueue = env['ehentai-toplist-archive'].send(CRAWL_QUEUE_MESSAGE)
+
+    await enqueue
+  },
+
+  async queue(batch: MessageBatch<unknown>, env: Env): Promise<void> {
+    for (const message of batch.messages) {
+      const body = message.body
+
+      if (body !== CRAWL_QUEUE_MESSAGE) {
+        console.warn('Discarding unexpected queue message payload.', { body })
+        message.ack()
+        continue
+      }
+
+      try {
+        await handleToplistCrawling(env)
+        message.ack()
+      }
+      catch (error) {
+        console.error('Failed to process toplist crawling queue message.', error)
+        message.ack()
+      }
+    }
   },
 } satisfies ExportedHandler<Env>
 
