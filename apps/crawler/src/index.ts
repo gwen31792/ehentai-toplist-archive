@@ -1,6 +1,8 @@
-import { AbortCrawlError, crawlToplistPage } from './crawler'
+import { AbortCrawlError, TemporaryBanError, crawlToplistPage } from './crawler'
+import { delay } from './utils'
 
 const CRAWL_QUEUE_MESSAGE = 'crawl-toplists'
+const RECOVERY_RETRY_DELAY_SECONDS = 3600
 
 export default {
   async fetch(): Promise<Response> {
@@ -36,9 +38,6 @@ export default {
   },
 } satisfies ExportedHandler<Env>
 
-// 简单的延迟函数，用于控制请求节奏
-const delay = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms))
-
 async function handleToplistCrawling(env: Env): Promise<void> {
   const tasks = [
     ['all', 'https://e-hentai.org/toplist.php?tl=11'],
@@ -70,6 +69,22 @@ async function handleToplistCrawling(env: Env): Promise<void> {
     }
   }
   catch (error) {
+    if (error instanceof TemporaryBanError) {
+      console.warn('Toplist crawling halted due to temporary IP ban; scheduling retry.', error.context)
+      try {
+        await env['ehentai-toplist-archive'].send(CRAWL_QUEUE_MESSAGE, {
+          delaySeconds: RECOVERY_RETRY_DELAY_SECONDS,
+        })
+        console.info('Re-enqueued toplist crawl after temporary ban.', {
+          delaySeconds: RECOVERY_RETRY_DELAY_SECONDS,
+        })
+      }
+      catch (enqueueError) {
+        console.error('Failed to enqueue toplist crawl retry after temporary ban.', enqueueError)
+      }
+      return
+    }
+
     if (error instanceof AbortCrawlError) {
       // 命中英国地区触发的 Cloudflare 451 封锁时，立即终止剩余任务以避免继续命中限制。
       console.warn('Toplist crawling terminated early due to GB-based Cloudflare block.', error.context)

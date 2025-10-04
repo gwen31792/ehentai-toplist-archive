@@ -9,8 +9,7 @@
   "workers_dev": false,
   "triggers": {
     "crons": [
-      "0 0 * * *"
-      // 队列的 Delivery delay 为 3600 秒
+      "0 1 * * *"
     ]
   },
   "observability": {

@@ -32,6 +32,16 @@ export class AbortCrawlError extends Error {
   }
 }
 
+export class TemporaryBanError extends Error {
+  constructor(
+    message: string,
+    public readonly context: Record<string, unknown> = {},
+  ) {
+    super(message)
+    this.name = 'TemporaryBanError'
+  }
+}
+
 export async function crawlToplistPage(env: Env, period_type: ToplistType, url: string): Promise<void> {
   try {
     const response = await cfFetch(env, url, { method: 'GET' })
@@ -61,10 +71,15 @@ export async function crawlToplistPage(env: Env, period_type: ToplistType, url: 
     const data = await response.text()
 
     if (data.includes('This IP address has been temporarily banned')) {
-      console.error(
-        'Received temporary ban response while crawling toplist. Response body:',
-        data,
-      )
+      console.error('Received temporary ban response while crawling toplist.', {
+        requestUrl: url,
+        period_type,
+      })
+
+      throw new TemporaryBanError('Temporary IP ban encountered while crawling toplist.', {
+        requestUrl: url,
+        period_type,
+      })
     }
     const { galleries, toplistItems } = await parseToplistHtml(data, period_type, null)
     await storeToplistData(env, galleries, toplistItems)
@@ -72,7 +87,7 @@ export async function crawlToplistPage(env: Env, period_type: ToplistType, url: 
   catch (error) {
     console.error('Error fetching toplist:', error)
 
-    if (error instanceof AbortCrawlError) {
+    if (error instanceof AbortCrawlError || error instanceof TemporaryBanError) {
       throw error
     }
   }

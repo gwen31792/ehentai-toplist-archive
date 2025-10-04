@@ -20,6 +20,10 @@ export function getFetchStub(env: Env) {
   return cachedFetchStub
 }
 
+export function delay(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
 // 451 响应不会附带详细错误信息，这里通过 Cloudflare trace 接口补充请求上下文，便于定位封锁来源。
 export async function logCloudflareExecutionInfo(env: Env, response: Response, requestUrl: string): Promise<Record<string, string> | null> {
   const blockedHeaders = {
