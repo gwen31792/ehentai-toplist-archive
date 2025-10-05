@@ -24,10 +24,16 @@ const localeMap = {
   zh: zhCN,
 }
 
+function getUtcToday() {
+  const now = new Date()
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
+}
+
 export function DatePicker({ onDateChange }: DatePickerProps) {
   const [date, setDate] = useState<Date>()
+  const todayUtc = getUtcToday()
   // 设置初始月份为当前日期或选中日期
-  const [month, setMonth] = useState<Date>(date || new Date())
+  const [month, setMonth] = useState<Date>(() => todayUtc)
   const t = useTranslations('components.datePicker')
   const locale = useLocale() as 'en' | 'zh'
 
@@ -63,7 +69,7 @@ export function DatePicker({ onDateChange }: DatePickerProps) {
           captionLayout="dropdown"
           required={true} // 防止取消点击传输 undefined 日期
           onSelect={(newDate) => {
-            if (newDate) {
+            if (newDate && newDate <= todayUtc) {
               setDate(newDate)
               setMonth(newDate) // 同步更新月份显示
               onDateChange(newDate as Date)
@@ -72,7 +78,8 @@ export function DatePicker({ onDateChange }: DatePickerProps) {
           month={month}
           onMonthChange={setMonth}
           startMonth={new Date(2023, 10, 15)} // 2023-11-15
-          endMonth={new Date()}
+          endMonth={todayUtc}
+          disabled={{ after: todayUtc }}
           locale={localeMap[locale]}
           fixedWeeks
         />
