@@ -73,6 +73,8 @@ export function DataTable({ data, loading }: DataTableProps) {
   type TagFilterMode = 'or' | 'and'
   const [tagFilterMode, setTagFilterMode] = useState<TagFilterMode>('or')
   const [hasUserInteracted, setHasUserInteracted] = useState(false)
+  const [selectedTypes, setSelectedTypes] = useState<Set<string>>(new Set())
+  const [hasTypeUserInteracted, setHasTypeUserInteracted] = useState(false)
 
   // 对数据引用进行 memo
   const memoData = useMemo(() => data, [data])
@@ -92,6 +94,17 @@ export function DataTable({ data, loading }: DataTableProps) {
     return Array.from(tagSet).sort()
   }, [data])
 
+  // 提取所有唯一类型
+  const extractedTypes = useMemo(() => {
+    const typeSet = new Set<string>()
+    data.forEach((item) => {
+      if (item.gallery_type && item.gallery_type.trim()) {
+        typeSet.add(item.gallery_type.trim())
+      }
+    })
+    return Array.from(typeSet).sort()
+  }, [data])
+
   // 初始化标签状态（每次数据变化时重置为全选）
   useEffect(() => {
     if (extractedTags.length > 0) {
@@ -107,9 +120,24 @@ export function DataTable({ data, loading }: DataTableProps) {
     }
   }, [selectedTags, hasUserInteracted])
 
+  // 初始化类型状态（每次数据变化时重置为全选）
+  useEffect(() => {
+    if (extractedTypes.length > 0) {
+      setSelectedTypes(new Set(extractedTypes))
+      setHasTypeUserInteracted(false)
+    }
+  }, [extractedTypes])
+
+  // 当用户操作类型筛选时标记已交互
+  useEffect(() => {
+    if (selectedTypes.size > 0 || hasTypeUserInteracted) {
+      setHasTypeUserInteracted(true)
+    }
+  }, [selectedTypes, hasTypeUserInteracted])
+
   // 更新列过滤器（加入模式与全选状态，切换 OR/AND/全选都会触发重算）
   useEffect(() => {
-    setColumnFilters([
+    const filters: ColumnFiltersState = [
       {
         id: 'tags',
         value: {
@@ -118,8 +146,16 @@ export function DataTable({ data, loading }: DataTableProps) {
           mode: tagFilterMode,
         },
       },
-    ])
-  }, [selectedTags, tagFilterMode, extractedTags.length])
+      {
+        id: 'gallery_type',
+        value: {
+          values: Array.from(selectedTypes),
+          allSelected: selectedTypes.size > 0 && selectedTypes.size === extractedTypes.length,
+        },
+      },
+    ]
+    setColumnFilters(filters)
+  }, [selectedTags, tagFilterMode, extractedTags.length, selectedTypes, extractedTypes.length])
   // 数据变化时重置页码，避免跨数据集残留页码
   useEffect(() => {
     setPagination(p => ({ ...p, pageIndex: 0 }))
@@ -327,6 +363,18 @@ export function DataTable({ data, loading }: DataTableProps) {
       header: () => t('headers.gallery_type'),
       cell: info => <CellWrapper>{info.getValue()}</CellWrapper>,
       size: 100,
+      filterFn: (row, columnId, filterValue: { values: string[], allSelected: boolean }) => {
+        const type = row.getValue(columnId) as string
+        if (!type) return false
+
+        const selected = new Set(filterValue.values)
+
+        // 全选：显示所有行；空选：不显示任何行
+        if (filterValue.allSelected) return true
+        if (selected.size === 0) return false
+
+        return selected.has(type.trim())
+      },
     }),
     columnHelper.accessor('tags', {
       header: () => t('headers.tags'),
@@ -442,6 +490,9 @@ export function DataTable({ data, loading }: DataTableProps) {
         tagFilterMode={tagFilterMode}
         onSelectedTagsChange={setSelectedTags}
         onTagFilterModeChange={setTagFilterMode}
+        selectedTypes={selectedTypes}
+        extractedTypes={extractedTypes}
+        onSelectedTypesChange={setSelectedTypes}
       />
 
       <div className="w-full overflow-x-auto">

@@ -23,6 +23,9 @@ interface TableHeaderControlsProps<TData> {
   tagFilterMode: TagFilterMode
   onSelectedTagsChange: (tags: Set<string>) => void
   onTagFilterModeChange: (mode: TagFilterMode) => void
+  selectedTypes: Set<string>
+  extractedTypes: string[]
+  onSelectedTypesChange: (types: Set<string>) => void
 }
 
 export function TableHeaderControls<TData>({
@@ -32,6 +35,9 @@ export function TableHeaderControls<TData>({
   tagFilterMode,
   onSelectedTagsChange,
   onTagFilterModeChange,
+  selectedTypes,
+  extractedTypes,
+  onSelectedTypesChange,
 }: TableHeaderControlsProps<TData>) {
   const t = useTranslations('components.dataTable')
 
@@ -86,6 +92,72 @@ export function TableHeaderControls<TData>({
           </HoverCard>
         </div>
 
+        {/* 类型筛选器 */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className="bg-zinc-50 dark:bg-zinc-800"
+            >
+              <Filter className="mr-2 h-4 w-4" />
+              {t('typeFilter')}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="start" className="w-[300px] bg-zinc-50 dark:bg-zinc-800 max-h-[400px] overflow-y-auto">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h4 className="font-medium leading-none text-zinc-900 dark:text-zinc-100">
+                  {t('typeFilter')}
+                </h4>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onSelectedTypesChange(new Set(extractedTypes))}
+                    className="h-6 text-xs"
+                  >
+                    {t('selectAll')}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onSelectedTypesChange(new Set())}
+                    className="h-6 text-xs"
+                  >
+                    {t('clear')}
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                {extractedTypes.map(type => (
+                  <div key={type} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`type-${type}`}
+                      checked={selectedTypes.has(type)}
+                      onCheckedChange={(checked: boolean | 'indeterminate') => {
+                        const newSelectedTypes = new Set(selectedTypes)
+                        if (checked === true) {
+                          newSelectedTypes.add(type)
+                        }
+                        else {
+                          newSelectedTypes.delete(type)
+                        }
+                        onSelectedTypesChange(newSelectedTypes)
+                      }}
+                    />
+                    <label
+                      htmlFor={`type-${type}`}
+                      className="text-sm font-normal text-zinc-700 dark:text-zinc-300 cursor-pointer flex-1"
+                    >
+                      {type}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+
         {/* 标签筛选器 */}
         <Popover>
           <PopoverTrigger asChild>
@@ -110,7 +182,7 @@ export function TableHeaderControls<TData>({
                     onClick={() => onSelectedTagsChange(new Set(extractedTags))}
                     className="h-6 text-xs"
                   >
-                    {t('selectAllTags')}
+                    {t('selectAll')}
                   </Button>
                   <Button
                     variant="ghost"
@@ -118,7 +190,7 @@ export function TableHeaderControls<TData>({
                     onClick={() => onSelectedTagsChange(new Set())}
                     className="h-6 text-xs"
                   >
-                    {t('deselectAllTags')}
+                    {t('clear')}
                   </Button>
                 </div>
               </div>
