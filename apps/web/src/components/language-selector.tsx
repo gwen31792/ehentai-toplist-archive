@@ -16,12 +16,9 @@ export function LanguageSelector() {
   const toggleDropdown = () => setIsOpen(!isOpen)
 
   const selectLanguage = (locale: string) => {
-    // Store user's language preference in both localStorage and cookie
-    // 使用 next-intl 官方默认的 cookie 键名 NEXT_LOCALE
-    localStorage.setItem('preferred-language', locale)
-    document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=${60 * 60 * 24 * 365}` // 1 year
-    router.replace(pathname, { locale })
     setIsOpen(false)
+    // 触发路由切换，然后在 effect 中处理副作用
+    router.replace(pathname, { locale })
   }
 
   useEffect(() => {
@@ -36,6 +33,14 @@ export function LanguageSelector() {
       document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [])
+
+  // 当 locale 变化时，存储用户偏好
+  useEffect(() => {
+    // Store user's language preference in both localStorage and cookie
+    // 使用 next-intl 官方默认的 cookie 键名 NEXT_LOCALE
+    localStorage.setItem('preferred-language', currentLocale)
+    document.cookie = `NEXT_LOCALE=${currentLocale}; path=/; max-age=${60 * 60 * 24 * 365}` // 1 year
+  }, [currentLocale])
 
   const languageNames = {
     en: 'English',

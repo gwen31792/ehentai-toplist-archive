@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { format } from 'date-fns'
 import { CalendarIcon } from 'lucide-react'
 import { zhCN, enUS } from 'date-fns/locale'
@@ -36,13 +36,6 @@ export function DatePicker({ onDateChange }: DatePickerProps) {
   const [month, setMonth] = useState<Date>(() => todayUtc)
   const t = useTranslations('components.datePicker')
   const locale = useLocale() as 'en' | 'zh'
-
-  // 当选择日期变化时，同步更新月份显示
-  useEffect(() => {
-    if (date) {
-      setMonth(date)
-    }
-  }, [date])
 
   return (
     <Popover>

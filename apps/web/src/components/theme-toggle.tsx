@@ -4,14 +4,17 @@ import { useState, useEffect } from 'react'
 import { Moon, Sun } from 'lucide-react'
 
 export function ThemeToggle() {
-  const [darkMode, setDarkMode] = useState(false)
-
-  useEffect(() => {
-    // 从 localStorage 获取主题状态
+  // 使用函数式初始化状态，避免在 effect 中设置初始值
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window === 'undefined') return false
     const savedTheme = localStorage.getItem('theme')
-    const isDarkMode = savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)
-    setDarkMode(isDarkMode)
-    document.documentElement.classList.toggle('dark', isDarkMode)
+    return savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)
+  })
+
+  // 初始化时应用主题
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkMode)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- 只在组件挂载时运行一次
   }, [])
 
   const toggleDarkMode = () => {
