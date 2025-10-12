@@ -2,7 +2,7 @@
 
 [中文版](./docs/README-zh.md)
 
-This website displays the history of the E-Hentai Toplist. This repository contains the frontend code for the app.
+This website displays the history of the E-Hentai Toplist. This repository is a monorepo containing the web application, crawler service, and database package.
 
 Technical details are shown [here](./docs/implementation-details.md).
 
