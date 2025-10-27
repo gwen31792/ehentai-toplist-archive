@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState, useEffect, useMemo } from 'react'
-import { useDebouncedCallback } from 'use-debounce'
 import { useTranslations } from 'next-intl'
 import {
   useReactTable,
@@ -10,8 +9,6 @@ import {
   getFilteredRowModel,
   createColumnHelper,
   flexRender,
-  VisibilityState,
-  ColumnSizingState,
   ColumnFiltersState,
 } from '@tanstack/react-table'
 import Link from 'next/link'
@@ -30,6 +27,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { ImageWithSkeleton } from '@/components/image-with-skeleton'
 import { TablePagination } from '@/components/table-pagination'
 import { TableHeaderControls } from '@/components/table-header-controls'
+import { useTableStore } from '@/lib/stores/table-store'
 
 interface DataTableProps {
   data: QueryResponseItem[]
@@ -58,23 +56,32 @@ const PreloadImage = ({ src }: { src: string }) => {
 }
 
 const columnHelper = createColumnHelper<QueryResponseItem>()
-const allowedPageSizes = [10, 20, 50, 100]
 
 export function DataTable({ data, loading }: DataTableProps) {
   const t = useTranslations('components.dataTable')
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 10,
-  })
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
-  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({})
+  const [pageIndex, setPageIndex] = useState(0)
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set())
-  type TagFilterMode = 'or' | 'and'
-  const [tagFilterMode, setTagFilterMode] = useState<TagFilterMode>('or')
+  const tagFilterMode = useTableStore(s => s.tagFilterMode)
+  const setTagFilterMode = useTableStore(s => s.setTagFilterMode)
   const [hasUserInteracted, setHasUserInteracted] = useState(false)
   const [selectedTypes, setSelectedTypes] = useState<Set<string>>(new Set())
   const [hasTypeUserInteracted, setHasTypeUserInteracted] = useState(false)
+
+  // 来自全局表格偏好的持久化状态
+  const pageSize = useTableStore(s => s.pageSize)
+  const setPageSize = useTableStore(s => s.setPageSize)
+  const columnVisibility = useTableStore(s => s.columnVisibility)
+  const setColumnVisibility = useTableStore(s => s.setColumnVisibility)
+  const columnSizing = useTableStore(s => s.columnSizing)
+  const setColumnSizing = useTableStore(s => s.setColumnSizing)
+  // 读取 hasHydrated 可用于占位渲染（当前不需要直接使用）
+  // const hasHydrated = useTableStore(s => s.hasHydrated)
+
+  // 触发持久化状态水合（skipHydration: true）
+  useEffect(() => {
+    ;(useTableStore as unknown as { persist?: { rehydrate?: () => void } }).persist?.rehydrate?.()
+  }, [])
 
   // 对数据引用进行 memo
   const memoData = useMemo(() => data, [data])
@@ -158,126 +165,8 @@ export function DataTable({ data, loading }: DataTableProps) {
   }, [selectedTags, tagFilterMode, extractedTags.length, selectedTypes, extractedTypes.length])
   // 数据变化时重置页码，避免跨数据集残留页码
   useEffect(() => {
-    setPagination(p => ({ ...p, pageIndex: 0 }))
+    setPageIndex(0)
   }, [memoData])
-
-  // 初始化列宽
-  useEffect(() => {
-    const savedSizing = localStorage.getItem('table-column-sizing')
-    if (savedSizing) {
-      try {
-        setColumnSizing(JSON.parse(savedSizing))
-      }
-      catch {
-        console.warn('Failed to parse saved column sizing')
-      }
-    }
-  }, [])
-
-  // 持久化列宽
-  const saveColumnSizing = useDebouncedCallback((sizing: ColumnSizingState) => {
-    try {
-      localStorage.setItem('table-column-sizing', JSON.stringify(sizing))
-    }
-    catch {
-      console.warn('Failed to save column sizing')
-    }
-  }, 200)
-
-  useEffect(() => {
-    if (Object.keys(columnSizing).length === 0) return
-    saveColumnSizing(columnSizing)
-  }, [columnSizing, saveColumnSizing])
-
-  // 初始化：列可见性
-  useEffect(() => {
-    const saved = localStorage.getItem('table-column-visibility')
-    if (saved) {
-      try {
-        setColumnVisibility(JSON.parse(saved))
-      }
-      catch {
-        console.warn('Failed to parse saved column visibility')
-      }
-    }
-    else {
-      // 设置默认显示的列：排名、预览图、名称、标签
-      const defaultVisibility: VisibilityState = {
-        rank: true,
-        gallery_id: false,
-        preview_url: true,
-        gallery_name: true,
-        gallery_type: false,
-        tags: true,
-        published_time: false,
-        uploader: false,
-        gallery_length: false,
-        points: false,
-        torrents_url: false,
-      }
-      setColumnVisibility(defaultVisibility)
-    }
-  }, [])
-
-  // 持久化：列可见性
-  const saveColumnVisibility = useDebouncedCallback((visibility: VisibilityState) => {
-    try {
-      localStorage.setItem('table-column-visibility', JSON.stringify(visibility))
-    }
-    catch {
-      console.warn('Failed to save column visibility')
-    }
-  }, 200)
-
-  useEffect(() => {
-    if (Object.keys(columnVisibility).length === 0) return
-    saveColumnVisibility(columnVisibility)
-  }, [columnVisibility, saveColumnVisibility])
-
-  // 初始化：每页条数
-  useEffect(() => {
-    const saved = localStorage.getItem('table-page-size')
-    if (!saved) return
-    const parsed = Number(saved)
-    if (!Number.isNaN(parsed) && allowedPageSizes.includes(parsed)) {
-      setPagination(p => ({ ...p, pageSize: parsed }))
-    }
-  }, [])
-
-  // 持久化：每页条数
-  const savePageSize = useDebouncedCallback((pageSize: number) => {
-    try {
-      localStorage.setItem('table-page-size', String(pageSize))
-    }
-    catch {
-      console.warn('Failed to save page size')
-    }
-  }, 200)
-
-  useEffect(() => {
-    savePageSize(pagination.pageSize)
-  }, [pagination.pageSize, savePageSize])
-
-  // 初始化与持久化：标签筛选模式（OR/AND），默认 OR
-  useEffect(() => {
-    const saved = localStorage.getItem('table-tag-filter-mode')
-    if (saved === 'or' || saved === 'and') {
-      setTagFilterMode(saved)
-    }
-  }, [])
-
-  const saveTagFilterMode = useDebouncedCallback((mode: TagFilterMode) => {
-    try {
-      localStorage.setItem('table-tag-filter-mode', mode)
-    }
-    catch {
-      console.warn('Failed to save tag filter mode')
-    }
-  }, 200)
-
-  useEffect(() => {
-    saveTagFilterMode(tagFilterMode)
-  }, [tagFilterMode, saveTagFilterMode])
 
   const CellWrapper = ({ children }: { children: React.ReactNode }) => (
     <div className="whitespace-normal break-words text-sm">
@@ -458,13 +347,30 @@ export function DataTable({ data, loading }: DataTableProps) {
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    onPaginationChange: setPagination,
-    onColumnVisibilityChange: setColumnVisibility,
-    onColumnSizingChange: setColumnSizing,
+    onPaginationChange: (updater) => {
+      const next = typeof updater === 'function'
+        ? updater({ pageIndex, pageSize })
+        : updater
+      if (next.pageSize !== pageSize) {
+        setPageSize(next.pageSize)
+        setPageIndex(0)
+      }
+      else {
+        setPageIndex(next.pageIndex)
+      }
+    },
+    onColumnVisibilityChange: (updater) => {
+      const next = typeof updater === 'function' ? updater(columnVisibility) : updater
+      setColumnVisibility(next)
+    },
+    onColumnSizingChange: (updater) => {
+      const next = typeof updater === 'function' ? updater(columnSizing) : updater
+      setColumnSizing(next)
+    },
     onColumnFiltersChange: setColumnFilters,
     columnResizeMode: 'onChange',
     state: {
-      pagination,
+      pagination: { pageIndex, pageSize },
       columnVisibility,
       columnSizing,
       columnFilters,
@@ -578,13 +484,13 @@ export function DataTable({ data, loading }: DataTableProps) {
       </div>
 
       <TablePagination<QueryResponseItem>
+        key={pageSize}
         table={table}
         content={{
           itemsPerPage: t('itemsPerPage'),
           page: t('page'),
           of: t('of'),
         }}
-        allowedPageSizes={allowedPageSizes}
       />
     </div>
   )

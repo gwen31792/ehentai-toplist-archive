@@ -171,9 +171,9 @@ importers:
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@4.1.14)
-      use-debounce:
-        specifier: ^10.0.6
-        version: 10.0.6(react@19.2.0)
+      zustand:
+        specifier: ^5.0.8
+        version: 5.0.8(@types/react@19.2.0)(react@19.2.0)
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4.1.14
@@ -9191,12 +9191,6 @@ packages:
       '@types/react':
         optional: true
 
-  use-debounce@10.0.6:
-    resolution: {integrity: sha512-C5OtPyhAZgVoteO9heXMTdW7v/IbFI+8bSVKYCJrSmiWWCLsbUxiBSp4t9v0hNBTGY97bT72ydDIDyGSFWfwXg==}
-    engines: {node: '>= 16.0.0'}
-    peerDependencies:
-      react: '*'
-
   use-intl@4.3.9:
     resolution: {integrity: sha512-bZu+h13HIgOvsoGleQtUe4E6gM49CRm+AH36KnJVB/qb1+Beo7jr7HNrR8YWH8oaOkQfGNm6vh0HTepxng8UTg==}
     peerDependencies:
@@ -9577,6 +9571,24 @@ packages:
 
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+
+  zustand@5.0.8:
+    resolution: {integrity: sha512-gyPKpIaxY9XcO2vSMrLbiER7QMAMGOQZVRdJ6Zi782jkbzZygq5GI9nG8g+sMgitRtndwaBSl7uiqC49o1SSiw==}
+    engines: {node: '>=12.20.0'}
+    peerDependencies:
+      '@types/react': '>=18.0.0'
+      immer: '>=9.0.6'
+      react: '>=18.0.0'
+      use-sync-external-store: '>=1.2.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      immer:
+        optional: true
+      react:
+        optional: true
+      use-sync-external-store:
+        optional: true
 
 snapshots:
 
@@ -20499,10 +20511,6 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.0
 
-  use-debounce@10.0.6(react@19.2.0):
-    dependencies:
-      react: 19.2.0
-
   use-intl@4.3.9(react@19.2.0):
     dependencies:
       '@formatjs/fast-memoize': 2.2.7
@@ -20937,3 +20945,8 @@ snapshots:
   zod@3.22.3: {}
 
   zod@3.25.76: {}
+
+  zustand@5.0.8(@types/react@19.2.0)(react@19.2.0):
+    optionalDependencies:
+      '@types/react': 19.2.0
+      react: 19.2.0

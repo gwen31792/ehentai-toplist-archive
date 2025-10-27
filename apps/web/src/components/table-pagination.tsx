@@ -19,10 +19,17 @@ interface TablePaginationProps<T = unknown> {
     page: string
     of: string
   }
-  allowedPageSizes: number[]
+  allowedPageSizes?: number[]
 }
 
-export function TablePagination<T = unknown>({ table, content, allowedPageSizes }: TablePaginationProps<T>) {
+export function TablePagination<T = unknown>({
+  table,
+  content,
+  allowedPageSizes = [10, 20, 50, 100],
+}: TablePaginationProps<T>) {
+  // 直接从 table state 获取当前页大小
+  const pageSize = table.getState().pagination.pageSize
+
   return (
     <div className="mt-4 flex items-center justify-between">
       <div className="flex items-center space-x-2">
@@ -30,10 +37,9 @@ export function TablePagination<T = unknown>({ table, content, allowedPageSizes 
           {content.itemsPerPage}
         </span>
         <Select
-          value={table.getState().pagination.pageSize.toString()}
+          value={String(pageSize)}
           onValueChange={(value) => {
             table.setPageSize(Number(value))
-            table.setPageIndex(0)
           }}
         >
           <SelectTrigger className="w-[70px] bg-zinc-50 dark:bg-zinc-800">
