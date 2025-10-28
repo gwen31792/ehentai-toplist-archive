@@ -484,7 +484,7 @@ export function DataTable({ data, loading }: DataTableProps) {
       </div>
 
       <TablePagination<QueryResponseItem>
-        key={pageSize}
+        key={`${pageSize}-${pageIndex}-${table.getFilteredRowModel().rows.length}`}
         table={table}
         content={{
           itemsPerPage: t('itemsPerPage'),
