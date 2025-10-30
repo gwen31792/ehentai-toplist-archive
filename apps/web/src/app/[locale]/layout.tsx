@@ -1,8 +1,10 @@
-import { NextIntlClientProvider, hasLocale } from 'next-intl'
 import { notFound } from 'next/navigation'
-import { routing } from '@/i18n/routing'
-import requestConfig from '@/i18n/request'
+
+import { NextIntlClientProvider, hasLocale } from 'next-intl'
 import { setRequestLocale } from 'next-intl/server'
+
+import requestConfig from '@/i18n/request'
+import { routing } from '@/i18n/routing'
 
 type Props = {
   children: React.ReactNode

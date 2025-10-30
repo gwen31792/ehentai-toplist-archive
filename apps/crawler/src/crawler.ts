@@ -1,7 +1,3 @@
-import * as cheerio from 'cheerio'
-
-import type { InferInsertModel } from 'drizzle-orm'
-import { DrizzleQueryError } from 'drizzle-orm/errors'
 import {
   galleriesTable,
   getToplistItemsTableByYear,
@@ -9,7 +5,12 @@ import {
   // 注意：ToplistItemsTable 是一个联合的表类型（2023/2024/2025），便于统一推导字段。
   type ToplistItemsTable,
 } from '@ehentai-toplist-archive/db'
+import * as cheerio from 'cheerio'
+import { DrizzleQueryError } from 'drizzle-orm/errors'
+
 import { cfFetch, getDbClient, logCloudflareExecutionInfo } from './utils'
+
+import type { InferInsertModel } from 'drizzle-orm'
 
 // 使用 Drizzle 推导的“插入模型”类型，避免与表结构漂移。
 type GalleryItem = InferInsertModel<typeof galleriesTable>

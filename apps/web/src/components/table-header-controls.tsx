@@ -1,18 +1,20 @@
 'use client'
 
 import React from 'react'
+
 import { Table } from '@tanstack/react-table'
+import { Settings, Filter } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/hover-card'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { Switch } from '@/components/ui/switch'
-import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/hover-card'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Settings, Filter } from 'lucide-react'
-import { useTranslations } from 'next-intl'
 
 type TagFilterMode = 'or' | 'and'
 

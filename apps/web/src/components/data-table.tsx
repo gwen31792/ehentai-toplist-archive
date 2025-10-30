@@ -1,7 +1,10 @@
 'use client'
 
 import React, { useState, useEffect, useMemo } from 'react'
-import { useTranslations } from 'next-intl'
+
+import Image from 'next/image'
+import Link from 'next/link'
+
 import {
   useReactTable,
   getCoreRowModel,
@@ -11,8 +14,13 @@ import {
   flexRender,
   ColumnFiltersState,
 } from '@tanstack/react-table'
-import Link from 'next/link'
-import Image from 'next/image'
+import { useTranslations } from 'next-intl'
+
+import { ImageWithSkeleton } from '@/components/image-with-skeleton'
+import { TableHeaderControls } from '@/components/table-header-controls'
+import { TablePagination } from '@/components/table-pagination'
+import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/hover-card'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   Table,
   TableBody,
@@ -21,13 +29,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/hover-card'
-import { QueryResponseItem } from '@/lib/types'
-import { Skeleton } from '@/components/ui/skeleton'
-import { ImageWithSkeleton } from '@/components/image-with-skeleton'
-import { TablePagination } from '@/components/table-pagination'
-import { TableHeaderControls } from '@/components/table-header-controls'
 import { useTableStore } from '@/lib/stores/table-store'
+import { QueryResponseItem } from '@/lib/types'
 
 interface DataTableProps {
   data: QueryResponseItem[]

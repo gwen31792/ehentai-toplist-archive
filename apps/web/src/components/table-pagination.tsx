@@ -1,7 +1,10 @@
 'use client'
 
 import React from 'react'
+
 import { Table } from '@tanstack/react-table'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -10,7 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface TablePaginationProps<T = unknown> {
   table: Table<T>

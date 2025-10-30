@@ -1,10 +1,11 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { Link } from '@/lib/navigation'
-import { ThemeToggle } from '@/components/theme-toggle'
+
 import { GitHubLink } from '@/components/github-link'
 import { LanguageSelector } from '@/components/language-selector'
+import { ThemeToggle } from '@/components/theme-toggle'
+import { Link } from '@/lib/navigation'
 
 export default function About() {
   const t = useTranslations('pages.about')

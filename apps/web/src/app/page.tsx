@@ -1,6 +1,7 @@
-import { redirect } from 'next/navigation'
-import { routing, type Locale } from '@/i18n/routing'
 import { cookies, headers } from 'next/headers'
+import { redirect } from 'next/navigation'
+
+import { routing, type Locale } from '@/i18n/routing'
 
 // 根页面的语言检测和重定向
 // Next.js 15: cookies() / headers() / params / searchParams 都是异步 Dynamic APIs

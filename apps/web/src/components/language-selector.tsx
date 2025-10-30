@@ -1,10 +1,12 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+
 import { Languages } from 'lucide-react'
-import { usePathname, useRouter } from '@/lib/navigation'
 import { useLocale } from 'next-intl'
+
 import { locales } from '@/i18n/routing'
+import { usePathname, useRouter } from '@/lib/navigation'
 
 export function LanguageSelector() {
   const [isOpen, setIsOpen] = useState(false)
