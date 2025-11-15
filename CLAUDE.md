@@ -44,7 +44,7 @@ cd ../..
 ### 技术栈
 - **前端**: React 19 + Next.js 15
 - **样式**: Tailwind CSS + shadcn/ui
-- **状态管理**: React hooks + localStorage
+- **状态管理**: URL 参数 + React hooks
 - **数据库**: Cloudflare D1 (SQLite)
 - **ORM**: Drizzle ORM
 - **国际化**: next-intl (支持中英文)
@@ -96,6 +96,16 @@ const db = createDbClient(getCloudflareContext().env)
 - 数据查询逻辑只能在 API 路由中实现，不要在组件中直接访问数据库
 - API 端点: `GET /api/data?list_date=YYYY-MM-DD&period_type=day|month|year|all`
 - 使用 `{ cache: 'force-cache' }` 进行客户端缓存
+
+### URL 参数和状态管理
+- 日期和周期类型选择通过 URL 参数管理，而非本地状态
+- URL 格式: `/[locale]?date=YYYY-MM-DD&period_type=day|month|year|all`
+- 参数验证工具函数位于 `apps/web/src/lib/url-params.ts`
+- 主要组件使用 `useSearchParams` 读取 URL 参数
+- 使用 `router.push` 更新 URL（设置 `scroll: false` 避免页面滚动）
+- Next.js 15 要求 `useSearchParams` 必须包裹在 Suspense 边界中
+- 参数默认值：`date` 默认为今天（UTC），`period_type` 默认为 `'day'`
+- 参数验证范围：日期必须在 2023-11-15 至今天之间
 
 ### 类型安全
 - 数据库类型：修改 `packages/db` 后必须运行 `pnpm nx build db` 重新构建
