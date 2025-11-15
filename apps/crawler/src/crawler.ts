@@ -1,47 +1,12 @@
-import {
-  galleriesTable,
-  getToplistItemsTableByYear,
-  type ToplistType,
-  // 注意：ToplistItemsTable 是一个联合的表类型（2023/2024/2025），便于统一推导字段。
-  type ToplistItemsTable,
-} from '@ehentai-toplist-archive/db'
+import { galleriesTable, getToplistItemsTableByYear, type ToplistType } from '@ehentai-toplist-archive/db'
 import * as cheerio from 'cheerio'
 import { DrizzleQueryError } from 'drizzle-orm/errors'
 
-import { cfFetch, getDbClient, logCloudflareExecutionInfo } from './utils'
+import { AbortCrawlError, type CrawlResult, type GalleryItem, TemporaryBanError, type ToplistItem } from './types'
+import { cfFetch, delay, getDbClient, logCloudflareExecutionInfo } from './utils'
 
-import type { InferInsertModel } from 'drizzle-orm'
-
-// 使用 Drizzle 推导的“插入模型”类型，避免与表结构漂移。
-type GalleryItem = InferInsertModel<typeof galleriesTable>
-type ToplistItem = InferInsertModel<ToplistItemsTable>
-
-interface CrawlResult {
-  galleries: GalleryItem[]
-  toplistItems: ToplistItem[]
-}
-
-// 用于在检测到需要立即停止后续请求的场景（例如被 Cloudflare 针对特定地区封锁）时抛出，
-// 以便调用方可以按需中断整个爬取流程。
-export class AbortCrawlError extends Error {
-  constructor(
-    message: string,
-    public readonly context: Record<string, unknown> = {},
-  ) {
-    super(message)
-    this.name = 'AbortCrawlError'
-  }
-}
-
-export class TemporaryBanError extends Error {
-  constructor(
-    message: string,
-    public readonly context: Record<string, unknown> = {},
-  ) {
-    super(message)
-    this.name = 'TemporaryBanError'
-  }
-}
+export const CRAWL_QUEUE_MESSAGE = 'crawl-toplists'
+const RECOVERY_RETRY_DELAY_SECONDS = 3600
 
 export async function crawlToplistPage(env: Env, period_type: ToplistType, url: string): Promise<void> {
   try {
@@ -291,4 +256,61 @@ async function storeToplistData(env: Env, galleries: GalleryItem[], toplistItems
   }
 
   console.log(`Persisted ${galleries.length} galleries and ${toplistItems.length} toplist rows.`)
+}
+
+export async function handleToplistCrawling(env: Env): Promise<void> {
+  const tasks = [
+    ['all', 'https://e-hentai.org/toplist.php?tl=11'],
+    ['all', 'https://e-hentai.org/toplist.php?tl=11&p=1'],
+    ['all', 'https://e-hentai.org/toplist.php?tl=11&p=2'],
+    ['all', 'https://e-hentai.org/toplist.php?tl=11&p=3'],
+    ['year', 'https://e-hentai.org/toplist.php?tl=12'],
+    ['year', 'https://e-hentai.org/toplist.php?tl=12&p=1'],
+    ['year', 'https://e-hentai.org/toplist.php?tl=12&p=2'],
+    ['year', 'https://e-hentai.org/toplist.php?tl=12&p=3'],
+    ['month', 'https://e-hentai.org/toplist.php?tl=13'],
+    ['month', 'https://e-hentai.org/toplist.php?tl=13&p=1'],
+    ['month', 'https://e-hentai.org/toplist.php?tl=13&p=2'],
+    ['month', 'https://e-hentai.org/toplist.php?tl=13&p=3'],
+    ['day', 'https://e-hentai.org/toplist.php?tl=15'],
+    ['day', 'https://e-hentai.org/toplist.php?tl=15&p=1'],
+    ['day', 'https://e-hentai.org/toplist.php?tl=15&p=2'],
+    ['day', 'https://e-hentai.org/toplist.php?tl=15&p=3'],
+  ] as const
+
+  try {
+    for (let i = 0; i < tasks.length; i++) {
+      const [type, url] = tasks[i]
+      await crawlToplistPage(env, type, url)
+      // 每个任务之间等待 1 秒，最后一个任务后不再等待
+      if (i < tasks.length - 1) {
+        await delay(1000)
+      }
+    }
+  }
+  catch (error) {
+    if (error instanceof TemporaryBanError) {
+      console.warn('Toplist crawling halted due to temporary IP ban; scheduling retry.', error.context)
+      try {
+        await env['ehentai-toplist-archive'].send(CRAWL_QUEUE_MESSAGE, {
+          delaySeconds: RECOVERY_RETRY_DELAY_SECONDS,
+        })
+        console.info('Re-enqueued toplist crawl after temporary ban.', {
+          delaySeconds: RECOVERY_RETRY_DELAY_SECONDS,
+        })
+      }
+      catch (enqueueError) {
+        console.error('Failed to enqueue toplist crawl retry after temporary ban.', enqueueError)
+      }
+      return
+    }
+
+    if (error instanceof AbortCrawlError) {
+      // 命中英国地区触发的 Cloudflare 451 封锁时，立即终止剩余任务以避免继续命中限制。
+      console.warn('Toplist crawling terminated early due to GB-based Cloudflare block.', error.context)
+      return
+    }
+
+    throw error
+  }
 }

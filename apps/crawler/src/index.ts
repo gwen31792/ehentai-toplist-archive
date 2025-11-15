@@ -1,8 +1,4 @@
-import { AbortCrawlError, TemporaryBanError, crawlToplistPage } from './crawler'
-import { delay } from './utils'
-
-const CRAWL_QUEUE_MESSAGE = 'crawl-toplists'
-const RECOVERY_RETRY_DELAY_SECONDS = 3600
+import { CRAWL_QUEUE_MESSAGE, handleToplistCrawling } from './crawler'
 
 export default {
   async fetch(): Promise<Response> {
@@ -20,80 +16,25 @@ export default {
     for (const message of batch.messages) {
       const body = message.body
 
-      if (body !== CRAWL_QUEUE_MESSAGE) {
-        console.warn('Discarding unexpected queue message payload.', { body })
-        message.ack()
-        continue
+      switch (body) {
+        case CRAWL_QUEUE_MESSAGE:
+          try {
+            await handleToplistCrawling(env)
+          }
+          catch (error) {
+            console.error('Failed to process toplist crawling queue message.', error)
+          }
+          break
+
+        default:
+          console.warn('Discarding unexpected queue message payload.', { body })
+          break
       }
 
-      try {
-        await handleToplistCrawling(env)
-        message.ack()
-      }
-      catch (error) {
-        console.error('Failed to process toplist crawling queue message.', error)
-        message.ack()
-      }
+      message.ack()
     }
   },
 } satisfies ExportedHandler<Env>
-
-async function handleToplistCrawling(env: Env): Promise<void> {
-  const tasks = [
-    ['all', 'https://e-hentai.org/toplist.php?tl=11'],
-    ['all', 'https://e-hentai.org/toplist.php?tl=11&p=1'],
-    ['all', 'https://e-hentai.org/toplist.php?tl=11&p=2'],
-    ['all', 'https://e-hentai.org/toplist.php?tl=11&p=3'],
-    ['year', 'https://e-hentai.org/toplist.php?tl=12'],
-    ['year', 'https://e-hentai.org/toplist.php?tl=12&p=1'],
-    ['year', 'https://e-hentai.org/toplist.php?tl=12&p=2'],
-    ['year', 'https://e-hentai.org/toplist.php?tl=12&p=3'],
-    ['month', 'https://e-hentai.org/toplist.php?tl=13'],
-    ['month', 'https://e-hentai.org/toplist.php?tl=13&p=1'],
-    ['month', 'https://e-hentai.org/toplist.php?tl=13&p=2'],
-    ['month', 'https://e-hentai.org/toplist.php?tl=13&p=3'],
-    ['day', 'https://e-hentai.org/toplist.php?tl=15'],
-    ['day', 'https://e-hentai.org/toplist.php?tl=15&p=1'],
-    ['day', 'https://e-hentai.org/toplist.php?tl=15&p=2'],
-    ['day', 'https://e-hentai.org/toplist.php?tl=15&p=3'],
-  ] as const
-
-  try {
-    for (let i = 0; i < tasks.length; i++) {
-      const [type, url] = tasks[i]
-      await crawlToplistPage(env, type, url)
-      // 每个任务之间等待 1 秒，最后一个任务后不再等待
-      if (i < tasks.length - 1) {
-        await delay(1000)
-      }
-    }
-  }
-  catch (error) {
-    if (error instanceof TemporaryBanError) {
-      console.warn('Toplist crawling halted due to temporary IP ban; scheduling retry.', error.context)
-      try {
-        await env['ehentai-toplist-archive'].send(CRAWL_QUEUE_MESSAGE, {
-          delaySeconds: RECOVERY_RETRY_DELAY_SECONDS,
-        })
-        console.info('Re-enqueued toplist crawl after temporary ban.', {
-          delaySeconds: RECOVERY_RETRY_DELAY_SECONDS,
-        })
-      }
-      catch (enqueueError) {
-        console.error('Failed to enqueue toplist crawl retry after temporary ban.', enqueueError)
-      }
-      return
-    }
-
-    if (error instanceof AbortCrawlError) {
-      // 命中英国地区触发的 Cloudflare 451 封锁时，立即终止剩余任务以避免继续命中限制。
-      console.warn('Toplist crawling terminated early due to GB-based Cloudflare block.', error.context)
-      return
-    }
-
-    throw error
-  }
-}
 
 // 用于在指定地区（APAC）代理外部请求的 Durable Object
 export class FetchProxy implements DurableObject {

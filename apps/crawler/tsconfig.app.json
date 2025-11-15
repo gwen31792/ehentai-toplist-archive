@@ -13,5 +13,10 @@
   "include": [
     "src/**/*.ts"
   ],
-  "exclude": []
+  "exclude": [],
+  "references": [
+    {
+      "path": "../../packages/db/tsconfig.lib.json"
+    }
+  ]
 }
