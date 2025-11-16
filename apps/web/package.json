@@ -48,6 +48,16 @@
       "@ehentai-toplist-archive/db"
     ],
     "targets": {
+      "typecheck": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "tsc --build --emitDeclarationOnly"
+        },
+        "dependsOn": [
+          "^typecheck"
+        ],
+        "cache": true
+      },
       "build": {
         "dependsOn": [
           "^build"

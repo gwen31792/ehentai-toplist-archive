@@ -57,6 +57,16 @@
     }
   },
   "targetDefaults": {
+    "typecheck": {
+      "cache": true,
+      "dependsOn": [
+        "^typecheck"
+      ],
+      "inputs": [
+        "default",
+        "^default"
+      ]
+    },
     "@nx/esbuild:esbuild": {
       "cache": true,
       "dependsOn": [
