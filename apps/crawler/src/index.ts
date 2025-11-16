@@ -1,4 +1,5 @@
-import { CRAWL_QUEUE_MESSAGE, handleToplistCrawling } from './crawler'
+import { CRAWL_TAGS_TRANSLATION_MESSAGE, handleTagsTranslationCrawling } from './crawl-tags-translation'
+import { CRAWL_QUEUE_MESSAGE, handleToplistCrawling } from './crawl-toplist'
 
 export default {
   async fetch(): Promise<Response> {
@@ -7,9 +8,10 @@ export default {
 
   async scheduled(_controller: ScheduledController, env: Env): Promise<void> {
     // 定期向队列投递爬取任务，由队列消费者串行执行抓取逻辑。
-    const enqueue = env['ehentai-toplist-archive'].send(CRAWL_QUEUE_MESSAGE)
+    const enqueueToplist = env['ehentai-toplist-archive'].send(CRAWL_QUEUE_MESSAGE)
+    const enqueueTagsTranslation = env['ehentai-toplist-archive'].send(CRAWL_TAGS_TRANSLATION_MESSAGE)
 
-    await enqueue
+    await Promise.all([enqueueToplist, enqueueTagsTranslation])
   },
 
   async queue(batch: MessageBatch<unknown>, env: Env): Promise<void> {
@@ -23,6 +25,15 @@ export default {
           }
           catch (error) {
             console.error('Failed to process toplist crawling queue message.', error)
+          }
+          break
+
+        case CRAWL_TAGS_TRANSLATION_MESSAGE:
+          try {
+            await handleTagsTranslationCrawling(env)
+          }
+          catch (error) {
+            console.error('Failed to process tags translation crawling queue message.', error)
           }
           break
 

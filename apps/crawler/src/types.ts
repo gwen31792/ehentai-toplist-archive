@@ -32,3 +32,10 @@ export class TemporaryBanError extends Error {
     this.name = 'TemporaryBanError'
   }
 }
+
+// Tags 翻译相关类型
+export interface TagTranslationItem {
+  tag_namespace: string
+  tag_name: string
+  tag_translation: string
+}
