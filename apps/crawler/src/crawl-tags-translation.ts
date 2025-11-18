@@ -76,18 +76,22 @@ export async function fetchTagsTranslationDb(env: Env): Promise<Array<{ key: str
 
     const tagDb = await tagDbResponse.json() as {
       data: Array<{
+        namespace: string
         data: Record<string, { name: string }>
       }>
     }
     console.log('Successfully downloaded db.text.json')
 
     // 提取所有 key-value pairs (使用 flatMap 优化性能)
-    const keyValuePairs = tagDb.data.flatMap(item =>
-      Object.entries(item.data).map(([key, obj]) => ({
-        key,
-        value: obj.name,
-      })),
-    )
+    // 排除 namespace 为 'rows' 的对象
+    const keyValuePairs = tagDb.data
+      .filter(item => item.namespace !== 'rows')
+      .flatMap(item =>
+        Object.entries(item.data).map(([key, obj]) => ({
+          key,
+          value: obj.name,
+        })),
+      )
 
     console.log('Extracted key-value pairs count:', keyValuePairs.length)
     console.log('Sample pairs:', keyValuePairs.slice(0, 5))
