@@ -103,17 +103,27 @@ export async function fetchTagsTranslationDb(env: Env): Promise<Array<{ key: str
     // 举例：sango 语言和 sango 艺术家
     // 参号是谁翻译成 sango 的，任何地方都是参号作为 native 名称，只有 twitter 的用户名是 @sango3_3
     // 那用 sango3_3 不就不会冲突了吗？？？
-    const keyMap = new Map<string, string[]>()
-    for (const pair of keyValuePairs) {
-      if (!keyMap.has(pair.key)) {
-        keyMap.set(pair.key, [])
-      }
-      keyMap.get(pair.key)!.push(pair.value)
-    }
 
+    // 优化：使用 reduce 构建 Map，避免重复查询
+    const keyMap = keyValuePairs.reduce((map, pair) => {
+      const existing = map.get(pair.key)
+      if (existing) {
+        existing.push(pair.value)
+      }
+      else {
+        map.set(pair.key, [pair.value])
+      }
+      return map
+    }, new Map<string, string[]>())
+
+    // 优化：filter 和 map 中复用 Set，避免重复创建
     const duplicateKeys = Array.from(keyMap.entries())
-      .filter(([_key, values]) => new Set(values).size > 1)
-      .map(([key, values]) => ({ key, values: Array.from(new Set(values)) }))
+      .map(([key, values]) => {
+        const uniqueValues = new Set(values)
+        return { key, values, uniqueValuesSet: uniqueValues }
+      })
+      .filter(item => item.uniqueValuesSet.size > 1)
+      .map(item => ({ key: item.key, values: Array.from(item.uniqueValuesSet) }))
 
     if (duplicateKeys.length > 0) {
       console.log('⚠️ Found duplicate keys with different values:', duplicateKeys.length)
@@ -143,13 +153,23 @@ export async function fetchTagsTranslationDb(env: Env): Promise<Array<{ key: str
 
 /**
  * 将 key-value pairs 批量写入 Cloudflare KV
- * 使用 Cloudflare SDK 的 bulk update 接口
- * API 文档: https://developers.cloudflare.com/api/node/resources/kv/subresources/namespaces/methods/bulk_update/
+ * 优化策略：先批量读取现有值，对比差异后只写入变更的键值对
+ *
+ * 使用 KV binding 的批量读取 API：
+ * - 每次最多读取 100 个键
+ * - 返回 Map<string, string | null>
+ *
+ * 使用 Cloudflare SDK 的 bulk update 接口写入变更
  */
 export async function saveToCloudflareKV(
   env: Env,
   keyValuePairs: Array<{ key: string, value: string }>,
 ): Promise<void> {
+  // 检查环境变量
+  if (!env.KV) {
+    throw new Error('KV binding is not available in env')
+  }
+
   const apiToken = env.CLOUDFLARE_API_TOKEN
   const accountId = env.CLOUDFLARE_ACCOUNT_ID
   const namespaceId = env.KV_NAMESPACE_ID
@@ -160,8 +180,100 @@ export async function saveToCloudflareKV(
     throw new Error(error)
   }
 
-  console.log(`Preparing to save ${keyValuePairs.length} key-value pairs to KV...`)
+  console.log(`Preparing to process ${keyValuePairs.length} key-value pairs...`)
 
+  // 步骤 1: 批量读取现有的 KV 数据
+  console.log('Step 1: Reading existing KV values...')
+  const existingValues = await batchReadKV(env.KV, keyValuePairs.map(p => p.key))
+  console.log(`Read ${existingValues.size} existing values from KV`)
+
+  // 步骤 2: 对比差异，找出需要写入的键值对
+  console.log('Step 2: Comparing differences...')
+
+  // 使用 filter 一次性过滤出需要写入的数据
+  const pairsToWrite = keyValuePairs.filter((pair) => {
+    const existingValue = existingValues.get(pair.key)
+    // 如果 KV 中不存在该键，或者值不同，则需要写入
+    return existingValue === undefined || existingValue !== pair.value
+  })
+
+  const unchangedCount = keyValuePairs.length - pairsToWrite.length
+  console.log(`Found ${pairsToWrite.length} pairs to update (${unchangedCount} unchanged)`)
+
+  // 如果没有需要写入的数据，直接返回
+  if (pairsToWrite.length === 0) {
+    console.log('No changes detected, skipping KV write')
+    return
+  }
+
+  // 步骤 3: 批量写入变更的数据
+  console.log(`Step 3: Writing ${pairsToWrite.length} changed pairs to KV...`)
+  await batchWriteKV(apiToken, accountId, namespaceId, pairsToWrite)
+
+  console.log(`Successfully updated ${pairsToWrite.length} key-value pairs in KV`)
+}
+
+/**
+ * 批量读取 KV 中的值
+ * 使用 KV binding 的批量 get API，每次最多读取 100 个键
+ *
+ * @param kv KV namespace binding
+ * @param keys 要读取的键数组
+ * @returns Map<key, value>，如果键不存在则不包含在 Map 中
+ */
+async function batchReadKV(
+  kv: KVNamespace,
+  keys: string[],
+): Promise<Map<string, string>> {
+  const result = new Map<string, string>()
+
+  // KV 批量读取每次最多 100 个键
+  const BATCH_SIZE = 100
+  const totalBatches = Math.ceil(keys.length / BATCH_SIZE)
+
+  console.log(`Reading ${keys.length} keys in ${totalBatches} batches...`)
+
+  for (let i = 0; i < keys.length; i += BATCH_SIZE) {
+    const batchIndex = Math.floor(i / BATCH_SIZE) + 1
+    const batchKeys = keys.slice(i, i + BATCH_SIZE)
+
+    try {
+      // 使用 KV binding 的批量 get 方法
+      const batchResult = await kv.get(batchKeys, 'text')
+
+      // 将结果合并到 result Map 中
+      for (const [key, value] of batchResult.entries()) {
+        if (value !== null) {
+          result.set(key, value)
+        }
+      }
+
+      console.log(`Read batch ${batchIndex}/${totalBatches}: ${batchResult.size} values`)
+    }
+    catch (error) {
+      console.error(`Error reading batch ${batchIndex}:`, error)
+      throw error
+    }
+  }
+
+  return result
+}
+
+/**
+ * 批量写入 KV
+ * 使用 Cloudflare SDK 的 bulk update 接口
+ *
+ * @param apiToken Cloudflare API token
+ * @param accountId Cloudflare account ID
+ * @param namespaceId KV namespace ID
+ * @param pairs 要写入的键值对数组
+ */
+async function batchWriteKV(
+  apiToken: string,
+  accountId: string,
+  namespaceId: string,
+  pairs: Array<{ key: string, value: string }>,
+): Promise<void> {
   // 创建 Cloudflare 客户端
   const client = new Cloudflare({
     apiToken,
@@ -169,34 +281,30 @@ export async function saveToCloudflareKV(
 
   // Cloudflare KV bulk update API 每次最多支持 10000 个键值对
   const BATCH_SIZE = 10000
-  const totalBatches = Math.ceil(keyValuePairs.length / BATCH_SIZE)
+  const totalBatches = Math.ceil(pairs.length / BATCH_SIZE)
 
-  console.log(`Will process ${totalBatches} batches`)
+  console.log(`Writing ${pairs.length} pairs in ${totalBatches} batches...`)
 
-  try {
-    for (let i = 0; i < keyValuePairs.length; i += BATCH_SIZE) {
-      const batchIndex = Math.floor(i / BATCH_SIZE) + 1
-      const batch = keyValuePairs.slice(i, i + BATCH_SIZE)
+  for (let i = 0; i < pairs.length; i += BATCH_SIZE) {
+    const batchIndex = Math.floor(i / BATCH_SIZE) + 1
+    const batch = pairs.slice(i, i + BATCH_SIZE)
 
-      console.log(`Processing batch ${batchIndex}/${totalBatches} with ${batch.length} items...`)
-
+    try {
       const response = await client.kv.namespaces.bulkUpdate(namespaceId, {
         account_id: accountId,
         body: batch,
       })
 
       if (response) {
-        console.log(`Batch ${batchIndex}/${totalBatches} saved successfully. Successful keys: ${response.successful_key_count}`)
+        console.log(`Write batch ${batchIndex}/${totalBatches}: ${response.successful_key_count} keys updated`)
       }
       else {
-        console.log(`Batch ${batchIndex}/${totalBatches} completed (no response data)`)
+        console.log(`Write batch ${batchIndex}/${totalBatches}: completed (no response data)`)
       }
     }
-
-    console.log(`All ${keyValuePairs.length} key-value pairs saved to KV successfully`)
-  }
-  catch (error) {
-    console.error('Error in saveToCloudflareKV:', error)
-    throw error
+    catch (error) {
+      console.error(`Error writing batch ${batchIndex}:`, error)
+      throw error
+    }
   }
 }

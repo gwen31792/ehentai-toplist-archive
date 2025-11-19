@@ -46,5 +46,11 @@
         "queue": "ehentai-toplist-archive"
       }
     ]
-  }
+  },
+  "kv_namespaces": [
+    {
+      "id": "61b409af67a3475daaf5bb97e34b461c",
+      "binding": "KV"
+    }
+  ]
 }
