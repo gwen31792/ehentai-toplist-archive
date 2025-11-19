@@ -1,8 +1,9 @@
 'use client'
 
-import React from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 
 import { Table } from '@tanstack/react-table'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import { Settings, Filter } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
@@ -42,6 +43,51 @@ export function TableHeaderControls<TData>({
   onSelectedTypesChange,
 }: TableHeaderControlsProps<TData>) {
   const t = useTranslations('components.dataTable')
+
+  // Popover 打开状态
+  const [typePopoverOpen, setTypePopoverOpen] = useState(false)
+  const [tagPopoverOpen, setTagPopoverOpen] = useState(false)
+
+  // 类型筛选器虚拟滚动
+  const typeParentRef = useRef<HTMLDivElement>(null)
+  const typeVirtualizer = useVirtualizer({
+    count: extractedTypes.length,
+    getScrollElement: () => typeParentRef.current,
+    estimateSize: () => 28, // 每项高度约 28px (checkbox 20px + space-y-2 的 8px)
+    overscan: 10, // 预渲染 10 个额外项
+  })
+
+  // 标签筛选器虚拟滚动
+  const tagParentRef = useRef<HTMLDivElement>(null)
+  const tagVirtualizer = useVirtualizer({
+    count: extractedTags.length,
+    getScrollElement: () => tagParentRef.current,
+    estimateSize: () => 28, // 每项高度约 28px (checkbox 20px + space-y-2 的 8px)
+    overscan: 10, // 预渲染 10 个额外项
+  })
+
+  // 当 Popover 打开时，触发虚拟滚动重新测量
+  useEffect(() => {
+    if (typePopoverOpen) {
+      // 使用 setTimeout 确保 DOM 已完全渲染
+      const timer = setTimeout(() => {
+        typeVirtualizer.measure()
+      }, 0)
+      return () => clearTimeout(timer)
+    }
+    return undefined
+  }, [typePopoverOpen, typeVirtualizer])
+
+  useEffect(() => {
+    if (tagPopoverOpen) {
+      // 使用 setTimeout 确保 DOM 已完全渲染
+      const timer = setTimeout(() => {
+        tagVirtualizer.measure()
+      }, 0)
+      return () => clearTimeout(timer)
+    }
+    return undefined
+  }, [tagPopoverOpen, tagVirtualizer])
 
   return (
     <div className="mb-4 flex items-center justify-end">
@@ -95,7 +141,7 @@ export function TableHeaderControls<TData>({
         </div>
 
         {/* 类型筛选器 */}
-        <Popover>
+        <Popover open={typePopoverOpen} onOpenChange={setTypePopoverOpen}>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
@@ -105,7 +151,7 @@ export function TableHeaderControls<TData>({
               {t('typeFilter')}
             </Button>
           </PopoverTrigger>
-          <PopoverContent align="start" className="w-[300px] bg-zinc-50 dark:bg-zinc-800 max-h-[400px] overflow-y-auto">
+          <PopoverContent align="start" className="w-[300px] bg-zinc-50 dark:bg-zinc-800">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <h4 className="font-medium leading-none text-zinc-900 dark:text-zinc-100">
@@ -130,38 +176,63 @@ export function TableHeaderControls<TData>({
                   </Button>
                 </div>
               </div>
-              <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                {extractedTypes.map(type => (
-                  <div key={type} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`type-${type}`}
-                      checked={selectedTypes.has(type)}
-                      onCheckedChange={(checked: boolean | 'indeterminate') => {
-                        const newSelectedTypes = new Set(selectedTypes)
-                        if (checked === true) {
-                          newSelectedTypes.add(type)
-                        }
-                        else {
-                          newSelectedTypes.delete(type)
-                        }
-                        onSelectedTypesChange(newSelectedTypes)
-                      }}
-                    />
-                    <label
-                      htmlFor={`type-${type}`}
-                      className="text-sm font-normal text-zinc-700 dark:text-zinc-300 cursor-pointer flex-1"
-                    >
-                      {type}
-                    </label>
-                  </div>
-                ))}
+              <div
+                ref={typeParentRef}
+                className="max-h-[300px] min-h-[200px] overflow-y-auto"
+              >
+                <div
+                  style={{
+                    height: `${typeVirtualizer.getTotalSize()}px`,
+                    width: '100%',
+                    position: 'relative',
+                  }}
+                >
+                  {typeVirtualizer.getVirtualItems().map((virtualItem) => {
+                    const type = extractedTypes[virtualItem.index]
+                    return (
+                      <div
+                        key={virtualItem.key}
+                        data-index={virtualItem.index}
+                        className="flex items-center space-x-2"
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          transform: `translateY(${virtualItem.start}px)`,
+                        }}
+                      >
+                        <Checkbox
+                          id={`type-${type}`}
+                          checked={selectedTypes.has(type)}
+                          onCheckedChange={(checked: boolean | 'indeterminate') => {
+                            const newSelectedTypes = new Set(selectedTypes)
+                            if (checked === true) {
+                              newSelectedTypes.add(type)
+                            }
+                            else {
+                              newSelectedTypes.delete(type)
+                            }
+                            onSelectedTypesChange(newSelectedTypes)
+                          }}
+                        />
+                        <label
+                          htmlFor={`type-${type}`}
+                          className="text-sm font-normal text-zinc-700 dark:text-zinc-300 cursor-pointer flex-1"
+                        >
+                          {type}
+                        </label>
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
             </div>
           </PopoverContent>
         </Popover>
 
         {/* 标签筛选器 */}
-        <Popover>
+        <Popover open={tagPopoverOpen} onOpenChange={setTagPopoverOpen}>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
@@ -171,7 +242,7 @@ export function TableHeaderControls<TData>({
               {t('tagFilter')}
             </Button>
           </PopoverTrigger>
-          <PopoverContent align="start" className="w-[300px] bg-zinc-50 dark:bg-zinc-800 max-h-[400px] overflow-y-auto">
+          <PopoverContent align="start" className="w-[300px] bg-zinc-50 dark:bg-zinc-800">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <h4 className="font-medium leading-none text-zinc-900 dark:text-zinc-100">
@@ -196,31 +267,56 @@ export function TableHeaderControls<TData>({
                   </Button>
                 </div>
               </div>
-              <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                {extractedTags.map(tag => (
-                  <div key={tag} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`tag-${tag}`}
-                      checked={selectedTags.has(tag)}
-                      onCheckedChange={(checked: boolean | 'indeterminate') => {
-                        const newSelectedTags = new Set(selectedTags)
-                        if (checked === true) {
-                          newSelectedTags.add(tag)
-                        }
-                        else {
-                          newSelectedTags.delete(tag)
-                        }
-                        onSelectedTagsChange(newSelectedTags)
-                      }}
-                    />
-                    <label
-                      htmlFor={`tag-${tag}`}
-                      className="text-sm font-normal text-zinc-700 dark:text-zinc-300 cursor-pointer flex-1"
-                    >
-                      {tag}
-                    </label>
-                  </div>
-                ))}
+              <div
+                ref={tagParentRef}
+                className="max-h-[300px] min-h-[200px] overflow-y-auto"
+              >
+                <div
+                  style={{
+                    height: `${tagVirtualizer.getTotalSize()}px`,
+                    width: '100%',
+                    position: 'relative',
+                  }}
+                >
+                  {tagVirtualizer.getVirtualItems().map((virtualItem) => {
+                    const tag = extractedTags[virtualItem.index]
+                    return (
+                      <div
+                        key={virtualItem.key}
+                        data-index={virtualItem.index}
+                        className="flex items-center space-x-2"
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          transform: `translateY(${virtualItem.start}px)`,
+                        }}
+                      >
+                        <Checkbox
+                          id={`tag-${tag}`}
+                          checked={selectedTags.has(tag)}
+                          onCheckedChange={(checked: boolean | 'indeterminate') => {
+                            const newSelectedTags = new Set(selectedTags)
+                            if (checked === true) {
+                              newSelectedTags.add(tag)
+                            }
+                            else {
+                              newSelectedTags.delete(tag)
+                            }
+                            onSelectedTagsChange(newSelectedTags)
+                          }}
+                        />
+                        <label
+                          htmlFor={`tag-${tag}`}
+                          className="text-sm font-normal text-zinc-700 dark:text-zinc-300 cursor-pointer flex-1"
+                        >
+                          {tag}
+                        </label>
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
             </div>
           </PopoverContent>
