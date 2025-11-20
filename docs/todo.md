@@ -3,7 +3,7 @@
 - [ ] 减少写入次数，当前每天更新一次 tag 翻译，一天写入 30k，一个月要 0.9M，不小心就会超了起始限制了
 
 ## 中优先级
-
+- [ ] nextjs 16 升级
 
 ## 低优先级
 - [ ] 对数据库查询的缓存，从 F12 看，相同内容还是会重发请求
@@ -15,7 +15,6 @@
 - [ ] 检查 CLS 问题，see also: https://liudon.com/posts/fix-blog-cls/
 - [ ] 等 eslint-plugin-tailwindcss 支持 Tailwind CSS v4 后重新添加到项目中
 - [ ] galleries 表回扫详细数据，比如 Rating
-- [ ] eslint, eslint-config-next, typescript 5.9 升级
 - [ ] 使用 <Activity>: https://react.dev/reference/react/Activity
 
 # 专项
@@ -50,6 +49,7 @@ WebP Cloud Services 这里感觉可以不做了，公网连接怎么也不会有
 - [x] 重构后端爬虫，从 AWS Lambda 迁移到 Cloudflare Workers，增加爬取数量
 - [x] 检查 ipv6 支持
 - [x] 爬虫 ip 被 ban 后自动调起一次新的执行，考虑是否完全改造成适配 cloudflare queues，自己做生产者和消费者
+- [x] eslint, eslint-config-next, typescript 5.9 升级
 
 # 不考虑做
 - [ ] tag 中文翻译，因为没有官方的中文翻译，官方目前只有日语翻译
