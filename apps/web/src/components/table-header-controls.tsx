@@ -161,6 +161,11 @@ export function TableHeaderControls<TData>({
               <div className="flex items-center justify-between">
                 <h4 className="font-medium leading-none text-zinc-900 dark:text-zinc-100">
                   {t('tagFilter')}
+                  <span className="ml-2 text-xs text-zinc-500 dark:text-zinc-400">
+                    {selectedTags.size}
+                    /
+                    {extractedTags.length}
+                  </span>
                 </h4>
                 <div className="flex items-center gap-2">
                   <Button
