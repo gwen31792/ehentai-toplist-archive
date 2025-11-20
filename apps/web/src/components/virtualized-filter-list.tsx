@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef, useEffect } from 'react'
+import React, { useRef } from 'react'
 
 import { useVirtualizer } from '@tanstack/react-virtual'
 
@@ -28,13 +28,6 @@ export function VirtualizedFilterList({
     overscan: 10,
   })
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      virtualizer.measure()
-    }, 0)
-    return () => clearTimeout(timer)
-  }, [virtualizer])
-
   return (
     <div
       ref={parentRef}
@@ -53,7 +46,8 @@ export function VirtualizedFilterList({
             <div
               key={virtualItem.key}
               data-index={virtualItem.index}
-              className="flex items-center space-x-2"
+              ref={virtualizer.measureElement}
+              className="flex items-center space-x-2 py-1"
               style={{
                 position: 'absolute',
                 top: 0,
