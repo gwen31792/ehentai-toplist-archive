@@ -12,4 +12,5 @@ export const galleriesTable = sqliteTable('galleries', {
   torrents_url: text().notNull(),
   preview_url: text().notNull(),
   gallery_url: text().notNull(),
+  updated_at: text(),
 })
