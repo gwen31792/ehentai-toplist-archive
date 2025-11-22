@@ -1,5 +1,6 @@
 import { galleriesTable, getToplistItemsTableByYear, type ToplistType } from '@ehentai-toplist-archive/db'
 import * as cheerio from 'cheerio'
+import { isNull } from 'drizzle-orm'
 import { DrizzleQueryError } from 'drizzle-orm/errors'
 
 import { AbortCrawlError, type CrawlResult, type GalleryItem, TemporaryBanError, type ToplistItem } from './types'
@@ -195,6 +196,8 @@ async function storeToplistData(env: Env, galleries: GalleryItem[], toplistItems
           preview_url: gallery.preview_url,
           gallery_url: gallery.gallery_url,
         },
+        // 仅当 updated_at 为空时才更新，防止覆盖已被 update-gallery-tags 任务更新过的详细数据（如完整 tags）
+        where: isNull(galleriesTable.updated_at),
       }),
     )
 
