@@ -1,17 +1,28 @@
 import { CRAWL_TAGS_TRANSLATION_MESSAGE, handleTagsTranslationCrawling } from './crawl-tags-translation'
 import { CRAWL_QUEUE_MESSAGE, handleToplistCrawling } from './crawl-toplist'
+import { UPDATE_GALLERY_TAGS_MESSAGE, handleUpdateGalleryTags } from './update-gallery-tags'
 
 export default {
   async fetch(): Promise<Response> {
     return new Response('Forbidden', { status: 403 })
   },
 
-  async scheduled(_controller: ScheduledController, env: Env): Promise<void> {
-    // 定期向队列投递爬取任务，由队列消费者串行执行抓取逻辑。
-    const enqueueToplist = env['ehentai-toplist-archive'].send(CRAWL_QUEUE_MESSAGE)
-    const enqueueTagsTranslation = env['ehentai-toplist-archive'].send(CRAWL_TAGS_TRANSLATION_MESSAGE)
+  async scheduled(controller: ScheduledController, env: Env): Promise<void> {
+    const tasks: Promise<void>[] = []
 
-    await Promise.all([enqueueToplist, enqueueTagsTranslation])
+    switch (controller.cron) {
+      case '0 1 * * *':
+        // 每天 1 点执行的任务
+        tasks.push(env['ehentai-toplist-archive'].send(CRAWL_QUEUE_MESSAGE))
+        tasks.push(env['ehentai-toplist-archive'].send(CRAWL_TAGS_TRANSLATION_MESSAGE))
+        break
+      case '0 * * * *':
+        // 每小时执行的任务
+        tasks.push(env['ehentai-toplist-archive'].send(UPDATE_GALLERY_TAGS_MESSAGE))
+        break
+    }
+
+    await Promise.all(tasks)
   },
 
   async queue(batch: MessageBatch<unknown>, env: Env): Promise<void> {
@@ -34,6 +45,15 @@ export default {
           }
           catch (error) {
             console.error('Failed to process tags translation crawling queue message.', error)
+          }
+          break
+
+        case UPDATE_GALLERY_TAGS_MESSAGE:
+          try {
+            await handleUpdateGalleryTags(env)
+          }
+          catch (error) {
+            console.error('Failed to process update gallery tags queue message.', error)
           }
           break
 
