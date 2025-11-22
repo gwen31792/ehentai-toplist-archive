@@ -21,6 +21,7 @@ export function VirtualizedFilterList({
 }: VirtualizedFilterListProps) {
   'use no memo'
   const parentRef = useRef<HTMLDivElement>(null)
+  // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: items.length,
     getScrollElement: () => parentRef.current,

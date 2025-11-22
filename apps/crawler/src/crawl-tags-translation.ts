@@ -1,4 +1,4 @@
-import Cloudflare from 'cloudflare'
+import { Cloudflare } from 'cloudflare'
 
 export const CRAWL_TAGS_TRANSLATION_MESSAGE = 'crawl-tags-translation'
 
