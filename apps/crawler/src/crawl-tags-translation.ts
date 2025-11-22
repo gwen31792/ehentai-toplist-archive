@@ -2,6 +2,23 @@ import { Cloudflare } from 'cloudflare'
 
 export const CRAWL_TAGS_TRANSLATION_MESSAGE = 'crawl-tags-translation'
 
+const NAMESPACE_ABBREVIATIONS: Record<string, string> = {
+  artist: 'a',
+  character: 'c',
+  cosplayer: 'cos',
+  female: 'f',
+  group: 'g',
+  language: 'l',
+  location: 'loc',
+  male: 'm',
+  mixed: 'x',
+  other: 'o',
+  parody: 'p',
+  reclass: 'r',
+  // temp 不在 e-hentai 官方标签分类中
+  temp: 't',
+}
+
 /**
  * 处理 tags 中文翻译的爬取任务
  * 从 GitHub 仓库 EhTagTranslation/Database 的最新 release 获取 db.text.json
@@ -86,23 +103,20 @@ export async function fetchTagsTranslationDb(env: Env): Promise<Array<{ key: str
     // 排除 namespace 为 'rows' 的对象
     const keyValuePairs = tagDb.data
       .filter(item => item.namespace !== 'rows')
-      .flatMap(item =>
-        Object.entries(item.data).map(([key, obj]) => ({
-          key,
+      .flatMap((item) => {
+        const namespace = item.namespace
+        const prefix = NAMESPACE_ABBREVIATIONS[namespace] ?? namespace
+
+        return Object.entries(item.data).map(([key, obj]) => ({
+          key: `${prefix}:${key}`,
           value: obj.name,
-        })),
-      )
+        }))
+      })
 
     console.log('Extracted key-value pairs count:', keyValuePairs.length)
     console.log('Sample pairs:', keyValuePairs.slice(0, 5))
 
     // 检查是否有相同的 key 但不同的 value
-    // 20251117 检查结果: 489/38379 冲突
-    // 暂时不解决这个问题了，不同命名空间有冲突内容，就直接把冲突的全删掉，不然当前的记录 tags 的系统要大改
-    // 目前只有 female 这个命名空间下有 f: 的前缀，别的都没有，如果把所有 tags 加上前缀可能会很乱
-    // 举例：sango 语言和 sango 艺术家
-    // 参号是谁翻译成 sango 的，任何地方都是参号作为 native 名称，只有 twitter 的用户名是 @sango3_3
-    // 那用 sango3_3 不就不会冲突了吗？？？
 
     // 优化：使用 reduce 构建 Map，避免重复查询
     const keyMap = keyValuePairs.reduce((map, pair) => {
