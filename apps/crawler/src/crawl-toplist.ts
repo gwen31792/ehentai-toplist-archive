@@ -288,9 +288,9 @@ export async function handleToplistCrawling(env: Env): Promise<void> {
     for (let i = 0; i < tasks.length; i++) {
       const [type, url] = tasks[i]
       await crawlToplistPage(env, type, url)
-      // 每个任务之间等待 1 秒，最后一个任务后不再等待
+      // 每个任务之间等待 5 秒，最后一个任务后不再等待
       if (i < tasks.length - 1) {
-        await delay(1000)
+        await delay(5000)
       }
     }
   }

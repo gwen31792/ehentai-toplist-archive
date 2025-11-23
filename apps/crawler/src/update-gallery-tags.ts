@@ -54,8 +54,8 @@ export async function handleUpdateGalleryTags(env: Env): Promise<void> {
       // TODO: Parse tags from html
       // TODO: Update gallery tags and updated_at in database
 
-      // 避免请求过快
-      await delay(1000)
+      // 避免请求过快，等待 5 秒
+      await delay(5000)
     }
     catch (error) {
       console.error(`Error processing gallery ${gallery.gallery_id}:`, error)
