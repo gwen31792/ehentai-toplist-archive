@@ -3,6 +3,23 @@ import { createDbClient } from '@ehentai-toplist-archive/db'
 let cachedDbClient: ReturnType<typeof createDbClient> | null = null
 let cachedFetchStub: DurableObjectStub | null = null
 
+export const NAMESPACE_ABBREVIATIONS: Record<string, string> = {
+  artist: 'a',
+  character: 'c',
+  cosplayer: 'cos',
+  female: 'f',
+  group: 'g',
+  language: 'l',
+  location: 'loc',
+  male: 'm',
+  mixed: 'x',
+  other: 'o',
+  parody: 'p',
+  reclass: 'r',
+  // temp 不在 e-hentai 官方标签分类中
+  temp: 't',
+}
+
 export function getDbClient(env: Env) {
   if (cachedDbClient == null) {
     cachedDbClient = createDbClient(env)

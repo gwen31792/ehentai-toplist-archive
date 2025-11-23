@@ -1,23 +1,8 @@
 import { Cloudflare } from 'cloudflare'
 
-export const CRAWL_TAGS_TRANSLATION_MESSAGE = 'crawl-tags-translation'
+import { NAMESPACE_ABBREVIATIONS } from './utils'
 
-const NAMESPACE_ABBREVIATIONS: Record<string, string> = {
-  artist: 'a',
-  character: 'c',
-  cosplayer: 'cos',
-  female: 'f',
-  group: 'g',
-  language: 'l',
-  location: 'loc',
-  male: 'm',
-  mixed: 'x',
-  other: 'o',
-  parody: 'p',
-  reclass: 'r',
-  // temp 不在 e-hentai 官方标签分类中
-  temp: 't',
-}
+export const CRAWL_TAGS_TRANSLATION_MESSAGE = 'crawl-tags-translation'
 
 /**
  * 处理 tags 中文翻译的爬取任务

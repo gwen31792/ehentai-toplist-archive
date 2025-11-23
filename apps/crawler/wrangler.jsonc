@@ -10,8 +10,8 @@
   "triggers": {
     "crons": [
       "0 1 * * *", // Toplist crawling
-      "0 13 * * *" // Tags translation crawling
-      // "0 * * * *" // Update gallery tags
+      "0 13 * * *", // Tags translation crawling
+      "0 * * * *" // Update gallery tags
     ]
   },
   "observability": {
