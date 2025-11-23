@@ -80,7 +80,10 @@ export function DatePicker({ date: externalDate, onDateChange }: DatePickerProps
           onMonthChange={setMonth}
           startMonth={new Date(2023, 10, 15)} // 2023-11-15
           endMonth={todayUtc}
-          disabled={{ after: todayUtc }}
+          disabled={[
+            { after: todayUtc },
+            { before: new Date(2023, 10, 15) },
+          ]}
           locale={localeMap[locale]}
           fixedWeeks
         />
