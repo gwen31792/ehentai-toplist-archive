@@ -1,8 +1,5 @@
 import { createDbClient } from '@ehentai-toplist-archive/db'
 
-let cachedDbClient: ReturnType<typeof createDbClient> | null = null
-let cachedFetchStub: DurableObjectStub | null = null
-
 export const NAMESPACE_ABBREVIATIONS: Record<string, string> = {
   artist: 'a',
   character: 'c',
@@ -21,20 +18,19 @@ export const NAMESPACE_ABBREVIATIONS: Record<string, string> = {
 }
 
 export function getDbClient(env: Env) {
-  if (cachedDbClient == null) {
-    cachedDbClient = createDbClient(env)
-  }
-
-  return cachedDbClient
+  // Cloudflare Workers 的 env 对象是绑定到特定请求上下文的。
+  // 虽然 Worker 实例可能会在多个请求之间复用，但 env 对象（及其包含的 DB 绑定）不能跨请求使用。
+  // 如果将使用旧 env 创建的 client 缓存在全局变量中，当 Worker 复用于处理新请求时，
+  // 尝试使用旧 client 执行 I/O 操作会触发 "Cannot perform I/O on behalf of a different request" 错误。
+  // 因此，必须每次都使用当前请求传入的 env 创建新的 client 实例。
+  return createDbClient(env)
 }
 
 export function getFetchStub(env: Env) {
-  if (cachedFetchStub == null) {
-    const id = env.FETCH_DO.idFromName('fetch-proxy')
-    cachedFetchStub = env.FETCH_DO.get(id, { locationHint: 'apac' })
-  }
-
-  return cachedFetchStub
+  // 同理，Durable Object Stub 也绑定了创建它的请求上下文。
+  // 必须在当前请求的上下文中获取 Stub，而不能复用之前请求创建的 Stub。
+  const id = env.FETCH_DO.idFromName('fetch-proxy')
+  return env.FETCH_DO.get(id, { locationHint: 'apac' })
 }
 
 export function delay(ms: number): Promise<void> {
