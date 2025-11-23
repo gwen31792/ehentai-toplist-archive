@@ -14,6 +14,9 @@ export default {
       case '0 1 * * *':
         // 每天 1 点执行的任务
         tasks.push(env.QUEUE.send(CRAWL_QUEUE_MESSAGE))
+        break
+      case '0 13 * * *':
+        // 每天 13 点执行的任务
         tasks.push(env.QUEUE.send(CRAWL_TAGS_TRANSLATION_MESSAGE))
         break
       case '0 * * * *':
