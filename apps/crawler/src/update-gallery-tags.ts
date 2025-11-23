@@ -1,6 +1,6 @@
 import { galleriesTable } from '@ehentai-toplist-archive/db'
 import * as cheerio from 'cheerio'
-import { asc, eq, isNull, lt, or } from 'drizzle-orm'
+import { asc, count, eq, isNull, lt, or } from 'drizzle-orm'
 
 import { TemporaryBanError } from './types'
 import { cfFetch, delay, getDbClient, NAMESPACE_ABBREVIATIONS } from './utils'
@@ -15,6 +15,19 @@ export async function handleUpdateGalleryTags(env: Env): Promise<void> {
   const oneMonthAgo = new Date()
   oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1)
   const thresholdDate = oneMonthAgo.toISOString().split('T')[0]
+
+  const totalResult = await db
+    .select({ count: count() })
+    .from(galleriesTable)
+    .where(
+      or(
+        isNull(galleriesTable.updated_at),
+        lt(galleriesTable.updated_at, thresholdDate),
+      ),
+    )
+    .get()
+
+  console.log(`Total galleries needing update: ${totalResult?.count ?? 0}`)
 
   // 查询 updated_at 为空 或者 updated_at 早于一个月前的 gallery，限制 5 条
   // SQLite 中 NULL 比任何值都小，所以 ASC 排序时 NULL 会排在最前面
