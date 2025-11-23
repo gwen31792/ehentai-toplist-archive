@@ -39,7 +39,7 @@
     "producers": [
       {
         "queue": "ehentai-toplist-archive",
-        "binding": "ehentai-toplist-archive"
+        "binding": "QUEUE"
       }
     ],
     "consumers": [

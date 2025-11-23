@@ -13,12 +13,12 @@ export default {
     switch (controller.cron) {
       case '0 1 * * *':
         // 每天 1 点执行的任务
-        tasks.push(env['ehentai-toplist-archive'].send(CRAWL_QUEUE_MESSAGE))
-        tasks.push(env['ehentai-toplist-archive'].send(CRAWL_TAGS_TRANSLATION_MESSAGE))
+        tasks.push(env.QUEUE.send(CRAWL_QUEUE_MESSAGE))
+        tasks.push(env.QUEUE.send(CRAWL_TAGS_TRANSLATION_MESSAGE))
         break
       case '0 * * * *':
         // 每小时执行的任务
-        tasks.push(env['ehentai-toplist-archive'].send(UPDATE_GALLERY_TAGS_MESSAGE))
+        tasks.push(env.QUEUE.send(UPDATE_GALLERY_TAGS_MESSAGE))
         break
     }
 

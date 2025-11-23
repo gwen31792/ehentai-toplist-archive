@@ -295,7 +295,7 @@ export async function handleToplistCrawling(env: Env): Promise<void> {
     if (error instanceof TemporaryBanError) {
       console.warn('Toplist crawling halted due to temporary IP ban; scheduling retry.', error.context)
       try {
-        await env['ehentai-toplist-archive'].send(CRAWL_QUEUE_MESSAGE, {
+        await env.QUEUE.send(CRAWL_QUEUE_MESSAGE, {
           delaySeconds: RECOVERY_RETRY_DELAY_SECONDS,
         })
         console.info('Re-enqueued toplist crawl after temporary ban.', {
