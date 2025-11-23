@@ -41,6 +41,9 @@ export async function crawlToplistPage(env: Env, period_type: ToplistType, url: 
       console.error('Received temporary ban response while crawling toplist.', {
         requestUrl: url,
         period_type,
+        status: response.status,
+        headers: Object.fromEntries(response.headers),
+        responseBody: data,
       })
 
       throw new TemporaryBanError('Temporary IP ban encountered while crawling toplist.', {
