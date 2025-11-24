@@ -190,17 +190,29 @@ export function DataTable({ data, loading }: DataTableProps) {
     }),
     columnHelper.accessor('preview_url', {
       header: () => t('headers.preview_url'),
-      cell: info => (
-        <CellWrapper>
-          <div className="w-full">
-            <ImageWithSkeleton
-              src={info.getValue()}
-              alt="预览图"
-              className="w-full rounded"
-            />
-          </div>
-        </CellWrapper>
-      ),
+      cell: (info) => {
+        const url = info.getValue()
+        if (url === 'unavailable') {
+          return (
+            <CellWrapper>
+              <div className="flex aspect-3/4 w-full items-center justify-center rounded bg-zinc-100 text-xs text-zinc-400 dark:bg-zinc-800">
+                No Preview
+              </div>
+            </CellWrapper>
+          )
+        }
+        return (
+          <CellWrapper>
+            <div className="w-full">
+              <ImageWithSkeleton
+                src={url}
+                alt="预览图"
+                className="w-full rounded"
+              />
+            </div>
+          </CellWrapper>
+        )
+      },
       size: 120,
     }),
     columnHelper.accessor('gallery_name', {
@@ -208,8 +220,9 @@ export function DataTable({ data, loading }: DataTableProps) {
       cell: (info) => {
         const isPreviewColumnVisible = info.table.getColumn('preview_url')?.getIsVisible() ?? true
         const previewUrl = info.row.original.preview_url
+        const hasPreview = previewUrl && previewUrl !== 'unavailable'
 
-        if (isPreviewColumnVisible || !previewUrl) {
+        if (isPreviewColumnVisible || !hasPreview) {
           return (
             <CellWrapper>
               <Link

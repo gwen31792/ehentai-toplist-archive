@@ -2,7 +2,7 @@ import { parse, isValid, isAfter, isBefore, startOfDay } from 'date-fns'
 
 import { TOPLIST_PERIOD_TYPES, type ToplistType } from './types'
 
-const MIN_DATE = new Date('2023-11-15')
+const MIN_DATE = new Date(2023, 10, 15) // 2023-11-15
 const MAX_DATE = startOfDay(new Date())
 
 /**
