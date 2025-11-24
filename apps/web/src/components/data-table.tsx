@@ -375,14 +375,8 @@ export function DataTable({ data, loading }: DataTableProps) {
         setPageIndex(next.pageIndex)
       }
     },
-    onColumnVisibilityChange: (updater) => {
-      const next = typeof updater === 'function' ? updater(columnVisibility) : updater
-      setColumnVisibility(next)
-    },
-    onColumnSizingChange: (updater) => {
-      const next = typeof updater === 'function' ? updater(columnSizing) : updater
-      setColumnSizing(next)
-    },
+    onColumnVisibilityChange: setColumnVisibility,
+    onColumnSizingChange: setColumnSizing,
     onColumnFiltersChange: setColumnFilters,
     columnResizeMode: 'onChange',
     state: {
@@ -408,6 +402,7 @@ export function DataTable({ data, loading }: DataTableProps) {
     <div className="mx-auto mt-8 w-full max-w-[95%]">
       <TableHeaderControls
         table={table}
+        columnVisibility={columnVisibility}
         selectedTags={selectedTags}
         extractedTags={extractedTags}
         tagFilterMode={tagFilterMode}

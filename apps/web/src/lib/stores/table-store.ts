@@ -19,8 +19,8 @@ interface TableState {
 
   // actions
   setPageSize: (pageSize: number) => void
-  setColumnVisibility: (columnVisibility: VisibilityState) => void
-  setColumnSizing: (columnSizing: ColumnSizingState) => void
+  setColumnVisibility: (updaterOrValue: VisibilityState | ((old: VisibilityState) => VisibilityState)) => void
+  setColumnSizing: (updaterOrValue: ColumnSizingState | ((old: ColumnSizingState) => ColumnSizingState)) => void
   setTagFilterMode: (mode: TagFilterMode) => void
   setHasHydrated: (hydrated: boolean) => void
 }
@@ -49,8 +49,18 @@ export const useTableStore = create<TableState>()(
       hasHydrated: false,
 
       setPageSize: pageSize => set({ pageSize }),
-      setColumnVisibility: columnVisibility => set({ columnVisibility }),
-      setColumnSizing: columnSizing => set({ columnSizing }),
+      setColumnVisibility: updaterOrValue => set((state) => {
+        const columnVisibility = typeof updaterOrValue === 'function'
+          ? updaterOrValue(state.columnVisibility)
+          : updaterOrValue
+        return { columnVisibility }
+      }),
+      setColumnSizing: updaterOrValue => set((state) => {
+        const columnSizing = typeof updaterOrValue === 'function'
+          ? updaterOrValue(state.columnSizing)
+          : updaterOrValue
+        return { columnSizing }
+      }),
       setTagFilterMode: mode => set({ tagFilterMode: mode }),
       setHasHydrated: hydrated => set({ hasHydrated: hydrated }),
     }),

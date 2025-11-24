@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 
-import { Table } from '@tanstack/react-table'
+import { Table, VisibilityState } from '@tanstack/react-table'
 import { Settings, Filter } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
@@ -20,6 +20,7 @@ type TagFilterMode = 'or' | 'and'
 
 interface TableHeaderControlsProps<TData> {
   table: Table<TData>
+  columnVisibility: VisibilityState
   selectedTags: Set<string>
   extractedTags: string[]
   tagFilterMode: TagFilterMode
@@ -32,6 +33,7 @@ interface TableHeaderControlsProps<TData> {
 
 export function TableHeaderControls<TData>({
   table,
+  columnVisibility,
   selectedTags,
   extractedTags,
   tagFilterMode,
@@ -217,13 +219,13 @@ export function TableHeaderControls<TData>({
                 {table.getAllColumns().filter(column => column.getCanHide()).map(column => (
                   <div key={column.id} className="flex items-center space-x-2">
                     <Switch
-                      id={column.id}
-                      checked={column.getIsVisible()}
+                      id={`col-toggle-${column.id}`}
+                      checked={columnVisibility[column.id] ?? true}
                       onCheckedChange={value => column.toggleVisibility(!!value)}
                       className="data-[state=checked]:bg-zinc-900 dark:data-[state=checked]:bg-zinc-100"
                     />
                     <label
-                      htmlFor={column.id}
+                      htmlFor={`col-toggle-${column.id}`}
                       className="text-sm font-normal text-zinc-700 dark:text-zinc-300 cursor-pointer"
                     >
                       {t(`headers.${column.id}`) || column.id}
