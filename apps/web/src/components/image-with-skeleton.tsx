@@ -18,7 +18,7 @@ export function ImageWithSkeleton({ src, alt, className }: ImageWithSkeletonProp
   return (
     <div className="relative">
       {!imageLoaded && (
-        <Skeleton className="aspect-[3/4] w-full bg-gray-200 dark:bg-gray-700" />
+        <Skeleton className="aspect-3/4 w-full bg-gray-200 dark:bg-gray-700" />
       )}
       <Image
         src={src}

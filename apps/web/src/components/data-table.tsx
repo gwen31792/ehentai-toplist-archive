@@ -172,7 +172,7 @@ export function DataTable({ data, loading }: DataTableProps) {
   }, [memoData])
 
   const CellWrapper = ({ children }: { children: React.ReactNode }) => (
-    <div className="whitespace-normal break-words text-sm">
+    <div className="whitespace-normal break-all text-sm">
       {children}
     </div>
   )
@@ -245,7 +245,7 @@ export function DataTable({ data, loading }: DataTableProps) {
                     href={info.row.original.gallery_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block w-full break-words"
+                    className="block w-full break-all"
                   >
                     {info.getValue()}
                   </Link>
