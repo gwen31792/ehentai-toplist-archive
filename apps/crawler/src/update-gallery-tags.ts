@@ -88,13 +88,19 @@ export async function handleUpdateGalleryTags(env: Env): Promise<void> {
 
       console.log(`Parsed tags for gallery ${gallery.gallery_id}:`, tags)
 
+      // 从 KV 中批量读取标签翻译
+      const tagsZh = await translateTags(env.KV, tags)
+      console.log(`Translated tags for gallery ${gallery.gallery_id}:`, tagsZh)
+
       const tagsString = tags.join(', ')
+      const tagsZhString = tagsZh.join(', ')
       const now = new Date().toISOString().split('T')[0]
 
       await db
         .update(galleriesTable)
         .set({
           tags: tagsString,
+          tags_zh: tagsZhString,
           updated_at: now,
         })
         .where(eq(galleriesTable.gallery_id, gallery.gallery_id))
@@ -129,4 +135,43 @@ function parseGalleryTags(html: string): string[] {
   })
 
   return tags
+}
+
+/**
+ * 从 KV 中批量读取标签翻译
+ * @param kv KV namespace binding
+ * @param tags 原始标签数组（格式：prefix:tag）
+ * @returns 翻译后的标签数组，未找到翻译的标签保留原值
+ */
+async function translateTags(kv: KVNamespace, tags: string[]): Promise<string[]> {
+  if (tags.length === 0) {
+    return []
+  }
+
+  // 批量读取翻译（每次最多 100 个）
+  const BATCH_SIZE = 100
+  const translationMap = new Map<string, string>()
+
+  for (let i = 0; i < tags.length; i += BATCH_SIZE) {
+    const batchKeys = tags.slice(i, i + BATCH_SIZE)
+    const batchResult = await kv.get(batchKeys, 'text')
+
+    for (const [key, value] of batchResult.entries()) {
+      if (value !== null) {
+        translationMap.set(key, value)
+      }
+    }
+  }
+
+  // 构建翻译后的标签数组
+  return tags.map((tag) => {
+    const translation = translationMap.get(tag)
+    if (translation) {
+      // 提取 namespace 前缀
+      const colonIndex = tag.indexOf(':')
+      const namespace = colonIndex > -1 ? tag.substring(0, colonIndex) : ''
+      return namespace ? `${namespace}:${translation}` : translation
+    }
+    return tag
+  })
 }
