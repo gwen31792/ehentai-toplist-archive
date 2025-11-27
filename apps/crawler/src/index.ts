@@ -19,7 +19,7 @@ export default {
         // 每天 13 点执行的任务
         tasks.push(env.QUEUE.send(CRAWL_TAGS_TRANSLATION_MESSAGE))
         break
-      case '21 * * * *':
+      case '21,51 * * * *':
         // 每小时执行的任务
         tasks.push(env.QUEUE.send(UPDATE_GALLERY_TAGS_MESSAGE))
         break
