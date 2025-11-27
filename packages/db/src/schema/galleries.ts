@@ -5,6 +5,7 @@ export const galleriesTable = sqliteTable('galleries', {
   gallery_name: text().notNull(),
   gallery_type: text().notNull(),
   tags: text().notNull(),
+  tags_zh: text(),
   published_time: text().notNull(),
   uploader: text().notNull(),
   gallery_length: int().notNull(),
