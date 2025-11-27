@@ -139,10 +139,10 @@ function parseGalleryTags(html: string): string[] {
     const namespace = NAMESPACE_ABBREVIATIONS[namespaceText] ?? namespaceText
 
     // 对于每个 namespace，优先使用 .gt 标签
-    // 如果该 namespace 下没有 .gt 标签，则回退使用 .gt1 标签
-    // 这是因为有些 gallery 页面只有 .gt1 标签
+    // 如果该 namespace 下没有 .gt 标签，则回退使用 .gtl 标签
+    // 这是因为有些 gallery 页面只有 .gtl 标签
     const gtDivs = $(tr).find('td').not('.tc').find('div.gt')
-    const targetDivs = gtDivs.length > 0 ? gtDivs : $(tr).find('td').not('.tc').find('div.gt1')
+    const targetDivs = gtDivs.length > 0 ? gtDivs : $(tr).find('td').not('.tc').find('div.gtl')
 
     targetDivs.each((_, div) => {
       const tag = $(div).find('a').text().trim()
