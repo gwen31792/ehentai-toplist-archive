@@ -55,7 +55,11 @@ export async function handleUpdateGalleryTags(env: Env): Promise<void> {
     console.log(`Processing gallery: ${gallery.gallery_id} - ${gallery.gallery_url}`)
 
     try {
-      const response = await cfFetch(env, gallery.gallery_url)
+      const response = await cfFetch(env, gallery.gallery_url, {
+        headers: {
+          Cookie: 'nw=1',
+        },
+      })
 
       if (!response.ok) {
         console.error(`Failed to fetch gallery page: ${response.status} ${response.statusText}`)
