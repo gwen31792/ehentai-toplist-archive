@@ -62,16 +62,17 @@ export async function handleUpdateGalleryTags(env: Env): Promise<void> {
       })
 
       if (!response.ok) {
-        console.error(`Failed to fetch gallery page: ${response.status} ${response.statusText}`)
-
         // 如果画廊不存在 (404) 或已删除 (410)，更新 updated_at 以避免重复重试
         if (response.status === 404 || response.status === 410) {
-          console.warn(`Gallery ${gallery.gallery_id} is gone. Updating timestamp to skip future checks.`)
+          console.warn(`Gallery ${gallery.gallery_id} is gone (${response.status}). Updating timestamp to skip future checks.`)
           // 使用当前时间更新，避免死循环
           await db
             .update(galleriesTable)
             .set({ updated_at: new Date().toISOString().split('T')[0] })
             .where(eq(galleriesTable.gallery_id, gallery.gallery_id))
+        }
+        else {
+          console.error(`Failed to fetch gallery page: ${response.status} ${response.statusText}`)
         }
 
         continue
@@ -89,6 +90,13 @@ export async function handleUpdateGalleryTags(env: Env): Promise<void> {
       }
 
       const tags = parseGalleryTags(html)
+
+      // 如果解析不到任何标签，可能类似 Offensive For Everyone 页面
+      // 例子：https://e-hentai.org/g/508505/6b3c6730f0/
+      if (tags.length === 0) {
+        console.error(`No tags found for gallery ${gallery.gallery_id}.`)
+        continue
+      }
 
       console.log(`Parsed tags for gallery ${gallery.gallery_id}:`, tags)
 
