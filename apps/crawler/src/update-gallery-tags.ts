@@ -140,9 +140,12 @@ function parseGalleryTags(html: string): string[] {
 
     // 对于每个 namespace，优先使用 .gt 标签
     // 如果该 namespace 下没有 .gt 标签，则回退使用 .gtl 标签
-    // 这是因为有些 gallery 页面只有 .gtl 标签
-    const gtDivs = $(tr).find('td').not('.tc').find('div.gt')
-    const targetDivs = gtDivs.length > 0 ? gtDivs : $(tr).find('td').not('.tc').find('div.gtl')
+    // 如果还没有，则回退使用 .gtw 标签
+    const tagCell = $(tr).find('td').not('.tc')
+    const gtDivs = tagCell.find('div.gt')
+    const gtlDivs = tagCell.find('div.gtl')
+    const gtwDivs = tagCell.find('div.gtw')
+    const targetDivs = gtDivs.length > 0 ? gtDivs : (gtlDivs.length > 0 ? gtlDivs : gtwDivs)
 
     targetDivs.each((_, div) => {
       const tag = $(div).find('a').text().trim()
