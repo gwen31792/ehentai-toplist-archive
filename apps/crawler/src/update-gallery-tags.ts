@@ -89,6 +89,16 @@ export async function handleUpdateGalleryTags(env: Env): Promise<void> {
         })
       }
 
+      // 如果画廊页面显示 "Gallery not found."，只更新 updated_at
+      if (html.includes('Gallery not found.')) {
+        console.warn(`Gallery ${gallery.gallery_id} not found. Updating timestamp only.`)
+        await db
+          .update(galleriesTable)
+          .set({ updated_at: new Date().toISOString().split('T')[0] })
+          .where(eq(galleriesTable.gallery_id, gallery.gallery_id))
+        continue
+      }
+
       const tags = parseGalleryTags(html)
 
       // 如果解析不到任何标签，可能类似 Offensive For Everyone 页面
