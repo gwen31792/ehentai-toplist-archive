@@ -3,7 +3,7 @@ import * as cheerio from 'cheerio'
 import { asc, count, eq, isNull, lt, or } from 'drizzle-orm'
 
 import { TemporaryBanError } from './types'
-import { cfFetch, delay, getDbClient, NAMESPACE_ABBREVIATIONS } from './utils'
+import { delay, ehentaiFetch, getDbClient, NAMESPACE_ABBREVIATIONS } from './utils'
 
 export const UPDATE_GALLERY_TAGS_MESSAGE = 'update-gallery-tags'
 
@@ -55,11 +55,7 @@ export async function handleUpdateGalleryTags(env: Env): Promise<void> {
     console.log(`Processing gallery: ${gallery.gallery_id} - ${gallery.gallery_url}`)
 
     try {
-      const response = await cfFetch(env, gallery.gallery_url, {
-        headers: {
-          Cookie: 'nw=1',
-        },
-      })
+      const response = await ehentaiFetch(env, gallery.gallery_url)
 
       if (!response.ok) {
         // 如果画廊不存在 (404) 或已删除 (410)，更新 updated_at 以避免重复重试

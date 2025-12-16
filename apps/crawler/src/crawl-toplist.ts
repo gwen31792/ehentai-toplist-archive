@@ -4,14 +4,14 @@ import { isNull } from 'drizzle-orm'
 import { DrizzleQueryError } from 'drizzle-orm/errors'
 
 import { AbortCrawlError, type CrawlResult, type GalleryItem, TemporaryBanError, type ToplistItem } from './types'
-import { cfFetch, delay, getDbClient, logCloudflareExecutionInfo } from './utils'
+import { delay, ehentaiFetch, getDbClient, logCloudflareExecutionInfo } from './utils'
 
 export const CRAWL_QUEUE_MESSAGE = 'crawl-toplists'
 const RECOVERY_RETRY_DELAY_SECONDS = 3600
 
 export async function crawlToplistPage(env: Env, period_type: ToplistType, url: string): Promise<void> {
   try {
-    const response = await cfFetch(env, url, { method: 'GET' })
+    const response = await ehentaiFetch(env, url, { method: 'GET' })
 
     if (response.status === 451) {
       // Cloudflare 会在 451 时返回受限地区信息，额外记录 trace 以判断是否因英国地区触发的封锁。

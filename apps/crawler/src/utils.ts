@@ -98,3 +98,32 @@ export async function cfFetch(env: Env, url: string, init?: RequestInit): Promis
   const proxyUrl = `https://internal/fetch-proxy?to=${encodeURIComponent(url)}`
   return stub.fetch(proxyUrl, init)
 }
+
+// 构建 e-hentai.org 请求所需的 cookie 字符串
+export function buildEhentaiCookie(env: Env, additionalCookies?: string): string {
+  const cookies: string[] = []
+
+  if (env.IPB_MEMBER_ID) {
+    cookies.push(`ipb_member_id=${env.IPB_MEMBER_ID}`)
+  }
+  if (env.STAR) {
+    cookies.push(`star=${env.STAR}`)
+  }
+  if (additionalCookies) {
+    cookies.push(additionalCookies)
+  }
+
+  return cookies.join('; ')
+}
+
+// 访问 e-hentai.org 的封装函数，自动带上认证 cookie
+export async function ehentaiFetch(env: Env, url: string, init?: RequestInit): Promise<Response> {
+  const cookie = buildEhentaiCookie(env, 'nw=1')
+  const headers = new Headers(init?.headers)
+  headers.set('Cookie', cookie)
+
+  return cfFetch(env, url, {
+    ...init,
+    headers,
+  })
+}
