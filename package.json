@@ -6,21 +6,21 @@
   "scripts": {},
   "private": true,
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20251120.0",
-    "@eslint/js": "^9.39.1",
-    "@next/eslint-plugin-next": "^16.0.7",
-    "@nx/esbuild": "22.1.0",
-    "@nx/eslint": "22.1.0",
-    "@nx/eslint-plugin": "22.1.0",
-    "@nx/js": "22.1.0",
-    "@nx/next": "22.1.0",
-    "@nx/node": "22.1.0",
-    "@nx/workspace": "22.1.0",
+    "@cloudflare/workers-types": "^4.20251225.0",
+    "@eslint/js": "^9.39.2",
+    "@next/eslint-plugin-next": "^16.1.1",
+    "@nx/esbuild": "22.3.1",
+    "@nx/eslint": "22.3.1",
+    "@nx/eslint-plugin": "22.3.1",
+    "@nx/js": "22.3.1",
+    "@nx/next": "22.3.1",
+    "@nx/node": "22.3.1",
+    "@nx/workspace": "22.3.1",
     "@stylistic/eslint-plugin": "^5.6.1",
     "@swc-node/register": "~1.11.1",
     "@swc/core": "~1.15.2",
     "@swc/helpers": "~0.5.17",
-    "@types/node": "^24.10.1",
+    "@types/node": "^24.10.4",
     "drizzle-kit": "^0.31.7",
     "esbuild": "^0.27.0",
     "eslint": "^9.39.1",
@@ -29,14 +29,14 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "globals": "^16.5.0",
-    "nx": "22.1.0",
+    "nx": "22.3.1",
     "tslib": "^2.8.1",
-    "tsx": "^4.20.6",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.47.0",
-    "wrangler": "^4.49.0"
+    "typescript-eslint": "^8.50.1",
+    "wrangler": "^4.54.0"
   },
   "dependencies": {
-    "drizzle-orm": "^0.44.7"
+    "drizzle-orm": "^0.45.1"
   }
 }
