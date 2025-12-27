@@ -191,7 +191,7 @@ export function DataTable({ data, loading }: DataTableProps) {
     columnHelper.accessor('preview_url', {
       header: () => t('headers.preview_url'),
       cell: (info) => {
-        const url = info.getValue()
+        const url = info.getValue() as string
         if (url === 'unavailable') {
           return (
             <CellWrapper>
@@ -226,7 +226,7 @@ export function DataTable({ data, loading }: DataTableProps) {
           return (
             <CellWrapper>
               <Link
-                href={info.row.original.gallery_url}
+                href={info.row.original.gallery_url as string}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -242,7 +242,7 @@ export function DataTable({ data, loading }: DataTableProps) {
               <HoverCardTrigger asChild>
                 <div className="w-full">
                   <Link
-                    href={info.row.original.gallery_url}
+                    href={info.row.original.gallery_url as string}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block w-full break-all"
@@ -255,7 +255,7 @@ export function DataTable({ data, loading }: DataTableProps) {
               <HoverCardContent side="left" className="p-1">
                 <ImageWithSkeleton
                   src={previewUrl}
-                  alt={info.getValue()}
+                  alt={info.getValue() as string}
                 />
               </HoverCardContent>
             </HoverCard>
@@ -341,7 +341,7 @@ export function DataTable({ data, loading }: DataTableProps) {
           {info.getValue()
             ? (
                 <Link
-                  href={info.getValue()}
+                  href={info.getValue() as string}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="link-hover-underline text-blue-600 dark:text-blue-400"
