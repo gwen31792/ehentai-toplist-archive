@@ -199,7 +199,7 @@ async function storeToplistData(env: Env, galleries: GalleryItem[], toplistItems
           preview_url: gallery.preview_url,
           gallery_url: gallery.gallery_url,
         },
-        // 仅当 updated_at 为空时才更新，防止覆盖已被 update-gallery-tags 任务更新过的详细数据（如完整 tags）
+        // 仅当 updated_at 为空时才更新，防止覆盖已被 update-gallery 任务更新过的详细数据（如完整 tags）
         where: isNull(galleriesTable.updated_at),
       }),
     )

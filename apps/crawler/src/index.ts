@@ -1,6 +1,6 @@
 import { CRAWL_TAGS_TRANSLATION_MESSAGE, handleTagsTranslationCrawling } from './crawl-tags-translation'
 import { CRAWL_QUEUE_MESSAGE, handleToplistCrawling } from './crawl-toplist'
-import { UPDATE_GALLERY_TAGS_MESSAGE, handleUpdateGalleryTags } from './update-gallery-tags'
+import { UPDATE_GALLERY_MESSAGE, handleUpdateGallery } from './update-gallery'
 
 export default {
   async fetch(): Promise<Response> {
@@ -21,7 +21,7 @@ export default {
         break
       case '0 11 * * *':
         // 每天 11 点执行的任务
-        tasks.push(env.QUEUE.send(UPDATE_GALLERY_TAGS_MESSAGE))
+        tasks.push(env.QUEUE.send(UPDATE_GALLERY_MESSAGE))
         break
     }
 
@@ -51,12 +51,12 @@ export default {
           }
           break
 
-        case UPDATE_GALLERY_TAGS_MESSAGE:
+        case UPDATE_GALLERY_MESSAGE:
           try {
-            await handleUpdateGalleryTags(env)
+            await handleUpdateGallery(env)
           }
           catch (error) {
-            console.error('Failed to process update gallery tags queue message.', error)
+            console.error('Failed to process update gallery queue message.', error)
           }
           break
 

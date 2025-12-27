@@ -5,10 +5,10 @@ import { asc, count, eq, isNull, lt, or } from 'drizzle-orm'
 import { TemporaryBanError } from './types'
 import { delay, ehentaiFetch, getDbClient, NAMESPACE_ABBREVIATIONS } from './utils'
 
-export const UPDATE_GALLERY_TAGS_MESSAGE = 'update-gallery-tags'
+export const UPDATE_GALLERY_MESSAGE = 'update-gallery'
 
-export async function handleUpdateGalleryTags(env: Env): Promise<void> {
-  console.log('Update gallery tags task started.')
+export async function handleUpdateGallery(env: Env): Promise<void> {
+  console.log('Update gallery task started.')
   const db = getDbClient(env)
 
   // 计算一个月前的日期
@@ -78,8 +78,8 @@ export async function handleUpdateGalleryTags(env: Env): Promise<void> {
       console.log(`Fetched page content, length: ${html.length}`)
 
       if (html.includes('This IP address has been temporarily banned')) {
-        console.error('Temporary ban detected. Stopping update-gallery-tags task.')
-        throw new TemporaryBanError('Temporary IP ban encountered while updating gallery tags.', {
+        console.error('Temporary ban detected. Stopping update-gallery task.')
+        throw new TemporaryBanError('Temporary IP ban encountered while updating gallery.', {
           gallery_id: gallery.gallery_id,
           gallery_url: gallery.gallery_url,
         })
@@ -95,31 +95,23 @@ export async function handleUpdateGalleryTags(env: Env): Promise<void> {
         continue
       }
 
-      const tags = parseGalleryTags(html)
-
-      // 如果解析不到任何标签，可能类似 Offensive For Everyone 页面
-      // 例子：https://e-hentai.org/g/508505/6b3c6730f0/
-      if (tags.length === 0) {
-        console.error(`No tags found for gallery ${gallery.gallery_id}.`)
-        continue
-      }
+      const tags = parseGalleryTags(html, gallery.gallery_id)
+      const galleryType = parseGalleryType(html)
 
       console.log(`Parsed tags for gallery ${gallery.gallery_id}:`, tags)
+      console.log(`Parsed gallery type for gallery ${gallery.gallery_id}:`, galleryType)
 
       // 从 KV 中批量读取标签翻译
       const tagsZh = await translateTags(env.KV, tags)
       console.log(`Translated tags for gallery ${gallery.gallery_id}:`, tagsZh)
 
-      const tagsString = tags.join(', ')
-      const tagsZhString = tagsZh.join(', ')
-      const now = new Date().toISOString().split('T')[0]
-
       await db
         .update(galleriesTable)
         .set({
-          tags: tagsString,
-          tags_zh: tagsZhString,
-          updated_at: now,
+          ...(tags && { tags }),
+          ...(tagsZh && { tags_zh: tagsZh }),
+          ...(galleryType && { gallery_type: galleryType }),
+          updated_at: new Date().toISOString().split('T')[0],
         })
         .where(eq(galleriesTable.gallery_id, gallery.gallery_id))
 
@@ -128,7 +120,7 @@ export async function handleUpdateGalleryTags(env: Env): Promise<void> {
     }
     catch (error) {
       if (error instanceof TemporaryBanError) {
-        console.warn('Update gallery tags task terminated early due to temporary IP ban.', error.context)
+        console.warn('Update gallery task terminated early due to temporary IP ban.', error.context)
         return
       }
       console.error(`Error processing gallery ${gallery.gallery_id}:`, error)
@@ -136,7 +128,13 @@ export async function handleUpdateGalleryTags(env: Env): Promise<void> {
   }
 }
 
-function parseGalleryTags(html: string): string[] {
+function parseGalleryType(html: string): string | null {
+  const $ = cheerio.load(html)
+  const galleryType = $('#gdc > div').first().text().trim()
+  return galleryType || null
+}
+
+function parseGalleryTags(html: string, galleryId: number): string | null {
   const $ = cheerio.load(html)
   const tags: string[] = []
 
@@ -161,19 +159,28 @@ function parseGalleryTags(html: string): string[] {
     })
   })
 
-  return tags
+  if (tags.length === 0) {
+    // 可能是 gallery 过于小众，需要手动给它们加个 tag
+    // 例子：https://e-hentai.org/g/508505/6b3c6730f0/
+    console.error(`No tags found for gallery ${galleryId}.`)
+    return null
+  }
+
+  return tags.join(', ')
 }
 
 /**
  * 从 KV 中批量读取标签翻译
  * @param kv KV namespace binding
- * @param tags 原始标签数组（格式：prefix:tag）
- * @returns 翻译后的标签数组，未找到翻译的标签保留原值
+ * @param tagsString 原始标签字符串（格式：prefix:tag, prefix:tag, ...）
+ * @returns 翻译后的标签字符串，未找到翻译的标签保留原值
  */
-async function translateTags(kv: KVNamespace, tags: string[]): Promise<string[]> {
-  if (tags.length === 0) {
-    return []
+async function translateTags(kv: KVNamespace, tagsString: string | null): Promise<string | null> {
+  if (!tagsString) {
+    return null
   }
+
+  const tags = tagsString.split(', ')
 
   // 批量读取翻译（每次最多 100 个）
   const BATCH_SIZE = 100
@@ -191,7 +198,7 @@ async function translateTags(kv: KVNamespace, tags: string[]): Promise<string[]>
   }
 
   // 构建翻译后的标签数组
-  return tags.map((tag) => {
+  const translatedTags = tags.map((tag) => {
     const translation = translationMap.get(tag)
     if (translation) {
       // 提取 namespace 前缀
@@ -201,4 +208,6 @@ async function translateTags(kv: KVNamespace, tags: string[]): Promise<string[]>
     }
     return tag
   })
+
+  return translatedTags.join(', ')
 }
