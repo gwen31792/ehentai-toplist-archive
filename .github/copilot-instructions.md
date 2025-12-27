@@ -3,7 +3,7 @@
 Next.js 15 + React 19 archive for E-Hentai toplists with bilingual UI, deployed through `@opennextjs/cloudflare` onto Cloudflare Workers; data persists in D1 via the shared Drizzle package.
 ### Architecture snapshot
 - Nx workspace hosting `apps/web` (Next App Router edge site), `apps/crawler` (scheduled worker), and `packages/db` (Drizzle schema/types).
-- Daily crawler writes toplist rows into per-year tables (`toplist_items_2023|2024|2025`) plus `galleries`; UI fetches `/api/data` to join and render via a TanStack table.
+- Daily crawler writes toplist rows into per-year tables (`toplist_items_2023|2024|2025|2026`) plus `galleries`; UI fetches `/api/data` to join and render via a TanStack table.
 - OpenNext config (`apps/web/open-next.config.ts`) enables Cloudflare incremental cache; remote bindings activate in `next.config.ts` through `initOpenNextCloudflareForDev`.
 ### Runtime guardrails
 - Cloudflare Workers runtime only: no Node.js APIs (fs, crypto callbacks, etc.); database binding is `env.DB`.

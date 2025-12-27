@@ -8,13 +8,14 @@ const createToplistItemsTable = (year: number) =>
     period_type: text().notNull(),
   })
 
-export const SUPPORTED_TOPLIST_YEARS = [2023, 2024, 2025] as const
+export const SUPPORTED_TOPLIST_YEARS = [2023, 2024, 2025, 2026] as const
 export type SupportedToplistYear = typeof SUPPORTED_TOPLIST_YEARS[number]
 
 const toplistItemsTables = {
   2023: createToplistItemsTable(2023),
   2024: createToplistItemsTable(2024),
   2025: createToplistItemsTable(2025),
+  2026: createToplistItemsTable(2026),
 } satisfies Record<SupportedToplistYear, ReturnType<typeof createToplistItemsTable>>
 
 type ToplistItemsTableMap = typeof toplistItemsTables
