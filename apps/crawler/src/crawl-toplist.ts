@@ -210,6 +210,8 @@ async function storeToplistData(env: Env, galleries: GalleryItem[], toplistItems
       await db.batch(galleryStatements)
     }
     catch (error) {
+      // 注意：D1 超时错误（如 "D1 DB storage operation exceeded timeout"）通常是假阳性。
+      // D1 的超时只影响客户端等待响应，实际写入操作可能已在后台完成并持久化。
       if (error instanceof DrizzleQueryError) {
         console.error(
           `Failed to batch upsert ${galleryStatements.length} galleries:`,
@@ -243,6 +245,9 @@ async function storeToplistData(env: Env, galleries: GalleryItem[], toplistItems
         await db.batch(toplistStatements)
       }
       catch (error) {
+        // 注意：D1 超时错误（如 "D1 DB storage operation exceeded timeout"）通常是假阳性。
+        // D1 的超时只影响客户端等待响应，实际写入操作可能已在后台完成并持久化。
+        // 由于使用了 onConflictDoNothing()，即使重试也不会导致数据重复。
         const sample = toplistItems[0]
         if (error instanceof DrizzleQueryError) {
           console.error(

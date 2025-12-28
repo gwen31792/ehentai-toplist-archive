@@ -140,11 +140,13 @@ export async function handleUpdateGallery(env: Env): Promise<void> {
         return
       }
       if (error instanceof DrizzleQueryError) {
+        const cause = error.cause as Error | undefined
         console.error(`Drizzle error processing gallery ${gallery.gallery_id}:`, {
           message: error.message,
           query: error.query,
           params: error.params,
-          cause: error.cause,
+          causeMessage: cause?.message,
+          causeStack: cause?.stack,
         })
         continue
       }
