@@ -11,7 +11,7 @@
     "crons": [
       "0 1 * * *", // Toplist crawling
       "0 13 * * *", // Tags translation crawling
-      "0 11 * * *" // Update gallery tags
+      "0 10 * * *" // Update gallery tags
     ]
   },
   "observability": {

@@ -1,6 +1,7 @@
 import { galleriesTable } from '@ehentai-toplist-archive/db'
 import * as cheerio from 'cheerio'
 import { asc, count, eq, isNull, lt, or } from 'drizzle-orm'
+import { DrizzleQueryError } from 'drizzle-orm/errors'
 
 import { TemporaryBanError } from './types'
 import { delay, ehentaiFetch, getDbClient, NAMESPACE_ABBREVIATIONS } from './utils'
@@ -137,6 +138,15 @@ export async function handleUpdateGallery(env: Env): Promise<void> {
       if (error instanceof TemporaryBanError) {
         console.warn('Update gallery task terminated early due to temporary IP ban.', error.context)
         return
+      }
+      if (error instanceof DrizzleQueryError) {
+        console.error(`Drizzle error processing gallery ${gallery.gallery_id}:`, {
+          message: error.message,
+          query: error.query,
+          params: error.params,
+          cause: error.cause,
+        })
+        continue
       }
       console.error(`Error processing gallery ${gallery.gallery_id}:`, error)
     }
