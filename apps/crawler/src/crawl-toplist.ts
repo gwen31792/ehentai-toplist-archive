@@ -182,6 +182,8 @@ async function storeToplistData(env: Env, galleries: GalleryItem[], toplistItems
   }
 
   const db = getDbClient(env)
+  // D1 批量写入容易超时，使用较小的批次大小
+  const GALLERY_BATCH_SIZE = 10
 
   if (galleries.length > 0) {
     const galleryStatements = galleries.map(gallery =>
@@ -204,26 +206,32 @@ async function storeToplistData(env: Env, galleries: GalleryItem[], toplistItems
       }),
     )
 
-    try {
-      // cloudflare workers subrequest limit is 1000
-      // 所以不能一条一条发请求，打包起来发能解决这个问题
-      await db.batch(galleryStatements)
-    }
-    catch (error) {
-      // 注意：D1 超时错误（如 "D1 DB storage operation exceeded timeout"）通常是假阳性。
-      // D1 的超时只影响客户端等待响应，实际写入操作可能已在后台完成并持久化。
-      if (error instanceof DrizzleQueryError) {
-        console.error(
-          `Failed to batch upsert ${galleryStatements.length} galleries:`,
-          error,
-          error.cause,
-        )
+    // 分批写入以避免 D1 超时
+    for (let i = 0; i < galleryStatements.length; i += GALLERY_BATCH_SIZE) {
+      const batch = galleryStatements.slice(i, i + GALLERY_BATCH_SIZE)
+      try {
+        // cloudflare workers subrequest limit is 1000
+        // 所以不能一条一条发请求，打包起来发能解决这个问题
+        await db.batch(batch)
       }
-      else {
-        console.error(`Failed to batch upsert ${galleryStatements.length} galleries:`, error)
+      catch (error) {
+        // 注意：D1 超时错误（如 "D1 DB storage operation exceeded timeout"）通常是假阳性。
+        // D1 的超时只影响客户端等待响应，实际写入操作可能已在后台完成并持久化。
+        if (error instanceof DrizzleQueryError) {
+          console.error(
+            `Failed to batch upsert galleries (batch ${Math.floor(i / GALLERY_BATCH_SIZE) + 1}, ${batch.length} items):`,
+            error,
+            error.cause,
+          )
+        }
+        else {
+          console.error(`Failed to batch upsert galleries (batch ${Math.floor(i / GALLERY_BATCH_SIZE) + 1}, ${batch.length} items):`, error)
+        }
       }
     }
   }
+
+  const TOPLIST_BATCH_SIZE = 10
 
   if (toplistItems.length > 0) {
     let table: ReturnType<typeof getToplistItemsTableByYear>
@@ -240,25 +248,27 @@ async function storeToplistData(env: Env, galleries: GalleryItem[], toplistItems
       db.insert(table).values(item).onConflictDoNothing(),
     )
 
-    if (toplistStatements.length > 0) {
+    // 分批写入以避免 D1 超时
+    for (let i = 0; i < toplistStatements.length; i += TOPLIST_BATCH_SIZE) {
+      const batch = toplistStatements.slice(i, i + TOPLIST_BATCH_SIZE)
+      const sample = toplistItems[0]
       try {
-        await db.batch(toplistStatements)
+        await db.batch(batch)
       }
       catch (error) {
         // 注意：D1 超时错误（如 "D1 DB storage operation exceeded timeout"）通常是假阳性。
         // D1 的超时只影响客户端等待响应，实际写入操作可能已在后台完成并持久化。
         // 由于使用了 onConflictDoNothing()，即使重试也不会导致数据重复。
-        const sample = toplistItems[0]
         if (error instanceof DrizzleQueryError) {
           console.error(
-            `Failed to batch insert ${toplistStatements.length} toplist items for ${sample?.list_date ?? 'unknown date'} (${sample?.period_type ?? 'unknown period'}):`,
+            `Failed to batch insert toplist items (batch ${Math.floor(i / TOPLIST_BATCH_SIZE) + 1}, ${batch.length} items) for ${sample?.list_date ?? 'unknown date'} (${sample?.period_type ?? 'unknown period'}):`,
             error,
             error.cause,
           )
         }
         else {
           console.error(
-            `Failed to batch insert ${toplistStatements.length} toplist items for ${sample?.list_date ?? 'unknown date'} (${sample?.period_type ?? 'unknown period'}):`,
+            `Failed to batch insert toplist items (batch ${Math.floor(i / TOPLIST_BATCH_SIZE) + 1}, ${batch.length} items) for ${sample?.list_date ?? 'unknown date'} (${sample?.period_type ?? 'unknown period'}):`,
             error,
           )
         }
