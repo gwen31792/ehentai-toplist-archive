@@ -42,25 +42,7 @@ cd ../..
 - 项目配置在根目录的 `nx.json`
 
 ### 技术栈
-- **前端**: React 19 + Next.js 15
-- **样式**: Tailwind CSS + shadcn/ui
-- **状态管理**: URL 参数 + React hooks
-- **数据库**: Cloudflare D1 (SQLite)
-- **ORM**: Drizzle ORM
-- **国际化**: next-intl (支持中英文)
-- **部署**: Cloudflare Workers (通过 @opennextjs/cloudflare)
-- **构建工具**: Nx + Next.js + Turbopack
-
-### 关键目录结构
-```
-apps/web/src/
-├── app/              # Next.js App Router
-├── components/       # React 组件
-│   └── ui/          # shadcn/ui 基础组件（不要修改）
-├── db/              # （已弃用）保留兼容层，实际 schema 位于 packages/db
-├── i18n/            # 国际化配置
-└── lib/             # 工具函数和类型定义
-```
+React 19 + Next.js 15 | Tailwind CSS + shadcn/ui | Drizzle ORM + Cloudflare D1 | next-intl (中英双语) | 部署到 Cloudflare Workers (通过 @opennextjs/cloudflare)
 
 ## 数据库架构
 
@@ -88,56 +70,59 @@ const db = createDbClient(getCloudflareContext().env)
 ## 重要开发约定
 
 ### 组件开发
-- 不要修改 `src/components/ui/` 下的 shadcn/ui 基础组件
-- 需要自定义时，创建包装组件或新组件
-- 遵循现有的组件结构和命名约定
+- 不要修改 `src/components/ui/` 下的 shadcn/ui 基础组件，需要自定义时创建包装组件
+- 表格使用 `@tanstack/react-table`，列设置持久化在 localStorage
 
 ### API 开发
 - 数据查询逻辑只能在 API 路由中实现，不要在组件中直接访问数据库
 - API 端点: `GET /api/data?list_date=YYYY-MM-DD&period_type=day|month|year|all`
-- 使用 `{ cache: 'force-cache' }` 进行客户端缓存
+- 客户端使用 `{ cache: 'force-cache' }` 缓存，优先在服务端/API 做失效处理
 
 ### URL 参数和状态管理
-- 日期和周期类型选择通过 URL 参数管理，而非本地状态
-- URL 格式: `/[locale]?date=YYYY-MM-DD&period_type=day|month|year|all`
-- 参数验证工具函数位于 `apps/web/src/lib/url-params.ts`
-- 主要组件使用 `useSearchParams` 读取 URL 参数
-- 使用 `router.push` 更新 URL（设置 `scroll: false` 避免页面滚动）
+- 日期和周期类型通过 URL 参数管理: `/[locale]?date=YYYY-MM-DD&period_type=day|month|year|all`
+- 参数验证工具: `apps/web/src/lib/url-params.ts`
 - Next.js 15 要求 `useSearchParams` 必须包裹在 Suspense 边界中
 - 参数默认值：`date` 默认为今天（UTC），`period_type` 默认为 `'day'`
-- 参数验证范围：日期必须在 2023-11-15 至今天之间
+- 日期范围：2023-11-15 至今天
 
 ### 类型安全
-- 数据库类型：修改 `packages/db` 后必须运行 `pnpm nx build db` 重新构建
+- 修改 `packages/db` 后必须运行 `pnpm nx build db` 重新构建
 - Cloudflare 环境类型：在 `apps/web` 目录运行 `pnpm cf-typegen` 生成
-- 应用类型定义在 `apps/web/src/lib/types.ts`
+- 远程图片只允许 `ehgt.org` 域名（配置在 `next.config.ts` 的 `remotePatterns`）
 
-### 图片处理
-- 远程图片必须匹配 `next.config.ts` 中的 `remotePatterns` 配置
-- 当前只允许 `ehgt.org` 域名
+### Next.js 15 特殊处理
+- `page.tsx` 使用 async `cookies()`/`headers()` 检测 locale
+- `[locale]/layout.tsx` 必须 await `params`（现在是 Promise）
+- OpenNext 配置在 `apps/web/open-next.config.ts`，开发时通过 `initOpenNextCloudflareForDev` 激活远程绑定
+
+## Crawler 工作原理
+
+- 通过 Cloudflare Queue 触发，入口在 `apps/crawler/src/index.ts`
+- 三个定时任务：1:00 抓 toplist、10:00 更新 gallery 详情、13:00 抓 tags 翻译
+- 外部请求通过 `FetchProxy` Durable Object (`FETCH_DO` 绑定) 代理，强制 APAC 出口并禁用缓存
+- 遇到 451 + GB trace 时抛出 `AbortCrawlError` 停止运行
+- 使用 Cheerio 解析 HTML，批量 upsert 到 `galleries` 和年份分区表
+
+## 运行时约束
+
+- Cloudflare Workers 环境，只能使用 Edge Runtime
+- 禁止 Node.js 特定 API（fs, crypto 回调等）
+- 数据库绑定名称为 `DB`（配置在各应用的 `wrangler.toml`）
+- 始终使用 `createDbClient(getCloudflareContext().env)` 创建数据库客户端，不要直接实例化 Drizzle
 
 ## 常见问题排查
 
-### 数据为空
-1. 检查 `list_date` 年份是否有对应的分区表
-2. 检查种子数据是否包含该日期和周期的记录
-3. 确认 `period_type` 拼写正确（all|year|month|day）
+- **数据为空**: 检查 `list_date` 年份是否有对应分区表，确认 `period_type` 拼写正确
+- **TypeScript 报错**: 运行 `pnpm cf-typegen` 更新 Cloudflare 环境类型
+- **db 包修改后应用未生效**: 运行 `pnpm nx build db` 重新构建
+- Nx 会自动处理构建依赖（`dependsOn: ["^build"]`）
 
-### 开发环境问题
-- 如果 TypeScript 报错，运行 `pnpm cf-typegen` 更新类型定义
+## 关键文件
 
-## 部署注意事项
-
-- Web 应用和 Crawler 均部署在 Cloudflare Workers，只能使用 Edge Runtime
-- 避免使用 Node.js 特定 API（如 fs, crypto 回调等）
-- 数据库绑定名称为 `DB`（配置在各应用的 `wrangler.toml`）
-- 部署前确保 db 包已构建：`pnpm nx build db`
-
-## 包依赖关系
-
-- `apps/web` 和 `apps/crawler` 都依赖 `packages/db`
-- 修改 `packages/db` 后必须运行 `pnpm nx build db` 才能在应用中生效
-- Nx 会自动处理构建依赖（`build` 和 `dev` 目标配置了 `dependsOn: ["^build"]`）
+- Web API/数据流: `apps/web/src/app/api/data/route.ts`, `apps/web/src/components/data-table.tsx`
+- i18n/路由: `apps/web/src/i18n/*`, `apps/web/src/app/[locale]/**`
+- 数据库 schema: `packages/db/src/schema/*`
+- 爬虫: `apps/crawler/src/{index,crawl-toplist,update-gallery}.ts`
 
 <!-- nx configuration start-->
 <!-- Leave the start & end comments to automatically receive updates. -->
