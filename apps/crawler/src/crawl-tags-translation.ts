@@ -1,5 +1,7 @@
 import { Cloudflare } from 'cloudflare'
+import { z } from 'zod'
 
+import { githubReleaseSchema, tagDbSchema } from './schemas'
 import { NAMESPACE_ABBREVIATIONS } from './utils'
 
 export const CRAWL_TAGS_TRANSLATION_MESSAGE = 'crawl-tags-translation'
@@ -47,9 +49,16 @@ export async function fetchTagsTranslationDb(env: Env): Promise<Array<{ key: str
       throw new Error(`Failed to fetch latest release: ${errorText}`)
     }
 
-    const releaseData = await releaseResponse.json() as {
-      assets: Array<{ name: string, browser_download_url: string }>
+    const releaseJson = await releaseResponse.json()
+    const releaseResult = githubReleaseSchema.safeParse(releaseJson)
+
+    if (!releaseResult.success) {
+      const error = `Invalid GitHub release response: ${z.flattenError(releaseResult.error).formErrors.join(', ')}`
+      console.error(error, releaseResult.error)
+      throw new Error(error)
     }
+
+    const releaseData = releaseResult.data
 
     // 查找 db.text.json 文件
     const dbTextAsset = releaseData.assets.find(asset => asset.name === 'db.text.json')
@@ -76,12 +85,16 @@ export async function fetchTagsTranslationDb(env: Env): Promise<Array<{ key: str
       throw new Error(`Failed to download db.text.json: ${errorText}`)
     }
 
-    const tagDb = await tagDbResponse.json() as {
-      data: Array<{
-        namespace: string
-        data: Record<string, { name: string }>
-      }>
+    const tagDbJson = await tagDbResponse.json()
+    const tagDbResult = tagDbSchema.safeParse(tagDbJson)
+
+    if (!tagDbResult.success) {
+      const error = `Invalid tag database response: ${z.flattenError(tagDbResult.error).formErrors.join(', ')}`
+      console.error(error, tagDbResult.error)
+      throw new Error(error)
     }
+
+    const tagDb = tagDbResult.data
     console.log('Successfully downloaded db.text.json')
 
     // 提取所有 key-value pairs (使用 flatMap 优化性能)

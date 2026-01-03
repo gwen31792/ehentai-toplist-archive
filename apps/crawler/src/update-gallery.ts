@@ -2,7 +2,9 @@ import { galleriesTable } from '@ehentai-toplist-archive/db'
 import * as cheerio from 'cheerio'
 import { asc, count, eq, isNull, lt, or } from 'drizzle-orm'
 import { DrizzleQueryError } from 'drizzle-orm/errors'
+import { z } from 'zod'
 
+import { galleryDetailsSchema } from './schemas'
 import { TemporaryBanError } from './types'
 import { delay, ehentaiFetch, getDbClient, NAMESPACE_ABBREVIATIONS } from './utils'
 
@@ -104,29 +106,48 @@ export async function handleUpdateGallery(env: Env): Promise<void> {
       const torrentsUrl = parseTorrentsUrl(html)
       const previewUrl = parsePreviewUrl(html)
 
-      console.log(`Parsed tags for gallery ${gallery.gallery_id}:`, tags)
-      console.log(`Parsed gallery type for gallery ${gallery.gallery_id}:`, galleryType)
-      console.log(`Parsed published time for gallery ${gallery.gallery_id}:`, publishedTime)
-      console.log(`Parsed uploader for gallery ${gallery.gallery_id}:`, uploader)
-      console.log(`Parsed gallery length for gallery ${gallery.gallery_id}:`, galleryLength)
-      console.log(`Parsed torrents URL for gallery ${gallery.gallery_id}:`, torrentsUrl)
-      console.log(`Parsed preview URL for gallery ${gallery.gallery_id}:`, previewUrl)
+      // 验证解析出的数据
+      const parseResult = galleryDetailsSchema.safeParse({
+        tags,
+        galleryType,
+        publishedTime,
+        uploader,
+        galleryLength,
+        torrentsUrl,
+        previewUrl,
+      })
+
+      if (!parseResult.success) {
+        console.warn(
+          `Invalid gallery details for gallery ${gallery.gallery_id}:`,
+          z.flattenError(parseResult.error),
+        )
+        // 验证失败时只更新 updated_at，避免写入无效数据
+        await db
+          .update(galleriesTable)
+          .set({ updated_at: new Date().toISOString().split('T')[0] })
+          .where(eq(galleriesTable.gallery_id, gallery.gallery_id))
+        continue
+      }
+
+      const details = parseResult.data
+      console.log(`Parsed details for gallery ${gallery.gallery_id}:`, details)
 
       // 从 KV 中批量读取标签翻译
-      const tagsZh = await translateTags(env.KV, tags)
+      const tagsZh = await translateTags(env.KV, details.tags)
       console.log(`Translated tags for gallery ${gallery.gallery_id}:`, tagsZh)
 
       await db
         .update(galleriesTable)
         .set({
-          ...(tags && { tags }),
+          ...(details.tags && { tags: details.tags }),
           ...(tagsZh && { tags_zh: tagsZh }),
-          ...(galleryType && { gallery_type: galleryType }),
-          ...(publishedTime && { published_time: publishedTime }),
-          ...(uploader && { uploader }),
-          ...(galleryLength && { gallery_length: galleryLength }),
-          ...(torrentsUrl && { torrents_url: torrentsUrl }),
-          ...(previewUrl && { preview_url: previewUrl }),
+          ...(details.galleryType && { gallery_type: details.galleryType }),
+          ...(details.publishedTime && { published_time: details.publishedTime }),
+          ...(details.uploader && { uploader: details.uploader }),
+          ...(details.galleryLength && { gallery_length: details.galleryLength }),
+          ...(details.torrentsUrl && { torrents_url: details.torrentsUrl }),
+          ...(details.previewUrl && { preview_url: details.previewUrl }),
           updated_at: new Date().toISOString().split('T')[0],
         })
         .where(eq(galleriesTable.gallery_id, gallery.gallery_id))

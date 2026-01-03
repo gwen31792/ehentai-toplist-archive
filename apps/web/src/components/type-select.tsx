@@ -7,11 +7,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { ToplistType } from '@/lib/types'
+import { PeriodType } from '@/lib/types'
 
 interface TypeSelectProps {
-  type: ToplistType
-  onSelectChange: (type: ToplistType) => void
+  type: PeriodType
+  onSelectChange: (type: PeriodType) => void
 }
 
 export function TypeSelect({ type, onSelectChange }: TypeSelectProps) {

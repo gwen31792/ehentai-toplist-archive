@@ -4,37 +4,28 @@ import {
   createDbClient,
   galleriesTable,
   getToplistItemsTableByYear,
-  TOPLIST_PERIOD_TYPES,
-  type ToplistType,
 } from '@ehentai-toplist-archive/db'
 import { getCloudflareContext } from '@opennextjs/cloudflare'
 import { eq, and, getTableColumns } from 'drizzle-orm'
+import { z } from 'zod'
+
+import { dataApiQuerySchema } from '@/lib/validators'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
-  const listDateParam = searchParams.get('list_date')
-  const periodTypeParam = searchParams.get('period_type')
 
-  if (!listDateParam || !periodTypeParam) {
-    return Response.json({ error: 'Missing required query parameters.' }, { status: 400 })
+  const parseResult = dataApiQuerySchema.safeParse({
+    list_date: searchParams.get('list_date'),
+    period_type: searchParams.get('period_type'),
+  })
+
+  if (!parseResult.success) {
+    return Response.json({ error: z.flattenError(parseResult.error) }, { status: 400 })
   }
 
-  const isToplistType = (value: string): value is ToplistType =>
-    TOPLIST_PERIOD_TYPES.includes(value as ToplistType)
+  const { list_date: listDateParam, period_type: periodTypeParam } = parseResult.data
 
-  if (!isToplistType(periodTypeParam)) {
-    return Response.json({ error: 'Invalid period_type value.' }, { status: 400 })
-  }
-
-  let toplistItemsTable
-  try {
-    toplistItemsTable = getToplistItemsTableByYear(listDateParam)
-  }
-  catch (error) {
-    const message = error instanceof Error ? error.message : 'Unsupported year'
-    return Response.json({ error: message }, { status: 400 })
-  }
-
+  const toplistItemsTable = getToplistItemsTableByYear(listDateParam)
   const db = createDbClient(getCloudflareContext().env)
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -42,7 +33,7 @@ export async function GET(request: NextRequest) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { updated_at, tags_zh, ...galleryColumns } = getTableColumns(galleriesTable)
 
-  const result = await db.select(
+  const queryResult = await db.select(
     {
       ...rest,
       ...galleryColumns,
@@ -57,5 +48,5 @@ export async function GET(request: NextRequest) {
     .innerJoin(galleriesTable, eq(toplistItemsTable.gallery_id, galleriesTable.gallery_id))
     .orderBy(toplistItemsTable.rank)
 
-  return Response.json(result)
+  return Response.json(queryResult)
 }
