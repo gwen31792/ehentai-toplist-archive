@@ -1,16 +1,13 @@
 import { galleriesTable } from './schema/galleries'
 
-import type { SupportedToplistYear, ToplistItemsTable } from './schema/toplist-items'
 import type { InferSelectModel } from 'drizzle-orm'
 
-export const TOPLIST_PERIOD_TYPES = ['day', 'month', 'year', 'all'] as const
-export type ToplistType = typeof TOPLIST_PERIOD_TYPES[number]
+// =============================================================================
+// 从 Drizzle Schema 推导的类型
+// =============================================================================
 
 export type Gallery = InferSelectModel<typeof galleriesTable>
-export type ToplistItem = InferSelectModel<ToplistItemsTable>
 
 export interface QueryResponseItem extends Gallery {
   rank: number
 }
-
-export type { SupportedToplistYear }

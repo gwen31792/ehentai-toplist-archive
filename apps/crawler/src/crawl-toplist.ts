@@ -1,15 +1,17 @@
-import { galleriesTable, getToplistItemsTableByYear, type ToplistType } from '@ehentai-toplist-archive/db'
+import { galleriesTable, getToplistItemsTableByYear, type PeriodType } from '@ehentai-toplist-archive/db'
 import * as cheerio from 'cheerio'
 import { isNull } from 'drizzle-orm'
 import { DrizzleQueryError } from 'drizzle-orm/errors'
+import { z } from 'zod'
 
+import { parsedGallerySchema, parsedToplistItemSchema } from './schemas'
 import { AbortCrawlError, type CrawlResult, type GalleryItem, TemporaryBanError, type ToplistItem } from './types'
 import { delay, ehentaiFetch, getDbClient, logCloudflareExecutionInfo } from './utils'
 
 export const CRAWL_QUEUE_MESSAGE = 'crawl-toplists'
 const RECOVERY_RETRY_DELAY_SECONDS = 3600
 
-export async function crawlToplistPage(env: Env, period_type: ToplistType, url: string): Promise<void> {
+export async function crawlToplistPage(env: Env, period_type: PeriodType, url: string): Promise<void> {
   try {
     const response = await ehentaiFetch(env, url, { method: 'GET' })
 
@@ -65,7 +67,7 @@ export async function crawlToplistPage(env: Env, period_type: ToplistType, url: 
 
 export async function parseToplistHtml(
   data: string,
-  period_type: ToplistType,
+  period_type: PeriodType,
   date: string | null,
 ): Promise<CrawlResult> {
   const $ = cheerio.load(data)
@@ -144,7 +146,8 @@ export async function parseToplistHtml(
         list_date = date
       }
 
-      const galleryItem: GalleryItem = {
+      // 验证并添加 gallery 数据
+      const galleryResult = parsedGallerySchema.safeParse({
         gallery_id,
         gallery_name,
         gallery_type,
@@ -156,16 +159,29 @@ export async function parseToplistHtml(
         preview_url,
         torrents_url,
         gallery_url,
-      }
-      galleries.push(galleryItem)
+      })
 
-      const toplist_item: ToplistItem = {
+      if (galleryResult.success) {
+        galleries.push(galleryResult.data)
+      }
+      else {
+        console.warn(`Invalid gallery data at rank ${rank}:`, z.flattenError(galleryResult.error))
+      }
+
+      // 验证并添加 toplist item 数据
+      const toplistResult = parsedToplistItemSchema.safeParse({
         gallery_id,
         rank,
         list_date,
         period_type,
+      })
+
+      if (toplistResult.success) {
+        toplist_items.push(toplistResult.data)
       }
-      toplist_items.push(toplist_item)
+      else {
+        console.warn(`Invalid toplist item at rank ${rank}:`, z.flattenError(toplistResult.error))
+      }
     }
   })
 

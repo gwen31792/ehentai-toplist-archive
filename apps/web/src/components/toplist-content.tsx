@@ -4,33 +4,36 @@ import { useState, useEffect, useMemo } from 'react'
 
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 
+import { type PeriodType } from '@ehentai-toplist-archive/db'
 import { format } from 'date-fns'
 
 import { DataTable } from '@/components/data-table'
 import { DatePicker } from '@/components/date-picker'
 import { TypeSelect } from '@/components/type-select'
-import { QueryResponseItem, ToplistType } from '@/lib/types'
+import { QueryResponseItem } from '@/lib/types'
 import { parseDate, validateDateRange, validatePeriodType } from '@/lib/url-params'
+
+function getUtcToday(): Date {
+  const now = new Date()
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
+}
 
 export function ToplistContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
 
-  // 从 URL 读取参数
-  const dateParam = searchParams.get('date')
-  const typeParam = searchParams.get('period_type')
-
-  // 验证并计算当前值
-  const selectedDate = useMemo(() => {
-    if (!dateParam) return new Date() // 默认今天
+  // 从 URL 读取并验证参数，无效则用默认值
+  const { selectedDate, selectedType } = useMemo(() => {
+    const dateParam = searchParams.get('date')
     const parsed = parseDate(dateParam)
-    return validateDateRange(parsed) ? parsed : new Date()
-  }, [dateParam])
+    const date = validateDateRange(parsed) ? parsed : getUtcToday()
 
-  const selectedType = useMemo(() => {
-    return validatePeriodType(typeParam)
-  }, [typeParam])
+    const typeParam = searchParams.get('period_type')
+    const type = validatePeriodType(typeParam)
+
+    return { selectedDate: date, selectedType: type }
+  }, [searchParams])
 
   // 数据获取
   const [data, setData] = useState<QueryResponseItem[]>([])
@@ -49,7 +52,7 @@ export function ToplistContent() {
   }, [selectedDate, selectedType])
 
   // 更新 URL 的函数
-  const updateURL = (newDate: Date, newType: ToplistType) => {
+  const updateURL = (newDate: Date, newType: PeriodType) => {
     const params = new URLSearchParams(searchParams.toString())
     params.set('date', format(newDate, 'yyyy-MM-dd'))
     params.set('period_type', newType)
@@ -61,7 +64,7 @@ export function ToplistContent() {
     updateURL(date, selectedType)
   }
 
-  const handleTypeChange = (type: ToplistType) => {
+  const handleTypeChange = (type: PeriodType) => {
     updateURL(selectedDate, type)
   }
 

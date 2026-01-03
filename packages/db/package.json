@@ -15,7 +15,14 @@
     }
   },
   "dependencies": {
-    "tslib": "^2.8.1"
+    "drizzle-zod": "^0.8.3"
+  },
+  "peerDependencies": {
+    "drizzle-orm": "^0.44.0",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20251120.0"
   },
   "nx": {
     "sourceRoot": "packages/db/src",
@@ -24,7 +31,9 @@
     "targets": {
       "build": {
         "executor": "@nx/js:tsc",
-        "outputs": ["{projectRoot}/dist"],
+        "outputs": [
+          "{projectRoot}/dist"
+        ],
         "options": {
           "tsConfig": "packages/db/tsconfig.lib.json",
           "main": "packages/db/src/index.ts",

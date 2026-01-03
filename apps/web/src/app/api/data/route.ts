@@ -5,7 +5,7 @@ import {
   galleriesTable,
   getToplistItemsTableByYear,
   TOPLIST_PERIOD_TYPES,
-  type ToplistType,
+  type PeriodType,
 } from '@ehentai-toplist-archive/db'
 import { getCloudflareContext } from '@opennextjs/cloudflare'
 import { eq, and, getTableColumns } from 'drizzle-orm'
@@ -19,10 +19,10 @@ export async function GET(request: NextRequest) {
     return Response.json({ error: 'Missing required query parameters.' }, { status: 400 })
   }
 
-  const isToplistType = (value: string): value is ToplistType =>
-    TOPLIST_PERIOD_TYPES.includes(value as ToplistType)
+  const isPeriodType = (value: string): value is PeriodType =>
+    TOPLIST_PERIOD_TYPES.includes(value as PeriodType)
 
-  if (!isToplistType(periodTypeParam)) {
+  if (!isPeriodType(periodTypeParam)) {
     return Response.json({ error: 'Invalid period_type value.' }, { status: 400 })
   }
 
