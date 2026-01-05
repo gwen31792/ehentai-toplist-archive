@@ -1,6 +1,6 @@
 import { galleriesTable } from '@ehentai-toplist-archive/db'
 import * as cheerio from 'cheerio'
-import { asc, count, eq, isNull, lt, or } from 'drizzle-orm'
+import { and, asc, count, eq, isNotNull, isNull, lt, or } from 'drizzle-orm'
 import { DrizzleQueryError } from 'drizzle-orm/errors'
 import { z } from 'zod'
 
@@ -23,9 +23,12 @@ export async function handleUpdateGallery(env: Env): Promise<void> {
     .select({ count: count() })
     .from(galleriesTable)
     .where(
-      or(
-        isNull(galleriesTable.updated_at),
-        lt(galleriesTable.updated_at, thresholdDate),
+      and(
+        isNotNull(galleriesTable.gallery_url),
+        or(
+          isNull(galleriesTable.updated_at),
+          lt(galleriesTable.updated_at, thresholdDate),
+        ),
       ),
     )
     .get()
@@ -38,9 +41,12 @@ export async function handleUpdateGallery(env: Env): Promise<void> {
     .select()
     .from(galleriesTable)
     .where(
-      or(
-        isNull(galleriesTable.updated_at),
-        lt(galleriesTable.updated_at, thresholdDate),
+      and(
+        isNotNull(galleriesTable.gallery_url),
+        or(
+          isNull(galleriesTable.updated_at),
+          lt(galleriesTable.updated_at, thresholdDate),
+        ),
       ),
     )
     .orderBy(asc(galleriesTable.updated_at))
@@ -55,6 +61,7 @@ export async function handleUpdateGallery(env: Env): Promise<void> {
   console.log(`Found ${galleries.length} galleries to update.`)
 
   for (const gallery of galleries) {
+    if (!gallery.gallery_url) continue
     console.log(`Processing gallery: ${gallery.gallery_id} - ${gallery.gallery_url}`)
 
     try {

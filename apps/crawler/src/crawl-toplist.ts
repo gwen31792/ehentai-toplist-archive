@@ -225,10 +225,11 @@ async function storeToplistData(env: Env, galleries: GalleryItem[], toplistItems
     // 分批写入以避免 D1 超时
     for (let i = 0; i < galleryStatements.length; i += GALLERY_BATCH_SIZE) {
       const batch = galleryStatements.slice(i, i + GALLERY_BATCH_SIZE)
+      if (batch.length === 0) continue
       try {
         // cloudflare workers subrequest limit is 1000
         // 所以不能一条一条发请求，打包起来发能解决这个问题
-        await db.batch(batch)
+        await db.batch(batch as [typeof batch[number], ...typeof batch[number][]])
       }
       catch (error) {
         // 注意：D1 超时错误（如 "D1 DB storage operation exceeded timeout"）通常是假阳性。
@@ -267,9 +268,10 @@ async function storeToplistData(env: Env, galleries: GalleryItem[], toplistItems
     // 分批写入以避免 D1 超时
     for (let i = 0; i < toplistStatements.length; i += TOPLIST_BATCH_SIZE) {
       const batch = toplistStatements.slice(i, i + TOPLIST_BATCH_SIZE)
+      if (batch.length === 0) continue
       const sample = toplistItems[0]
       try {
-        await db.batch(batch)
+        await db.batch(batch as [typeof batch[number], ...typeof batch[number][]])
       }
       catch (error) {
         // 注意：D1 超时错误（如 "D1 DB storage operation exceeded timeout"）通常是假阳性。

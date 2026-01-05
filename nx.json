@@ -12,7 +12,9 @@
       "sharedGlobals"
     ],
     "sharedGlobals": [
-      "{workspaceRoot}/.github/workflows/ci.yml"
+      "{workspaceRoot}/.github/workflows/ci.yml",
+      "{workspaceRoot}/package.json",
+      "{workspaceRoot}/tsconfig*.json"
     ]
   },
   "plugins": [
