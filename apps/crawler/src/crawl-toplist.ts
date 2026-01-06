@@ -6,7 +6,7 @@ import { z } from 'zod'
 
 import { parsedGallerySchema, parsedToplistItemSchema } from './schemas'
 import { AbortCrawlError, type CrawlResult, type GalleryItem, TemporaryBanError, type ToplistItem } from './types'
-import { delay, ehentaiFetch, getDbClient, logCloudflareExecutionInfo } from './utils'
+import { delay, ehentaiFetch, getDbClient, logCloudflareExecutionInfo, retryD1Operation } from './utils'
 
 export const CRAWL_QUEUE_MESSAGE = 'crawl-toplists'
 const RECOVERY_RETRY_DELAY_SECONDS = 3600
@@ -229,7 +229,7 @@ async function storeToplistData(env: Env, galleries: GalleryItem[], toplistItems
       try {
         // cloudflare workers subrequest limit is 1000
         // 所以不能一条一条发请求，打包起来发能解决这个问题
-        await db.batch(batch as [typeof batch[number], ...typeof batch[number][]])
+        await retryD1Operation(() => db.batch(batch as [typeof batch[number], ...typeof batch[number][]]))
       }
       catch (error) {
         // 注意：D1 超时错误（如 "D1 DB storage operation exceeded timeout"）通常是假阳性。
@@ -271,7 +271,7 @@ async function storeToplistData(env: Env, galleries: GalleryItem[], toplistItems
       if (batch.length === 0) continue
       const sample = toplistItems[0]
       try {
-        await db.batch(batch as [typeof batch[number], ...typeof batch[number][]])
+        await retryD1Operation(() => db.batch(batch as [typeof batch[number], ...typeof batch[number][]]))
       }
       catch (error) {
         // 注意：D1 超时错误（如 "D1 DB storage operation exceeded timeout"）通常是假阳性。

@@ -127,3 +127,31 @@ export async function ehentaiFetch(env: Env, url: string, init?: RequestInit): P
     headers,
   })
 }
+
+// D1 操作重试包装器，处理网络连接丢失和超时错误
+export async function retryD1Operation<T>(
+  fn: () => Promise<T>,
+  options: { maxRetries?: number, initialDelayMs?: number, maxDelayMs?: number } = {},
+): Promise<T> {
+  const { maxRetries = 2, initialDelayMs = 100, maxDelayMs = 1000 } = options
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn()
+    }
+    catch (error) {
+      if (attempt === maxRetries) throw error
+
+      const isRetryable = error instanceof Error
+        && (error.message.includes('Network connection lost')
+          || error.message.includes('exceeded timeout'))
+
+      if (!isRetryable) throw error
+
+      const delayMs = Math.min(initialDelayMs * 2 ** attempt, maxDelayMs)
+      console.warn(`D1 operation failed (attempt ${attempt + 1}), retrying in ${delayMs}ms...`)
+      await delay(delayMs)
+    }
+  }
+  throw new Error('Unreachable')
+}

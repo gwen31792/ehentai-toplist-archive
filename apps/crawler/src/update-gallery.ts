@@ -6,7 +6,7 @@ import { z } from 'zod'
 
 import { galleryDetailsSchema } from './schemas'
 import { TemporaryBanError } from './types'
-import { delay, ehentaiFetch, getDbClient, NAMESPACE_ABBREVIATIONS } from './utils'
+import { delay, ehentaiFetch, getDbClient, NAMESPACE_ABBREVIATIONS, retryD1Operation } from './utils'
 
 export const UPDATE_GALLERY_MESSAGE = 'update-gallery'
 
@@ -72,10 +72,12 @@ export async function handleUpdateGallery(env: Env): Promise<void> {
         if (response.status === 404 || response.status === 410) {
           console.warn(`Gallery ${gallery.gallery_id} is gone (${response.status}). Updating timestamp to skip future checks.`)
           // 使用当前时间更新，避免死循环
-          await db
-            .update(galleriesTable)
-            .set({ updated_at: new Date().toISOString().split('T')[0] })
-            .where(eq(galleriesTable.gallery_id, gallery.gallery_id))
+          await retryD1Operation(() =>
+            db
+              .update(galleriesTable)
+              .set({ updated_at: new Date().toISOString().split('T')[0] })
+              .where(eq(galleriesTable.gallery_id, gallery.gallery_id)),
+          )
         }
         else {
           console.error(`Failed to fetch gallery page: ${response.status} ${response.statusText}`)
@@ -98,10 +100,12 @@ export async function handleUpdateGallery(env: Env): Promise<void> {
       // 如果画廊页面显示 "Gallery not found."，只更新 updated_at
       if (html.includes('Gallery not found.')) {
         console.warn(`Gallery ${gallery.gallery_id} not found. Updating timestamp only.`)
-        await db
-          .update(galleriesTable)
-          .set({ updated_at: new Date().toISOString().split('T')[0] })
-          .where(eq(galleriesTable.gallery_id, gallery.gallery_id))
+        await retryD1Operation(() =>
+          db
+            .update(galleriesTable)
+            .set({ updated_at: new Date().toISOString().split('T')[0] })
+            .where(eq(galleriesTable.gallery_id, gallery.gallery_id)),
+        )
         continue
       }
 
@@ -130,10 +134,12 @@ export async function handleUpdateGallery(env: Env): Promise<void> {
           z.flattenError(parseResult.error),
         )
         // 验证失败时只更新 updated_at，避免写入无效数据
-        await db
-          .update(galleriesTable)
-          .set({ updated_at: new Date().toISOString().split('T')[0] })
-          .where(eq(galleriesTable.gallery_id, gallery.gallery_id))
+        await retryD1Operation(() =>
+          db
+            .update(galleriesTable)
+            .set({ updated_at: new Date().toISOString().split('T')[0] })
+            .where(eq(galleriesTable.gallery_id, gallery.gallery_id)),
+        )
         continue
       }
 
@@ -144,20 +150,22 @@ export async function handleUpdateGallery(env: Env): Promise<void> {
       const tagsZh = await translateTags(env.KV, details.tags)
       console.log(`Translated tags for gallery ${gallery.gallery_id}:`, tagsZh)
 
-      await db
-        .update(galleriesTable)
-        .set({
-          ...(details.tags && { tags: details.tags }),
-          ...(tagsZh && { tags_zh: tagsZh }),
-          ...(details.galleryType && { gallery_type: details.galleryType }),
-          ...(details.publishedTime && { published_time: details.publishedTime }),
-          ...(details.uploader && { uploader: details.uploader }),
-          ...(details.galleryLength && { gallery_length: details.galleryLength }),
-          ...(details.torrentsUrl && { torrents_url: details.torrentsUrl }),
-          ...(details.previewUrl && { preview_url: details.previewUrl }),
-          updated_at: new Date().toISOString().split('T')[0],
-        })
-        .where(eq(galleriesTable.gallery_id, gallery.gallery_id))
+      await retryD1Operation(() =>
+        db
+          .update(galleriesTable)
+          .set({
+            ...(details.tags && { tags: details.tags }),
+            ...(tagsZh && { tags_zh: tagsZh }),
+            ...(details.galleryType && { gallery_type: details.galleryType }),
+            ...(details.publishedTime && { published_time: details.publishedTime }),
+            ...(details.uploader && { uploader: details.uploader }),
+            ...(details.galleryLength && { gallery_length: details.galleryLength }),
+            ...(details.torrentsUrl && { torrents_url: details.torrentsUrl }),
+            ...(details.previewUrl && { preview_url: details.previewUrl }),
+            updated_at: new Date().toISOString().split('T')[0],
+          })
+          .where(eq(galleriesTable.gallery_id, gallery.gallery_id)),
+      )
 
       // 避免请求过快，等待 5 秒
       await delay(5000)
