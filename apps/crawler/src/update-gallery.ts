@@ -35,7 +35,7 @@ export async function handleUpdateGallery(env: Env): Promise<void> {
 
   console.log(`Total galleries needing update: ${totalResult?.count ?? 0}`)
 
-  // 查询 updated_at 为空 或者 updated_at 早于一个月前的 gallery，每次处理 150 条
+  // 查询 updated_at 为空 或者 updated_at 早于一个月前的 gallery，每次处理 100 条
   // SQLite 中 NULL 比任何值都小，所以 ASC 排序时 NULL 会排在最前面
   const galleries = await db
     .select()
@@ -50,7 +50,7 @@ export async function handleUpdateGallery(env: Env): Promise<void> {
       ),
     )
     .orderBy(asc(galleriesTable.updated_at))
-    .limit(150)
+    .limit(100)
     .all()
 
   if (galleries.length === 0) {
