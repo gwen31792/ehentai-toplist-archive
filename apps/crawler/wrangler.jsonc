@@ -10,7 +10,7 @@
   "triggers": {
     "crons": [
       "0 1 * * *", // Toplist crawling
-      "0 13 * * *", // Tags translation crawling
+      "0 13 * * 1", // Tags translation crawling (weekly, Monday)
       "0 */3 * * *" // Update gallery details (every 3 hours)
     ]
   },
