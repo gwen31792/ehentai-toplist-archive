@@ -4,7 +4,7 @@ import { and, asc, count, eq, isNotNull, isNull, lt, or } from 'drizzle-orm'
 import { DrizzleQueryError } from 'drizzle-orm/errors'
 import { z } from 'zod'
 
-import { galleryDetailsSchema } from './schemas'
+import { type GalleryDetails, galleryDetailsSchema } from './schemas'
 import { TemporaryBanError } from './types'
 import { delay, ehentaiFetch, getDbClient, NAMESPACE_ABBREVIATIONS, retryD1Operation } from './utils'
 
@@ -109,24 +109,10 @@ export async function handleUpdateGallery(env: Env): Promise<void> {
         continue
       }
 
-      const tags = parseGalleryTags(html, gallery.gallery_id)
-      const galleryType = parseGalleryType(html)
-      const publishedTime = parsePublishedTime(html)
-      const uploader = parseUploader(html)
-      const galleryLength = parseGalleryLength(html)
-      const torrentsUrl = parseTorrentsUrl(html)
-      const previewUrl = parsePreviewUrl(html)
-
       // 验证解析出的数据
-      const parseResult = galleryDetailsSchema.safeParse({
-        tags,
-        galleryType,
-        publishedTime,
-        uploader,
-        galleryLength,
-        torrentsUrl,
-        previewUrl,
-      })
+      const parseResult = galleryDetailsSchema.safeParse(
+        parseGalleryDetails(html, gallery.gallery_id),
+      )
 
       if (!parseResult.success) {
         console.warn(
@@ -191,111 +177,46 @@ export async function handleUpdateGallery(env: Env): Promise<void> {
   }
 }
 
-function parseGalleryType(html: string): string | null {
-  const $ = cheerio.load(html)
-  const galleryType = $('#gdc > div').first().text().trim()
-  return galleryType || null
-}
-
-function parsePublishedTime(html: string): string | null {
+function parseGalleryDetails(html: string, galleryId: number): GalleryDetails {
   const $ = cheerio.load(html)
   let publishedTime: string | null = null
-
-  $('td.gdt1').each((_, td) => {
-    if ($(td).text().trim() === 'Posted:') {
-      const dateTimeText = $(td).next('td.gdt2').text().trim()
-      // 只取年月日部分（前10个字符：YYYY-MM-DD）
-      publishedTime = dateTimeText.substring(0, 10)
-    }
-  })
-
-  return publishedTime || null
-}
-
-function parseUploader(html: string): string | null {
-  const $ = cheerio.load(html)
-  const gdnDiv = $('#gdn')
-
-  // 检查是否为 (Disowned)
-  const text = gdnDiv.text().trim()
-  if (text === '(Disowned)') {
-    return null
-  }
-
-  // 正常情况：获取第一个 a 标签的文本
-  const uploader = gdnDiv.find('a').first().text().trim()
-  return uploader || null
-}
-
-function parseGalleryLength(html: string): number | null {
-  const $ = cheerio.load(html)
   let galleryLength: number | null = null
 
   $('td.gdt1').each((_, td) => {
-    if ($(td).text().trim() === 'Length:') {
-      const lengthText = $(td).next('td.gdt2').text().trim()
+    const label = $(td).text().trim()
+    const value = $(td).next('td.gdt2').text().trim()
+
+    if (label === 'Posted:') {
+      // 只取年月日部分（前10个字符：YYYY-MM-DD）
+      publishedTime = value.substring(0, 10) || null
+    }
+
+    if (label === 'Length:') {
       // 提取数字部分（如 "889 pages" -> 889）
-      const match = lengthText.match(/^(\d+)/)
+      const match = value.match(/^(\d+)/)
       if (match) {
         galleryLength = parseInt(match[1], 10)
       }
     }
   })
 
-  return galleryLength
-}
-
-function parseTorrentsUrl(html: string): string | null {
-  const $ = cheerio.load(html)
+  const gdnDiv = $('#gdn')
+  const uploaderText = gdnDiv.text().trim()
+  const uploader = uploaderText === '(Disowned)'
+    ? null
+    : (gdnDiv.find('a').first().text().trim() || null)
 
   // 查找文本以 "Torrent Download" 开头的 <a> 标签
   const torrentLink = $('a').filter((_, a) => $(a).text().trim().startsWith('Torrent Download')).first()
-
-  if (torrentLink.length === 0) {
-    return null
-  }
-
   const onclick = torrentLink.attr('onclick')
-  if (!onclick) {
-    return null
-  }
-
-  // 从 onclick 中提取 https:// 开头的 URL
-  // 示例: return popUp('https://e-hentai.org/gallerytorrents.php?gid=2735599&amp;t=6996b4bce6',610,590)
-  const match = onclick.match(/https?:\/\/[^']+/)
-  if (!match) {
-    return null
-  }
-
-  // cheerio 会自动解码 HTML 实体，再处理一下
-  return match[0].replace(/&amp;/g, '&')
-}
-
-function parsePreviewUrl(html: string): string | null {
-  const $ = cheerio.load(html)
+  const torrentsUrl = onclick?.match(/https?:\/\/[^']+/)?.[0]?.replace(/&amp;/g, '&') || null
 
   // 从 #gleft #gd1 > div 的 style 属性中提取 url(...)
   // 示例: background:transparent url(https://ehgt.org/w/01/370/52871-unblcotr.webp) 0 0 no-repeat
-  const gd1Div = $('#gleft #gd1 > div').first()
-  const style = gd1Div.attr('style')
+  const style = $('#gleft #gd1 > div').first().attr('style')
+  const previewUrl = style?.match(/url\(([^)]+)\)/)?.[1] || null
 
-  if (!style) {
-    return null
-  }
-
-  // 匹配 url(...) 中的链接
-  const match = style.match(/url\(([^)]+)\)/)
-  if (!match) {
-    return null
-  }
-
-  return match[1]
-}
-
-function parseGalleryTags(html: string, galleryId: number): string | null {
-  const $ = cheerio.load(html)
   const tags: string[] = []
-
   $('#taglist table tbody tr').each((_, tr) => {
     const namespaceText = $(tr).find('td.tc').text().trim().replace(':', '')
     const namespace = NAMESPACE_ABBREVIATIONS[namespaceText] ?? namespaceText
@@ -321,10 +242,17 @@ function parseGalleryTags(html: string, galleryId: number): string | null {
     // 可能是 gallery 过于小众，需要手动给它们加个 tag
     // 例子：https://e-hentai.org/g/508505/6b3c6730f0/
     console.error(`No tags found for gallery ${galleryId}.`)
-    return null
   }
 
-  return tags.join(', ')
+  return {
+    tags: tags.length > 0 ? tags.join(', ') : null,
+    galleryType: $('#gdc > div').first().text().trim() || null,
+    publishedTime,
+    uploader,
+    galleryLength,
+    torrentsUrl,
+    previewUrl,
+  }
 }
 
 /**

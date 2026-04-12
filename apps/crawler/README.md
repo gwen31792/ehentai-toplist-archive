@@ -95,7 +95,9 @@ pnpm deploy
 - 月度排行榜 (第1页和第2页)
 - 日度排行榜 (第1页和第2页)
 
-定时触发器现在只负责向 Cloudflare Queues (`ehentai-toplist-archive`) 投递一条消息，真正的抓取流程由队列消费者执行，以确保同一时间只有一个抓取任务在运行，并能够利用队列的重试机制处理瞬时错误。
+定时触发器现在只负责向 Cloudflare Queues (`ehentai-toplist-archive`) 投递一条消息，真正的抓取流程由队列消费者执行，以确保同一时间只有一个抓取任务在运行。
+
+当前实现并不依赖 Cloudflare Queue 的自动重试机制：队列消息在消费者中会被显式确认，失败场景通常只记录日志。`crawl-toplists` 任务只有在检测到 `This IP address has been temporarily banned` 时，才会手动重新投递一条延迟 1 小时的 `crawl-toplists` 消息，用于在临时封禁恢复后再次尝试。
 
 ## 数据处理
 

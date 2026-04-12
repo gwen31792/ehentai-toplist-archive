@@ -11,3 +11,14 @@
 - If the user needs help with an Nx configuration or project graph error, use the `nx_workspace` tool to get any errors
 
 <!-- nx configuration end-->
+
+# Git Commit Message 规范
+
+- 优先使用 Conventional Commits 格式：`type(scope): summary`
+- 默认使用仓库里已经在用的类型：`feat`、`fix`、`refactor`、`chore`、`docs`；仅在明确是性能优化时使用 `perf`
+- 当改动明确只涉及某个项目或模块时，建议加上 scope。仓库里常见的 scope 包括 `crawler`、`web`、`db`、`nx`、`date-picker`
+- `summary` 尽量使用简体中文，产品名、库名、框架名和技术关键词保留原文
+- `summary` 保持单行，描述要具体、直接、偏动作导向，通常不加句号
+- 一个 commit 只表达一个主要意图；如果包含几处相关改动，优先概括最核心的用户可见变化或架构变化
+- 如果需要补充上下文，可以在标题下空一行，再用简短正文说明原因、影响范围或后续注意事项
+- 推荐使用具体表达，例如 `feat(crawler): 增加 gallery 详细信息解析`、`fix(web): 修复表格列设置切换无效及状态不同步问题`、`chore: 升级 Next.js 至 16.0.7`
