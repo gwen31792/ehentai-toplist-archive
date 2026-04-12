@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 
-import { useSearchParams, useRouter, usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 
 import { type PeriodType } from '@ehentai-toplist-archive/db'
 import { format } from 'date-fns'
@@ -10,73 +10,75 @@ import { format } from 'date-fns'
 import { DataTable } from '@/components/data-table'
 import { DatePicker } from '@/components/date-picker'
 import { TypeSelect } from '@/components/type-select'
-import { QueryResponseItem } from '@/lib/types'
-import { parseDate, validateDateRange, validatePeriodType } from '@/lib/url-params'
+import type { QueryResponseItem } from '@/lib/types'
+import { parseDate } from '@/lib/url-params'
 
-function getUtcToday(): Date {
-  const now = new Date()
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
+interface ToplistContentProps {
+  initialData: QueryResponseItem[]
+  selectedDateString: string
+  selectedType: PeriodType
+  searchParamsString: string
 }
 
-export function ToplistContent() {
-  const searchParams = useSearchParams()
+function toSelectedDate(dateString: string): Date {
+  return parseDate(dateString) ?? new Date(dateString)
+}
+
+export function ToplistContent({
+  initialData,
+  selectedDateString,
+  selectedType,
+  searchParamsString,
+}: ToplistContentProps) {
   const router = useRouter()
   const pathname = usePathname()
+  const [isPending, startTransition] = useTransition()
+  const [currentDate, setCurrentDate] = useState<Date>(() => toSelectedDate(selectedDateString))
+  const [currentType, setCurrentType] = useState<PeriodType>(selectedType)
 
-  // 从 URL 读取并验证参数，无效则用默认值
-  const { selectedDate, selectedType } = useMemo(() => {
-    const dateParam = searchParams.get('date')
-    const parsed = parseDate(dateParam)
-    const date = validateDateRange(parsed) ? parsed : getUtcToday()
-
-    const typeParam = searchParams.get('period_type')
-    const type = validatePeriodType(typeParam)
-
-    return { selectedDate: date, selectedType: type }
-  }, [searchParams])
-
-  // 数据获取
-  const [data, setData] = useState<QueryResponseItem[]>([])
-  const [loading, setLoading] = useState(true)
   useEffect(() => {
-    async function func() {
-      setLoading(true)
-      const dateString = format(selectedDate, 'yyyy-MM-dd')
-      const res = await fetch(`/api/data?list_date=${dateString}&period_type=${selectedType}`, {
-        cache: 'force-cache',
-      })
-      setData(await res.json())
-      setLoading(false)
-    }
-    func()
-  }, [selectedDate, selectedType])
+    setCurrentDate(toSelectedDate(selectedDateString))
+  }, [selectedDateString])
+
+  useEffect(() => {
+    setCurrentType(selectedType)
+  }, [selectedType])
 
   // 更新 URL 的函数
   const updateURL = (newDate: Date, newType: PeriodType) => {
-    const params = new URLSearchParams(searchParams.toString())
+    const params = new URLSearchParams(searchParamsString)
     params.set('date', format(newDate, 'yyyy-MM-dd'))
     params.set('period_type', newType)
-    router.push(`${pathname}?${params.toString()}`, { scroll: false })
+
+    startTransition(() => {
+      router.push(`${pathname}?${params.toString()}`, { scroll: false })
+    })
   }
 
   // DatePicker 和 TypeSelect 的回调
   const handleDateChange = (date: Date) => {
-    updateURL(date, selectedType)
+    setCurrentDate(date)
+    updateURL(date, currentType)
   }
 
   const handleTypeChange = (type: PeriodType) => {
-    updateURL(selectedDate, type)
+    setCurrentType(type)
+    updateURL(currentDate, type)
   }
 
   return (
     <div className="flex flex-col items-center space-y-4">
       <div className="flex space-x-4">
-        <DatePicker date={selectedDate} onDateChange={handleDateChange} />
-        <TypeSelect type={selectedType} onSelectChange={handleTypeChange} />
+        <DatePicker date={currentDate} onDateChange={handleDateChange} />
+        <TypeSelect type={currentType} onSelectChange={handleTypeChange} />
       </div>
       <div className="w-full space-y-12">
         <div className="w-full">
-          <DataTable data={data} loading={loading} />
+          <DataTable
+            key={`${selectedDateString}-${selectedType}`}
+            data={initialData}
+            loading={isPending}
+          />
         </div>
       </div>
     </div>

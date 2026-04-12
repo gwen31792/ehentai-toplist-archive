@@ -12,6 +12,10 @@
 
 <!-- nx configuration end-->
 
+# 仓库内 Nx 命令约定
+
+- 在本仓库中执行 Nx 相关命令时，统一使用 `pnpm nx`，例如 `pnpm nx run web:build`
+
 # Git Commit Message 规范
 
 - 优先使用 Conventional Commits 格式：`type(scope): summary`

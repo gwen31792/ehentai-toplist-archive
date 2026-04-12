@@ -37,6 +37,38 @@ interface DataTableProps {
   loading: boolean
 }
 
+function buildColumnFilters({
+  selectedTags,
+  extractedTags,
+  tagFilterMode,
+  selectedTypes,
+  extractedTypes,
+}: {
+  selectedTags: Set<string>
+  extractedTags: string[]
+  tagFilterMode: 'or' | 'and'
+  selectedTypes: Set<string>
+  extractedTypes: string[]
+}): ColumnFiltersState {
+  return [
+    {
+      id: 'tags',
+      value: {
+        values: Array.from(selectedTags),
+        allSelected: selectedTags.size > 0 && selectedTags.size === extractedTags.length,
+        mode: tagFilterMode,
+      },
+    },
+    {
+      id: 'gallery_type',
+      value: {
+        values: Array.from(selectedTypes),
+        allSelected: selectedTypes.size > 0 && selectedTypes.size === extractedTypes.length,
+      },
+    },
+  ]
+}
+
 // 隐藏图片预加载组件
 const PreloadImage = ({ src }: { src: string }) => {
   return (
@@ -63,13 +95,8 @@ const columnHelper = createColumnHelper<QueryResponseItem>()
 export function DataTable({ data, loading }: DataTableProps) {
   const t = useTranslations('components.dataTable')
   const [pageIndex, setPageIndex] = useState(0)
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set())
   const tagFilterMode = useTableStore(s => s.tagFilterMode)
   const setTagFilterMode = useTableStore(s => s.setTagFilterMode)
-  const [hasUserInteracted, setHasUserInteracted] = useState(false)
-  const [selectedTypes, setSelectedTypes] = useState<Set<string>>(new Set())
-  const [hasTypeUserInteracted, setHasTypeUserInteracted] = useState(false)
 
   // 来自全局表格偏好的持久化状态
   const pageSize = useTableStore(s => s.pageSize)
@@ -115,57 +142,37 @@ export function DataTable({ data, loading }: DataTableProps) {
     return Array.from(typeSet).sort()
   }, [data])
 
+  const [selectedTags, setSelectedTags] = useState<Set<string>>(() => new Set(extractedTags))
+  const [selectedTypes, setSelectedTypes] = useState<Set<string>>(() => new Set(extractedTypes))
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(() =>
+    buildColumnFilters({
+      selectedTags: new Set(extractedTags),
+      extractedTags,
+      tagFilterMode,
+      selectedTypes: new Set(extractedTypes),
+      extractedTypes,
+    }))
+
   // 初始化标签状态（每次数据变化时重置为全选）
   useEffect(() => {
-    if (extractedTags.length > 0) {
-      setSelectedTags(new Set(extractedTags))
-      setHasUserInteracted(false)
-    }
+    setSelectedTags(new Set(extractedTags))
   }, [extractedTags])
-
-  // 当用户操作时标记已交互
-  useEffect(() => {
-    if (selectedTags.size > 0 || hasUserInteracted) {
-      setHasUserInteracted(true)
-    }
-  }, [selectedTags, hasUserInteracted])
 
   // 初始化类型状态（每次数据变化时重置为全选）
   useEffect(() => {
-    if (extractedTypes.length > 0) {
-      setSelectedTypes(new Set(extractedTypes))
-      setHasTypeUserInteracted(false)
-    }
+    setSelectedTypes(new Set(extractedTypes))
   }, [extractedTypes])
-
-  // 当用户操作类型筛选时标记已交互
-  useEffect(() => {
-    if (selectedTypes.size > 0 || hasTypeUserInteracted) {
-      setHasTypeUserInteracted(true)
-    }
-  }, [selectedTypes, hasTypeUserInteracted])
 
   // 更新列过滤器（加入模式与全选状态，切换 OR/AND/全选都会触发重算）
   useEffect(() => {
-    const filters: ColumnFiltersState = [
-      {
-        id: 'tags',
-        value: {
-          values: Array.from(selectedTags),
-          allSelected: selectedTags.size > 0 && selectedTags.size === extractedTags.length,
-          mode: tagFilterMode,
-        },
-      },
-      {
-        id: 'gallery_type',
-        value: {
-          values: Array.from(selectedTypes),
-          allSelected: selectedTypes.size > 0 && selectedTypes.size === extractedTypes.length,
-        },
-      },
-    ]
-    setColumnFilters(filters)
-  }, [selectedTags, tagFilterMode, extractedTags.length, selectedTypes, extractedTypes.length])
+    setColumnFilters(buildColumnFilters({
+      selectedTags,
+      extractedTags,
+      tagFilterMode,
+      selectedTypes,
+      extractedTypes,
+    }))
+  }, [selectedTags, extractedTags, tagFilterMode, selectedTypes, extractedTypes])
   // 数据变化时重置页码，避免跨数据集残留页码
   useEffect(() => {
     setPageIndex(0)
