@@ -5,11 +5,13 @@ import { DrizzleQueryError } from 'drizzle-orm/errors'
 import { z } from 'zod'
 
 import { type GalleryDetails, galleryDetailsSchema } from './schemas'
+import { translateTags } from './tag-translation'
 import { TemporaryBanError } from './types'
 import { delay, ehentaiFetch, getDbClient, NAMESPACE_ABBREVIATIONS, retryD1Operation } from './utils'
 
 export const UPDATE_GALLERY_MESSAGE = 'update-gallery'
 
+// 批量补全 gallery 详情页信息，并在成功或失败后更新 updated_at，避免重复打同一批数据。
 export async function handleUpdateGallery(env: Env): Promise<void> {
   console.log('Update gallery task started.')
   const db = getDbClient(env)
@@ -177,6 +179,7 @@ export async function handleUpdateGallery(env: Env): Promise<void> {
   }
 }
 
+// 从 gallery 详情页 HTML 中提取数据库需要的详情字段，供后续校验和写入使用。
 function parseGalleryDetails(html: string, galleryId: number): GalleryDetails {
   const $ = cheerio.load(html)
   let publishedTime: string | null = null
@@ -253,47 +256,4 @@ function parseGalleryDetails(html: string, galleryId: number): GalleryDetails {
     torrentsUrl,
     previewUrl,
   }
-}
-
-/**
- * 从 KV 中批量读取标签翻译
- * @param kv KV namespace binding
- * @param tagsString 原始标签字符串（格式：prefix:tag, prefix:tag, ...）
- * @returns 翻译后的标签字符串，未找到翻译的标签保留原值
- */
-async function translateTags(kv: KVNamespace, tagsString: string | null): Promise<string | null> {
-  if (!tagsString) {
-    return null
-  }
-
-  const tags = tagsString.split(', ')
-
-  // 批量读取翻译（每次最多 100 个）
-  const BATCH_SIZE = 100
-  const translationMap = new Map<string, string>()
-
-  for (let i = 0; i < tags.length; i += BATCH_SIZE) {
-    const batchKeys = tags.slice(i, i + BATCH_SIZE)
-    const batchResult = await kv.get(batchKeys, 'text')
-
-    for (const [key, value] of batchResult.entries()) {
-      if (value !== null) {
-        translationMap.set(key, value)
-      }
-    }
-  }
-
-  // 构建翻译后的标签数组
-  const translatedTags = tags.map((tag) => {
-    const translation = translationMap.get(tag)
-    if (translation) {
-      // 提取 namespace 前缀
-      const colonIndex = tag.indexOf(':')
-      const namespace = colonIndex > -1 ? tag.substring(0, colonIndex) : ''
-      return namespace ? `${namespace}:${translation}` : translation
-    }
-    return tag
-  })
-
-  return translatedTags.join(', ')
 }

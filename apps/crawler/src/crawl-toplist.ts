@@ -5,12 +5,14 @@ import { DrizzleQueryError } from 'drizzle-orm/errors'
 import { z } from 'zod'
 
 import { parsedGallerySchema, parsedToplistItemSchema } from './schemas'
+import { getTagTranslationMap, translateTagsWithMap } from './tag-translation'
 import { AbortCrawlError, type CrawlResult, type GalleryItem, TemporaryBanError, type ToplistItem } from './types'
 import { delay, ehentaiFetch, getDbClient, logCloudflareExecutionInfo, retryD1Operation } from './utils'
 
 export const CRAWL_QUEUE_MESSAGE = 'crawl-toplists'
 const RECOVERY_RETRY_DELAY_SECONDS = 3600
 
+// 抓取单个 toplist 页面，并把解析和入库串起来执行。
 export async function crawlToplistPage(env: Env, period_type: PeriodType, url: string): Promise<void> {
   try {
     const response = await ehentaiFetch(env, url, { method: 'GET' })
@@ -65,6 +67,7 @@ export async function crawlToplistPage(env: Env, period_type: PeriodType, url: s
   }
 }
 
+// 从 toplist HTML 中提取 gallery 和榜单条目，并在入库前做一次 schema 校验。
 export async function parseToplistHtml(
   data: string,
   period_type: PeriodType,
@@ -191,6 +194,8 @@ export async function parseToplistHtml(
   }
 }
 
+// 分批写入 toplist 结果；对 gallery 额外补写 tags_zh 和 updated_at，
+// 但仍保留“已被详情页更新过的数据不再覆盖”的保护条件。
 async function storeToplistData(env: Env, galleries: GalleryItem[], toplistItems: ToplistItem[]): Promise<void> {
   if (galleries.length === 0 && toplistItems.length === 0) {
     console.log('No data to persist; skipping database writes.')
@@ -202,13 +207,25 @@ async function storeToplistData(env: Env, galleries: GalleryItem[], toplistItems
   const GALLERY_BATCH_SIZE = 10
 
   if (galleries.length > 0) {
-    const galleryStatements = galleries.map(gallery =>
+    const updatedAt = new Date().toISOString().split('T')[0]
+    const translationMap = await getTagTranslationMap(
+      env.KV,
+      galleries.flatMap(gallery => gallery.tags?.split(', ').filter(Boolean) ?? []),
+    )
+    const galleriesWithMetadata = galleries.map(gallery => ({
+      ...gallery,
+      tags_zh: translateTagsWithMap(gallery.tags ?? null, translationMap),
+      updated_at: updatedAt,
+    }))
+
+    const galleryStatements = galleriesWithMetadata.map(gallery =>
       db.insert(galleriesTable).values(gallery).onConflictDoUpdate({
         target: galleriesTable.gallery_id,
         set: {
           gallery_name: gallery.gallery_name,
           gallery_type: gallery.gallery_type,
           tags: gallery.tags,
+          tags_zh: gallery.tags_zh,
           published_time: gallery.published_time,
           uploader: gallery.uploader,
           gallery_length: gallery.gallery_length,
@@ -216,6 +233,7 @@ async function storeToplistData(env: Env, galleries: GalleryItem[], toplistItems
           torrents_url: gallery.torrents_url,
           preview_url: gallery.preview_url,
           gallery_url: gallery.gallery_url,
+          updated_at: gallery.updated_at,
         },
         // 仅当 updated_at 为空时才更新，防止覆盖已被 update-gallery 任务更新过的详细数据（如完整 tags）
         where: isNull(galleriesTable.updated_at),
@@ -297,6 +315,7 @@ async function storeToplistData(env: Env, galleries: GalleryItem[], toplistItems
   console.log(`Persisted ${galleries.length} galleries and ${toplistItems.length} toplist rows.`)
 }
 
+// 顺序抓取所有榜单页面；遇到临时封禁或 451 地区封锁时尽快停止并按需重试。
 export async function handleToplistCrawling(env: Env): Promise<void> {
   const tasks = [
     ['all', 'https://e-hentai.org/toplist.php?tl=11'],
