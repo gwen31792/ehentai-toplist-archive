@@ -30,10 +30,12 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { useTableStore } from '@/lib/stores/table-store'
+import { type TablePreferences } from '@/lib/table-preferences'
 import { QueryResponseItem } from '@/lib/types'
 
 interface DataTableProps {
   data: QueryResponseItem[]
+  initialPreferences: TablePreferences
   loading: boolean
 }
 
@@ -92,7 +94,7 @@ const PreloadImage = ({ src }: { src: string }) => {
 
 const columnHelper = createColumnHelper<QueryResponseItem>()
 
-export function DataTable({ data, loading }: DataTableProps) {
+export function DataTable({ data, initialPreferences, loading }: DataTableProps) {
   const t = useTranslations('components.dataTable')
   const [pageIndex, setPageIndex] = useState(0)
   const tagFilterMode = useTableStore(s => s.tagFilterMode)
@@ -105,13 +107,22 @@ export function DataTable({ data, loading }: DataTableProps) {
   const setColumnVisibility = useTableStore(s => s.setColumnVisibility)
   const columnSizing = useTableStore(s => s.columnSizing)
   const setColumnSizing = useTableStore(s => s.setColumnSizing)
-  // 读取 hasHydrated 可用于占位渲染（当前不需要直接使用）
-  // const hasHydrated = useTableStore(s => s.hasHydrated)
+  const hasHydrated = useTableStore(s => s.hasHydrated)
 
   // 触发持久化状态水合（skipHydration: true）
   useEffect(() => {
     ;(useTableStore as unknown as { persist?: { rehydrate?: () => void } }).persist?.rehydrate?.()
   }, [])
+
+  // 在客户端持久化状态恢复前，先使用 server 传下来的首屏偏好，避免默认列闪一下。
+  const effectiveTagFilterMode = hasHydrated ? tagFilterMode : initialPreferences.tagFilterMode
+  const effectivePageSize = hasHydrated ? pageSize : initialPreferences.pageSize
+  const effectiveColumnVisibility = hasHydrated
+    ? columnVisibility
+    : initialPreferences.columnVisibility
+  const effectiveColumnSizing = hasHydrated
+    ? columnSizing
+    : initialPreferences.columnSizing
 
   // 对数据引用进行 memo
   const memoData = useMemo(() => data, [data])
@@ -148,7 +159,7 @@ export function DataTable({ data, loading }: DataTableProps) {
     buildColumnFilters({
       selectedTags: new Set(extractedTags),
       extractedTags,
-      tagFilterMode,
+      tagFilterMode: effectiveTagFilterMode,
       selectedTypes: new Set(extractedTypes),
       extractedTypes,
     }))
@@ -168,11 +179,11 @@ export function DataTable({ data, loading }: DataTableProps) {
     setColumnFilters(buildColumnFilters({
       selectedTags,
       extractedTags,
-      tagFilterMode,
+      tagFilterMode: effectiveTagFilterMode,
       selectedTypes,
       extractedTypes,
     }))
-  }, [selectedTags, extractedTags, tagFilterMode, selectedTypes, extractedTypes])
+  }, [selectedTags, extractedTags, effectiveTagFilterMode, selectedTypes, extractedTypes])
   // 数据变化时重置页码，避免跨数据集残留页码
   useEffect(() => {
     setPageIndex(0)
@@ -372,9 +383,9 @@ export function DataTable({ data, loading }: DataTableProps) {
     getPaginationRowModel: getPaginationRowModel(),
     onPaginationChange: (updater) => {
       const next = typeof updater === 'function'
-        ? updater({ pageIndex, pageSize })
+        ? updater({ pageIndex, pageSize: effectivePageSize })
         : updater
-      if (next.pageSize !== pageSize) {
+      if (next.pageSize !== effectivePageSize) {
         setPageSize(next.pageSize)
         setPageIndex(0)
       }
@@ -387,9 +398,9 @@ export function DataTable({ data, loading }: DataTableProps) {
     onColumnFiltersChange: setColumnFilters,
     columnResizeMode: 'onChange',
     state: {
-      pagination: { pageIndex, pageSize },
-      columnVisibility,
-      columnSizing,
+      pagination: { pageIndex, pageSize: effectivePageSize },
+      columnVisibility: effectiveColumnVisibility,
+      columnSizing: effectiveColumnSizing,
       columnFilters,
     },
     manualPagination: false,
@@ -409,10 +420,10 @@ export function DataTable({ data, loading }: DataTableProps) {
     <div className="mx-auto mt-8 w-full max-w-[95%]">
       <TableHeaderControls
         table={table}
-        columnVisibility={columnVisibility}
+        columnVisibility={effectiveColumnVisibility}
         selectedTags={selectedTags}
         extractedTags={extractedTags}
-        tagFilterMode={tagFilterMode}
+        tagFilterMode={effectiveTagFilterMode}
         onSelectedTagsChange={setSelectedTags}
         onTagFilterModeChange={setTagFilterMode}
         selectedTypes={selectedTypes}
@@ -502,7 +513,8 @@ export function DataTable({ data, loading }: DataTableProps) {
       </div>
 
       <TablePagination<QueryResponseItem>
-        key={`${pageSize}-${pageIndex}-${table.getFilteredRowModel().rows.length}`}
+        // pageSize 变化后强制重建分页组件，避免旧页码和新分页大小短暂串状态。
+        key={`${effectivePageSize}-${pageIndex}-${table.getFilteredRowModel().rows.length}`}
         table={table}
         content={{
           itemsPerPage: t('itemsPerPage'),

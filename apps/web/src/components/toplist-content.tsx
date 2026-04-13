@@ -10,11 +10,13 @@ import { format } from 'date-fns'
 import { DataTable } from '@/components/data-table'
 import { DatePicker } from '@/components/date-picker'
 import { TypeSelect } from '@/components/type-select'
+import { type TablePreferences } from '@/lib/table-preferences'
 import type { QueryResponseItem } from '@/lib/types'
 import { parseDate } from '@/lib/url-params'
 
 interface ToplistContentProps {
   initialData: QueryResponseItem[]
+  initialTablePreferences: TablePreferences
   selectedDateString: string
   selectedType: PeriodType
   searchParamsString: string
@@ -26,6 +28,7 @@ function toSelectedDate(dateString: string): Date {
 
 export function ToplistContent({
   initialData,
+  initialTablePreferences,
   selectedDateString,
   selectedType,
   searchParamsString,
@@ -77,6 +80,7 @@ export function ToplistContent({
           <DataTable
             key={`${selectedDateString}-${selectedType}`}
             data={initialData}
+            initialPreferences={initialTablePreferences}
             loading={isPending}
           />
         </div>

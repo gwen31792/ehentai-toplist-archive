@@ -1,3 +1,5 @@
+import { cookies } from 'next/headers'
+
 import { getTranslations } from 'next-intl/server'
 
 import { GitHubLink } from '@/components/github-link'
@@ -5,6 +7,10 @@ import { LanguageSelector } from '@/components/language-selector'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { ToplistContent } from '@/components/toplist-content'
 import { Link } from '@/lib/navigation'
+import {
+  deserializeTablePreferences,
+  TABLE_PREFERENCES_COOKIE,
+} from '@/lib/table-preferences'
 import { queryToplistItems, resolveToplistParams } from '@/lib/toplist-data'
 
 type PageSearchParams = Record<string, string | string[] | undefined>
@@ -39,15 +45,20 @@ function toSearchParamsString(searchParams: PageSearchParams): string {
 }
 
 export default async function Home({ searchParams }: HomeProps) {
-  const [t, resolvedSearchParams] = await Promise.all([
+  const [t, resolvedSearchParams, cookieStore] = await Promise.all([
     getTranslations('pages.home'),
     searchParams,
+    cookies(),
   ])
   const { selectedDateString, selectedType } = resolveToplistParams({
     dateParam: getSearchParamValue(resolvedSearchParams.date),
     periodTypeParam: getSearchParamValue(resolvedSearchParams.period_type),
   })
   const initialData = await queryToplistItems(selectedDateString, selectedType)
+  // 首屏直接读取 cookie 里的表格偏好，让 SSR 和 hydration 前的客户端视图尽量一致。
+  const initialTablePreferences = deserializeTablePreferences(
+    cookieStore.get(TABLE_PREFERENCES_COOKIE)?.value,
+  )
 
   return (
     <div className="flex min-h-[calc(100vh+50px)] flex-col items-center justify-start bg-zinc-100 transition-colors dark:bg-zinc-900">
@@ -75,6 +86,7 @@ export default async function Home({ searchParams }: HomeProps) {
       </div>
       <ToplistContent
         initialData={initialData}
+        initialTablePreferences={initialTablePreferences}
         selectedDateString={selectedDateString}
         selectedType={selectedType}
         searchParamsString={toSearchParamsString(resolvedSearchParams)}
