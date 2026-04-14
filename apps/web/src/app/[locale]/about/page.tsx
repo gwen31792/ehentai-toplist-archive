@@ -1,15 +1,15 @@
-'use client'
-
-import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 
 import { GitHubLink } from '@/components/github-link'
 import { LanguageSelector } from '@/components/language-selector'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Link } from '@/lib/navigation'
 
-export default function About() {
-  const t = useTranslations('pages.about')
-  const tSections = useTranslations('pages.about.sections')
+export default async function About() {
+  const [t, tSections] = await Promise.all([
+    getTranslations('pages.about'),
+    getTranslations('pages.about.sections'),
+  ])
 
   return (
     <div className="flex min-h-screen flex-col items-center bg-zinc-100 transition-colors dark:bg-zinc-900">
