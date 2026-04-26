@@ -79,3 +79,16 @@ cloudflare-env.d.ts
 .github/instructions/nx.instructions.md
 .claude/worktrees
 .claude/settings.local.json
+
+.nx/polygraph
+
+# local agent/MCP tooling
+.mcp.json
+.agents/
+.codex/
+.opencode/
+opencode.json
+.claude/settings.json
+.github/agents/
+.github/prompts/
+.github/skills/

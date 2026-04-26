@@ -73,6 +73,9 @@
       "month": "Past Month",
       "year": "Past Year",
       "all": "All-Time"
+    },
+    "toplistQueryControls": {
+      "updatingResults": "Updating results..."
     }
   }
 }

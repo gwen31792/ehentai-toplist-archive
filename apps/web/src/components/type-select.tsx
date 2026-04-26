@@ -1,4 +1,4 @@
-import { useTranslations } from 'next-intl'
+'use client'
 
 import {
   Select,
@@ -7,26 +7,51 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { PeriodType } from '@/lib/types'
+import { type PeriodType } from '@/lib/types'
+
+export interface TypeSelectContent {
+  placeholder: string
+  day: string
+  month: string
+  year: string
+  all: string
+}
 
 interface TypeSelectProps {
   type: PeriodType
   onSelectChange: (type: PeriodType) => void
+  content: TypeSelectContent
+  disabled?: boolean
 }
 
-export function TypeSelect({ type, onSelectChange }: TypeSelectProps) {
-  const t = useTranslations('components.typeSelect')
-
+export function TypeSelect({
+  type,
+  onSelectChange,
+  content,
+  disabled = false,
+}: TypeSelectProps) {
   return (
-    <Select value={type} onValueChange={onSelectChange}>
+    <Select
+      value={type}
+      onValueChange={value => onSelectChange(value as PeriodType)}
+      disabled={disabled}
+    >
       <SelectTrigger className="w-[180px] bg-zinc-50 dark:bg-zinc-800">
-        <SelectValue placeholder={t('placeholder')} />
+        <SelectValue placeholder={content.placeholder} />
       </SelectTrigger>
       <SelectContent className="bg-zinc-50 dark:bg-zinc-800">
-        <SelectItem value="day" className="dark:hover:bg-zinc-700 dark:data-highlighted:bg-zinc-700">{t('day')}</SelectItem>
-        <SelectItem value="month" className="dark:hover:bg-zinc-700 dark:data-highlighted:bg-zinc-700">{t('month')}</SelectItem>
-        <SelectItem value="year" className="dark:hover:bg-zinc-700 dark:data-highlighted:bg-zinc-700">{t('year')}</SelectItem>
-        <SelectItem value="all" className="dark:hover:bg-zinc-700 dark:data-highlighted:bg-zinc-700">{t('all')}</SelectItem>
+        <SelectItem value="day" className="dark:hover:bg-zinc-700 dark:data-highlighted:bg-zinc-700">
+          {content.day}
+        </SelectItem>
+        <SelectItem value="month" className="dark:hover:bg-zinc-700 dark:data-highlighted:bg-zinc-700">
+          {content.month}
+        </SelectItem>
+        <SelectItem value="year" className="dark:hover:bg-zinc-700 dark:data-highlighted:bg-zinc-700">
+          {content.year}
+        </SelectItem>
+        <SelectItem value="all" className="dark:hover:bg-zinc-700 dark:data-highlighted:bg-zinc-700">
+          {content.all}
+        </SelectItem>
       </SelectContent>
     </Select>
   )

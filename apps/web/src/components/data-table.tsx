@@ -20,7 +20,6 @@ import { ImageWithSkeleton } from '@/components/image-with-skeleton'
 import { TableHeaderControls } from '@/components/table-header-controls'
 import { TablePagination } from '@/components/table-pagination'
 import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/hover-card'
-import { Skeleton } from '@/components/ui/skeleton'
 import {
   Table,
   TableBody,
@@ -36,7 +35,6 @@ import { QueryResponseItem } from '@/lib/types'
 interface DataTableProps {
   data: QueryResponseItem[]
   initialPreferences: TablePreferences
-  loading: boolean
 }
 
 function buildColumnFilters({
@@ -94,7 +92,7 @@ const PreloadImage = ({ src }: { src: string }) => {
 
 const columnHelper = createColumnHelper<QueryResponseItem>()
 
-export function DataTable({ data, initialPreferences, loading }: DataTableProps) {
+export function DataTable({ data, initialPreferences }: DataTableProps) {
   const t = useTranslations('components.dataTable')
   const [pageIndex, setPageIndex] = useState(0)
   const tagFilterMode = useTableStore(s => s.tagFilterMode)
@@ -406,18 +404,8 @@ export function DataTable({ data, initialPreferences, loading }: DataTableProps)
     manualPagination: false,
   })
 
-  const SkeletonRow = () => (
-    <TableRow>
-      {table.getVisibleLeafColumns().map(col => (
-        <TableCell key={col.id}>
-          <Skeleton className="h-4 w-full bg-zinc-200 dark:bg-zinc-800" />
-        </TableCell>
-      ))}
-    </TableRow>
-  )
-
   return (
-    <div className="mx-auto mt-8 w-full max-w-[95%]">
+    <div className="mx-auto mt-6 w-full max-w-[95%]">
       <TableHeaderControls
         table={table}
         columnVisibility={effectiveColumnVisibility}
@@ -473,41 +461,31 @@ export function DataTable({ data, initialPreferences, loading }: DataTableProps)
             ))}
           </TableHeader>
           <TableBody>
-            {loading
+            {table.getFilteredRowModel().rows.length === 0
               ? (
-                  <>
-                    <SkeletonRow />
-                    <SkeletonRow />
-                    <SkeletonRow />
-                    <SkeletonRow />
-                    <SkeletonRow />
-                  </>
+                  <TableRow>
+                    <TableCell colSpan={table.getVisibleLeafColumns().length} className="h-24 text-center">
+                      {t('noData')}
+                    </TableCell>
+                  </TableRow>
                 )
-              : table.getFilteredRowModel().rows.length === 0
-                ? (
-                    <TableRow>
-                      <TableCell colSpan={table.getVisibleLeafColumns().length} className="h-24 text-center">
-                        {t('noData')}
-                      </TableCell>
+              : (
+                  table.getRowModel().rows.map(row => (
+                    <TableRow key={row.id} className="dark:hover:bg-zinc-700">
+                      {row.getVisibleCells().map(cell => (
+                        <TableCell
+                          key={cell.id}
+                          className="align-top py-2"
+                          style={{
+                            width: cell.column.getSize(),
+                          }}
+                        >
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
                     </TableRow>
-                  )
-                : (
-                    table.getRowModel().rows.map(row => (
-                      <TableRow key={row.id} className="dark:hover:bg-zinc-700">
-                        {row.getVisibleCells().map(cell => (
-                          <TableCell
-                            key={cell.id}
-                            className="align-top py-2"
-                            style={{
-                              width: cell.column.getSize(),
-                            }}
-                          >
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))
-                  )}
+                  ))
+                )}
           </TableBody>
         </Table>
       </div>

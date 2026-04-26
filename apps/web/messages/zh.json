@@ -73,6 +73,9 @@
       "month": "过去一个月",
       "year": "过去一年",
       "all": "所有时间"
+    },
+    "toplistQueryControls": {
+      "updatingResults": "正在更新结果..."
     }
   }
 }

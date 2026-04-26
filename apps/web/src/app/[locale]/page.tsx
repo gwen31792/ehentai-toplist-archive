@@ -2,10 +2,11 @@ import { cookies } from 'next/headers'
 
 import { getTranslations } from 'next-intl/server'
 
+import { DataTable } from '@/components/data-table'
 import { GitHubLink } from '@/components/github-link'
 import { LanguageSelector } from '@/components/language-selector'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { ToplistContent } from '@/components/toplist-content'
+import { ToplistQueryControls } from '@/components/toplist-query-controls'
 import { Link } from '@/lib/navigation'
 import {
   deserializeTablePreferences,
@@ -13,12 +14,16 @@ import {
 } from '@/lib/table-preferences'
 import { queryToplistItems, resolveToplistParams } from '@/lib/toplist-data'
 
+// 首页 server page：负责解析 URL、查询首屏数据，并把查询控件和表格拼装起来。
+
 type PageSearchParams = Record<string, string | string[] | undefined>
 
 type HomeProps = {
+  params: Promise<{ locale: 'en' | 'zh' }>
   searchParams: Promise<PageSearchParams>
 }
 
+// Next 的 searchParams 可能是 string / string[] / undefined，这里统一收敛成单值。
 function getSearchParamValue(value: string | string[] | undefined): string | null {
   if (Array.isArray(value)) {
     return value[0] ?? null
@@ -27,6 +32,7 @@ function getSearchParamValue(value: string | string[] | undefined): string | nul
   return value ?? null
 }
 
+// 查询控件需要把当前 URL 参数原样带回客户端，继续在其基础上覆盖 date / period_type。
 function toSearchParamsString(searchParams: PageSearchParams): string {
   const params = new URLSearchParams()
 
@@ -44,17 +50,42 @@ function toSearchParamsString(searchParams: PageSearchParams): string {
   return params.toString()
 }
 
-export default async function Home({ searchParams }: HomeProps) {
-  const [t, resolvedSearchParams, cookieStore] = await Promise.all([
-    getTranslations('pages.home'),
-    searchParams,
-    cookies(),
-  ])
+export default async function Home({ params, searchParams }: HomeProps) {
+  const pageTranslationsPromise = getTranslations('pages.home')
+  const datePickerTranslationsPromise = getTranslations('components.datePicker')
+  const typeSelectTranslationsPromise = getTranslations('components.typeSelect')
+  const toplistQueryControlsTranslationsPromise = getTranslations('components.toplistQueryControls')
+  const cookieStorePromise = cookies()
+
+  const resolvedSearchParams = await searchParams
+
+  // server 侧统一校正 URL 参数，避免客户端和服务端对“当前查询条件”的理解不一致。
   const { selectedDateString, selectedType } = resolveToplistParams({
     dateParam: getSearchParamValue(resolvedSearchParams.date),
     periodTypeParam: getSearchParamValue(resolvedSearchParams.period_type),
   })
-  const initialData = await queryToplistItems(selectedDateString, selectedType)
+
+  // 查询条件一确定就启动 DB 查询，让它和翻译、cookie、locale 准备并行。
+  const initialDataPromise = queryToplistItems(selectedDateString, selectedType)
+
+  const [
+    t,
+    datePickerT,
+    typeSelectT,
+    toplistQueryControlsT,
+    cookieStore,
+    { locale },
+    initialData,
+  ] = await Promise.all([
+    pageTranslationsPromise,
+    datePickerTranslationsPromise,
+    typeSelectTranslationsPromise,
+    toplistQueryControlsTranslationsPromise,
+    cookieStorePromise,
+    params,
+    initialDataPromise,
+  ])
+
   // 首屏直接读取 cookie 里的表格偏好，让 SSR 和 hydration 前的客户端视图尽量一致。
   const initialTablePreferences = deserializeTablePreferences(
     cookieStore.get(TABLE_PREFERENCES_COOKIE)?.value,
@@ -84,14 +115,35 @@ export default async function Home({ searchParams }: HomeProps) {
           })}
         </p>
       </div>
-      <ToplistContent
-        initialData={initialData}
-        initialTablePreferences={initialTablePreferences}
-        selectedDateString={selectedDateString}
-        selectedType={selectedType}
-        searchParamsString={toSearchParamsString(resolvedSearchParams)}
-      />
-
+      <div className="flex w-full flex-col items-center space-y-3">
+        <ToplistQueryControls
+          selectedDateString={selectedDateString}
+          selectedType={selectedType}
+          searchParamsString={toSearchParamsString(resolvedSearchParams)}
+          locale={locale}
+          datePickerContent={{
+            selectDate: datePickerT('selectDate'),
+          }}
+          typeSelectContent={{
+            placeholder: typeSelectT('placeholder'),
+            day: typeSelectT('day'),
+            month: typeSelectT('month'),
+            year: typeSelectT('year'),
+            all: typeSelectT('all'),
+          }}
+          pendingText={toplistQueryControlsT('updatingResults')}
+        />
+        <div className="w-full space-y-12">
+          <div className="w-full">
+            <DataTable
+              // 查询条件变化后重建表格，让分页和筛选状态以新的数据集重新计算。
+              key={`${selectedDateString}-${selectedType}`}
+              data={initialData}
+              initialPreferences={initialTablePreferences}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

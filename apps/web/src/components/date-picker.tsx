@@ -1,11 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 import { format } from 'date-fns'
 import { zhCN, enUS } from 'date-fns/locale'
 import { CalendarIcon } from 'lucide-react'
-import { useTranslations, useLocale } from 'next-intl'
 
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
@@ -14,49 +13,83 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { cn } from '@/lib/utils'
-
-interface DatePickerProps {
-  date: Date
-  onDateChange: (date: Date) => void
-}
 
 const localeMap = {
   en: enUS,
   zh: zhCN,
 }
 
-function getUtcToday() {
-  const now = new Date()
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
+export type DatePickerLocale = keyof typeof localeMap
+
+export interface DatePickerContent {
+  selectDate: string
 }
 
-export function DatePicker({ date: externalDate, onDateChange }: DatePickerProps) {
-  const [internalDate, setInternalDate] = useState<Date>(externalDate)
-  const todayUtc = getUtcToday()
-  // 设置初始月份为当前日期或选中日期
-  const [month, setMonth] = useState<Date>(() => externalDate)
-  const t = useTranslations('components.datePicker')
-  const locale = useLocale() as 'en' | 'zh'
+interface DatePickerProps {
+  dateString: string
+  onDateChange: (dateString: string) => void
+  locale: DatePickerLocale
+  content: DatePickerContent
+  disabled?: boolean
+}
 
-  // 同步外部状态
-  useEffect(() => {
-    setInternalDate(externalDate)
-    setMonth(externalDate)
-  }, [externalDate])
+function getUtcTodayString() {
+  const now = new Date()
+  const year = now.getUTCFullYear()
+  const month = String(now.getUTCMonth() + 1).padStart(2, '0')
+  const day = String(now.getUTCDate()).padStart(2, '0')
+
+  return `${year}-${month}-${day}`
+}
+
+function toCalendarDate(dateString: string): Date {
+  const [year, month, day] = dateString.split('-').map(Number)
+  return new Date(year, month - 1, day)
+}
+
+function toDateString(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+
+  return `${year}-${month}-${day}`
+}
+
+export function DatePicker({
+  dateString,
+  onDateChange,
+  locale,
+  content,
+  disabled = false,
+}: DatePickerProps) {
+  const [open, setOpen] = useState(false)
+  const today = toCalendarDate(getUtcTodayString())
+  const selectedDate = toCalendarDate(dateString)
+  // 设置初始月份为当前日期或选中日期
+  const [month, setMonth] = useState<Date>(() => selectedDate)
+  const formattedDate = format(selectedDate, 'PPP', { locale: localeMap[locale] })
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (disabled || !nextOpen) {
+      setOpen(false)
+      return
+    }
+
+    setMonth(selectedDate)
+    setOpen(true)
+  }
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          className={cn(
-            'w-[280px] justify-start text-left font-normal bg-zinc-50 dark:bg-zinc-800',
-            !internalDate && 'text-muted-foreground',
-          )}
+          className="w-[280px] justify-start bg-zinc-50 text-left font-normal dark:bg-zinc-800"
+          disabled={disabled}
+          aria-label={`${content.selectDate}: ${formattedDate}`}
         >
           <CalendarIcon className="mr-2 size-4" />
-          {internalDate ? format(internalDate, 'PPP', { locale: localeMap[locale] }) : <span>{t('selectDate')}</span>}
+          {formattedDate}
         </Button>
       </PopoverTrigger>
       <PopoverContent
@@ -66,22 +99,22 @@ export function DatePicker({ date: externalDate, onDateChange }: DatePickerProps
       >
         <Calendar
           mode="single"
-          selected={internalDate}
+          selected={selectedDate}
           captionLayout="dropdown"
           required={true} // 防止取消点击传输 undefined 日期
           onSelect={(newDate) => {
-            if (newDate && newDate <= todayUtc) {
-              setInternalDate(newDate)
+            if (!disabled && newDate && newDate <= today) {
               setMonth(newDate) // 同步更新月份显示
-              onDateChange(newDate as Date)
+              setOpen(false)
+              onDateChange(toDateString(newDate))
             }
           }}
           month={month}
           onMonthChange={setMonth}
           startMonth={new Date(2023, 10, 15)} // 2023-11-15
-          endMonth={todayUtc}
+          endMonth={today}
           disabled={[
-            { after: todayUtc },
+            { after: today },
             { before: new Date(2023, 10, 15) },
           ]}
           locale={localeMap[locale]}
