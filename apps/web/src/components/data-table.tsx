@@ -28,7 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { useTableStore } from '@/lib/stores/table-store'
+import { hydrateTableStoreOnce, useTableStore } from '@/lib/stores/table-store'
 import { type TablePreferences } from '@/lib/table-preferences'
 import { QueryResponseItem } from '@/lib/types'
 
@@ -109,7 +109,7 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
 
   // 触发持久化状态水合（skipHydration: true）
   useEffect(() => {
-    ;(useTableStore as unknown as { persist?: { rehydrate?: () => void } }).persist?.rehydrate?.()
+    void hydrateTableStoreOnce()
   }, [])
 
   // 在客户端持久化状态恢复前，先使用 server 传下来的首屏偏好，避免默认列闪一下。

@@ -5,7 +5,7 @@
 ## 中优先级
 - [ ] nextjs 16 升级
 - [ ] 好好梳理一下对于 zod 的使用
-- [ ] 优化 `DataTable` 持久化状态 hydration，避免按查询条件重建表格时重复触发 store rehydrate
+- [x] 优化 `DataTable` 持久化状态 hydration，避免按查询条件重建表格时重复触发 store rehydrate
 - [ ] 清理 `DataTable` 中无实际收益的 `useMemo(() => data, [data])`
 - [ ] 将 `TypeSelect` 的周期选项收敛为 typed options 数组生成，避免 `PeriodType` 扩展时选项和文案漏同步
 

@@ -111,3 +111,19 @@ export const useTableStore = create<TableState>()(
     },
   ),
 )
+
+let tableStoreHydrationPromise: Promise<void> | undefined
+
+// DataTable 会因查询条件变化而 remount；这里把持久化状态恢复收敛为客户端一次，避免重复读写 storage。
+export function hydrateTableStoreOnce(): Promise<void> {
+  if (useTableStore.persist.hasHydrated()) {
+    return tableStoreHydrationPromise ?? Promise.resolve()
+  }
+
+  tableStoreHydrationPromise ??= Promise.resolve(useTableStore.persist.rehydrate())
+    .finally(() => {
+      tableStoreHydrationPromise = undefined
+    })
+
+  return tableStoreHydrationPromise
+}
