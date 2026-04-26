@@ -122,9 +122,6 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
     ? columnSizing
     : initialPreferences.columnSizing
 
-  // 对数据引用进行 memo
-  const memoData = useMemo(() => data, [data])
-
   // 提取所有唯一标签
   const extractedTags = useMemo(() => {
     const tagSet = new Set<string>()
@@ -185,7 +182,7 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
   // 数据变化时重置页码，避免跨数据集残留页码
   useEffect(() => {
     setPageIndex(0)
-  }, [memoData])
+  }, [data])
 
   const CellWrapper = ({ children }: { children: React.ReactNode }) => (
     <div className="whitespace-normal break-all text-sm">
@@ -374,7 +371,7 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
 
   // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table's useReactTable returns stable function references
   const table = useReactTable({
-    data: memoData,
+    data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),

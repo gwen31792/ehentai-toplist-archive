@@ -5,9 +5,6 @@
 ## 中优先级
 - [ ] nextjs 16 升级
 - [ ] 好好梳理一下对于 zod 的使用
-- [x] 优化 `DataTable` 持久化状态 hydration，避免按查询条件重建表格时重复触发 store rehydrate
-- [ ] 清理 `DataTable` 中无实际收益的 `useMemo(() => data, [data])`
-- [ ] 将 `TypeSelect` 的周期选项收敛为 typed options 数组生成，避免 `PeriodType` 扩展时选项和文案漏同步
 
 ## 低优先级
 - [ ] 对数据库查询的缓存，从 F12 看，相同内容还是会重发请求
@@ -20,6 +17,7 @@
 - [ ] 等 eslint-plugin-tailwindcss 支持 Tailwind CSS v4 后重新添加到项目中
 - [ ] galleries 表回扫详细数据，比如 Rating
 - [ ] 使用 <Activity>: https://react.dev/reference/react/Activity
+- [ ] 研究 Cloudflare Agent Readiness: https://blog.cloudflare.com/agent-readiness/
 
 # 专项
 ## 图片加载速度解决方案
