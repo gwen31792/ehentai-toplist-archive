@@ -1,26 +1,41 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 
 import { Languages } from 'lucide-react'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
+import { PendingStatusBadge } from '@/components/pending-status-badge'
 import { locales } from '@/i18n/routing'
 import { usePathname, useRouter } from '@/lib/navigation'
 
 export function LanguageSelector() {
   const [isOpen, setIsOpen] = useState(false)
+  const [isPending, startTransition] = useTransition()
   const dropdownRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
   const router = useRouter()
   const currentLocale = useLocale()
+  const pendingStatusT = useTranslations('components.pendingStatus')
 
-  const toggleDropdown = () => setIsOpen(!isOpen)
+  const toggleDropdown = () => {
+    if (isPending) {
+      return
+    }
+
+    setIsOpen(open => !open)
+  }
 
   const selectLanguage = (locale: string) => {
     setIsOpen(false)
+    if (isPending || locale === currentLocale) {
+      return
+    }
+
     // 触发路由切换，然后在 effect 中处理副作用
-    router.replace(pathname, { locale })
+    startTransition(() => {
+      router.replace(pathname, { locale })
+    })
   }
 
   useEffect(() => {
@@ -54,9 +69,7 @@ export function LanguageSelector() {
       <button
         onClick={toggleDropdown}
         className="flex items-center rounded-full bg-zinc-100 p-2 text-zinc-900 transition-colors hover:text-zinc-600 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:text-zinc-400"
-        aria-label="Select language"
-        aria-expanded={isOpen}
-        aria-haspopup="true"
+        disabled={isPending}
       >
         <Languages size={24} />
       </button>
@@ -68,12 +81,18 @@ export function LanguageSelector() {
               className={`block w-full px-4 py-2 text-left text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-700 ${currentLocale === locale ? 'bg-zinc-100 dark:bg-zinc-700' : ''
               }`}
               onClick={() => selectLanguage(locale)}
+              disabled={isPending}
             >
               {languageNames[locale as keyof typeof languageNames]}
             </button>
           ))}
         </div>
       )}
+      <PendingStatusBadge
+        show={isPending}
+        text={pendingStatusT('updatingResults')}
+        className="left-auto right-0 translate-x-0"
+      />
     </div>
   )
 }

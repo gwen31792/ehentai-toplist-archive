@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { format } from 'date-fns'
 import { zhCN, enUS } from 'date-fns/locale'
 import { CalendarIcon } from 'lucide-react'
+import { useLocale } from 'next-intl'
 
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
@@ -19,17 +20,11 @@ const localeMap = {
   zh: zhCN,
 }
 
-export type DatePickerLocale = keyof typeof localeMap
-
-export interface DatePickerContent {
-  selectDate: string
-}
+type DatePickerLocale = keyof typeof localeMap
 
 interface DatePickerProps {
   dateString: string
   onDateChange: (dateString: string) => void
-  locale: DatePickerLocale
-  content: DatePickerContent
   disabled?: boolean
 }
 
@@ -58,16 +53,16 @@ function toDateString(date: Date): string {
 export function DatePicker({
   dateString,
   onDateChange,
-  locale,
-  content,
   disabled = false,
 }: DatePickerProps) {
+  const locale = useLocale() as DatePickerLocale
   const [open, setOpen] = useState(false)
   const today = toCalendarDate(getUtcTodayString())
   const selectedDate = toCalendarDate(dateString)
   // 设置初始月份为当前日期或选中日期
   const [month, setMonth] = useState<Date>(() => selectedDate)
-  const formattedDate = format(selectedDate, 'PPP', { locale: localeMap[locale] })
+  const datePickerLocale = localeMap[locale] ?? localeMap.en
+  const formattedDate = format(selectedDate, 'PPP', { locale: datePickerLocale })
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (disabled || !nextOpen) {
@@ -86,7 +81,6 @@ export function DatePicker({
           variant="outline"
           className="w-[280px] justify-start bg-zinc-50 text-left font-normal dark:bg-zinc-800"
           disabled={disabled}
-          aria-label={`${content.selectDate}: ${formattedDate}`}
         >
           <CalendarIcon className="mr-2 size-4" />
           {formattedDate}
@@ -117,7 +111,7 @@ export function DatePicker({
             { after: today },
             { before: new Date(2023, 10, 15) },
           ]}
-          locale={localeMap[locale]}
+          locale={datePickerLocale}
           fixedWeeks
         />
       </PopoverContent>

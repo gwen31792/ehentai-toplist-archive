@@ -30,7 +30,6 @@ export function ThemeToggle() {
     <button
       onClick={toggleDarkMode}
       className="rounded-full bg-zinc-100 p-2 text-zinc-900 transition-colors hover:text-zinc-600 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:text-zinc-400"
-      aria-label="Toggle dark mode"
     >
       {darkMode ? <Sun size={24} /> : <Moon size={24} />}
     </button>

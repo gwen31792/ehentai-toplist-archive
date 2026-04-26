@@ -74,7 +74,7 @@
       "year": "Past Year",
       "all": "All-Time"
     },
-    "toplistQueryControls": {
+    "pendingStatus": {
       "updatingResults": "Updating results..."
     }
   }

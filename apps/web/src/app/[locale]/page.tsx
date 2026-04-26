@@ -19,7 +19,6 @@ import { queryToplistItems, resolveToplistParams } from '@/lib/toplist-data'
 type PageSearchParams = Record<string, string | string[] | undefined>
 
 type HomeProps = {
-  params: Promise<{ locale: 'en' | 'zh' }>
   searchParams: Promise<PageSearchParams>
 }
 
@@ -50,11 +49,8 @@ function toSearchParamsString(searchParams: PageSearchParams): string {
   return params.toString()
 }
 
-export default async function Home({ params, searchParams }: HomeProps) {
+export default async function Home({ searchParams }: HomeProps) {
   const pageTranslationsPromise = getTranslations('pages.home')
-  const datePickerTranslationsPromise = getTranslations('components.datePicker')
-  const typeSelectTranslationsPromise = getTranslations('components.typeSelect')
-  const toplistQueryControlsTranslationsPromise = getTranslations('components.toplistQueryControls')
   const cookieStorePromise = cookies()
 
   const resolvedSearchParams = await searchParams
@@ -65,24 +61,16 @@ export default async function Home({ params, searchParams }: HomeProps) {
     periodTypeParam: getSearchParamValue(resolvedSearchParams.period_type),
   })
 
-  // 查询条件一确定就启动 DB 查询，让它和翻译、cookie、locale 准备并行。
+  // 查询条件一确定就启动 DB 查询，让它和翻译、cookie 准备并行。
   const initialDataPromise = queryToplistItems(selectedDateString, selectedType)
 
   const [
     t,
-    datePickerT,
-    typeSelectT,
-    toplistQueryControlsT,
     cookieStore,
-    { locale },
     initialData,
   ] = await Promise.all([
     pageTranslationsPromise,
-    datePickerTranslationsPromise,
-    typeSelectTranslationsPromise,
-    toplistQueryControlsTranslationsPromise,
     cookieStorePromise,
-    params,
     initialDataPromise,
   ])
 
@@ -120,18 +108,6 @@ export default async function Home({ params, searchParams }: HomeProps) {
           selectedDateString={selectedDateString}
           selectedType={selectedType}
           searchParamsString={toSearchParamsString(resolvedSearchParams)}
-          locale={locale}
-          datePickerContent={{
-            selectDate: datePickerT('selectDate'),
-          }}
-          typeSelectContent={{
-            placeholder: typeSelectT('placeholder'),
-            day: typeSelectT('day'),
-            month: typeSelectT('month'),
-            year: typeSelectT('year'),
-            all: typeSelectT('all'),
-          }}
-          pendingText={toplistQueryControlsT('updatingResults')}
         />
         <div className="w-full space-y-12">
           <div className="w-full">

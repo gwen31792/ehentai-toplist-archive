@@ -1,5 +1,7 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
+
 import {
   Select,
   SelectContent,
@@ -9,27 +11,19 @@ import {
 } from '@/components/ui/select'
 import { type PeriodType } from '@/lib/types'
 
-export interface TypeSelectContent {
-  placeholder: string
-  day: string
-  month: string
-  year: string
-  all: string
-}
-
 interface TypeSelectProps {
   type: PeriodType
   onSelectChange: (type: PeriodType) => void
-  content: TypeSelectContent
   disabled?: boolean
 }
 
 export function TypeSelect({
   type,
   onSelectChange,
-  content,
   disabled = false,
 }: TypeSelectProps) {
+  const t = useTranslations('components.typeSelect')
+
   return (
     <Select
       value={type}
@@ -37,20 +31,20 @@ export function TypeSelect({
       disabled={disabled}
     >
       <SelectTrigger className="w-[180px] bg-zinc-50 dark:bg-zinc-800">
-        <SelectValue placeholder={content.placeholder} />
+        <SelectValue placeholder={t('placeholder')} />
       </SelectTrigger>
       <SelectContent className="bg-zinc-50 dark:bg-zinc-800">
         <SelectItem value="day" className="dark:hover:bg-zinc-700 dark:data-highlighted:bg-zinc-700">
-          {content.day}
+          {t('day')}
         </SelectItem>
         <SelectItem value="month" className="dark:hover:bg-zinc-700 dark:data-highlighted:bg-zinc-700">
-          {content.month}
+          {t('month')}
         </SelectItem>
         <SelectItem value="year" className="dark:hover:bg-zinc-700 dark:data-highlighted:bg-zinc-700">
-          {content.year}
+          {t('year')}
         </SelectItem>
         <SelectItem value="all" className="dark:hover:bg-zinc-700 dark:data-highlighted:bg-zinc-700">
-          {content.all}
+          {t('all')}
         </SelectItem>
       </SelectContent>
     </Select>

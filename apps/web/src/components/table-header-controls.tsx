@@ -61,8 +61,6 @@ export function TableHeaderControls<TData>({
                 size="sm"
                 className={`h-9 px-3 text-sm ${tagFilterMode === 'or' ? '' : 'text-zinc-700 dark:text-zinc-300'}`}
                 onClick={() => onTagFilterModeChange('or')}
-                aria-pressed={tagFilterMode === 'or'}
-                aria-label={t('matchAnyHint')}
               >
                 {t('matchAnyShort')}
               </Button>
@@ -83,8 +81,6 @@ export function TableHeaderControls<TData>({
                 size="sm"
                 className={`h-9 px-3 text-sm ${tagFilterMode === 'and' ? '' : 'text-zinc-700 dark:text-zinc-300'}`}
                 onClick={() => onTagFilterModeChange('and')}
-                aria-pressed={tagFilterMode === 'and'}
-                aria-label={t('matchAllHint')}
               >
                 {t('matchAllShort')}
               </Button>
