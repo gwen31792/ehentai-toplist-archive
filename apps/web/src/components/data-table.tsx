@@ -14,7 +14,7 @@ import {
   flexRender,
   ColumnFiltersState,
 } from '@tanstack/react-table'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 import { ImageWithSkeleton } from '@/components/image-with-skeleton'
 import { TableHeaderControls } from '@/components/table-header-controls'
@@ -92,8 +92,17 @@ const PreloadImage = ({ src }: { src: string }) => {
 
 const columnHelper = createColumnHelper<QueryResponseItem>()
 
+function getLocalizedTags(item: QueryResponseItem, locale: string): string {
+  if (locale === 'zh') {
+    return item.tags_zh?.trim() || item.tags?.trim() || ''
+  }
+
+  return item.tags?.trim() || ''
+}
+
 export function DataTable({ data, initialPreferences }: DataTableProps) {
   const t = useTranslations('components.dataTable')
+  const locale = useLocale()
   const [pageIndex, setPageIndex] = useState(0)
   const tagFilterMode = useTableStore(s => s.tagFilterMode)
   const setTagFilterMode = useTableStore(s => s.setTagFilterMode)
@@ -122,12 +131,13 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
     ? columnSizing
     : initialPreferences.columnSizing
 
-  // 提取所有唯一标签
+  // 提取当前语言下的唯一标签；中文翻译缺失时回退英文 tags，避免筛选丢行。
   const extractedTags = useMemo(() => {
     const tagSet = new Set<string>()
     data.forEach((item) => {
-      if (item.tags) {
-        item.tags.split(/\s*,\s*/).forEach((tag) => {
+      const tags = getLocalizedTags(item, locale)
+      if (tags) {
+        tags.split(/\s*,\s*/).forEach((tag) => {
           if (tag.trim()) {
             tagSet.add(tag.trim())
           }
@@ -135,7 +145,7 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
       }
     })
     return Array.from(tagSet).sort()
-  }, [data])
+  }, [data, locale])
 
   // 提取所有唯一类型
   const extractedTypes = useMemo(() => {
@@ -294,7 +304,8 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
         return selected.has(type.trim())
       },
     }),
-    columnHelper.accessor('tags', {
+    columnHelper.accessor(row => getLocalizedTags(row, locale), {
+      id: 'tags',
       header: () => t('headers.tags'),
       cell: info => <CellWrapper>{info.getValue()}</CellWrapper>,
       size: 300,
@@ -367,7 +378,7 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
       ),
       size: 80,
     }),
-  ]), [t])
+  ]), [locale, t])
 
   // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table's useReactTable returns stable function references
   const table = useReactTable({

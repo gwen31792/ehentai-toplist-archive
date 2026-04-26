@@ -51,7 +51,7 @@ export async function queryToplistItems(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { list_date, period_type, ...toplistColumns } = getTableColumns(toplistItemsTable)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { updated_at, tags_zh, ...galleryColumns } = getTableColumns(galleriesTable)
+  const { updated_at, ...galleryColumns } = getTableColumns(galleriesTable)
 
   const result = await db.select(
     {
