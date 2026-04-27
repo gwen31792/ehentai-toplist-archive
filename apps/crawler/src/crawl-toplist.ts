@@ -7,10 +7,34 @@ import { z } from 'zod'
 import { parsedGallerySchema, parsedToplistItemSchema } from './schemas'
 import { getTagTranslationMap, translateTagsWithMap } from './tag-translation'
 import { AbortCrawlError, type CrawlResult, type GalleryItem, TemporaryBanError, type ToplistItem } from './types'
-import { delay, ehentaiFetch, getDbClient, logCloudflareExecutionInfo, retryD1Operation } from './utils'
+import { delay, ehentaiFetch, getDbClient, logCloudflareExecutionInfo, NAMESPACE_ABBREVIATIONS, retryD1Operation } from './utils'
 
 export const CRAWL_QUEUE_MESSAGE = 'crawl-toplists'
 const RECOVERY_RETRY_DELAY_SECONDS = 3600
+
+// Toplist 页可见标签会省略部分 namespace，优先使用 title 中的完整 namespace 生成可翻译的标准 key。
+function normalizeToplistTag(title: string | undefined, fallbackText: string): string {
+  const fallback = fallbackText.trim()
+  const normalizedTitle = title?.trim()
+
+  if (!normalizedTitle) {
+    return fallback
+  }
+
+  const namespaceSeparatorIndex = normalizedTitle.indexOf(':')
+  if (namespaceSeparatorIndex <= 0 || namespaceSeparatorIndex >= normalizedTitle.length - 1) {
+    return fallback
+  }
+
+  const namespaceText = normalizedTitle.slice(0, namespaceSeparatorIndex).trim()
+  const tagText = normalizedTitle.slice(namespaceSeparatorIndex + 1).trim()
+  if (!namespaceText || !tagText) {
+    return fallback
+  }
+
+  const namespace = NAMESPACE_ABBREVIATIONS[namespaceText] ?? namespaceText
+  return `${namespace}:${tagText}`
+}
 
 // 抓取单个 toplist 页面，并把解析和入库串起来执行。
 export async function crawlToplistPage(env: Env, period_type: PeriodType, url: string): Promise<void> {
@@ -128,7 +152,11 @@ export async function parseToplistHtml(
       const $divTags = $(td_array[3]).find('div').eq(1).find('div')
       const tags = $divTags
         .toArray()
-        .map(el => $(el).text())
+        .map((el) => {
+          const $tag = $(el)
+          return normalizeToplistTag($tag.attr('title'), $tag.text())
+        })
+        .filter(Boolean)
         .join(', ')
 
       const uploader = $(td_array[4]).find('a').text()

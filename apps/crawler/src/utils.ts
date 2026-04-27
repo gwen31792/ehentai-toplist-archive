@@ -17,7 +17,7 @@ export const NAMESPACE_ABBREVIATIONS: Record<string, string> = {
   temp: 't',
 }
 
-export function getDbClient(env: Env) {
+export function getDbClient(env: Env): ReturnType<typeof createDbClient> {
   // Cloudflare Workers 的 env 对象是绑定到特定请求上下文的。
   // 虽然 Worker 实例可能会在多个请求之间复用，但 env 对象（及其包含的 DB 绑定）不能跨请求使用。
   // 如果将使用旧 env 创建的 client 缓存在全局变量中，当 Worker 复用于处理新请求时，
