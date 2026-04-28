@@ -3,7 +3,7 @@
 - [ ] 减少写入次数，当前每天更新一次 tag 翻译，一天写入 30k，一个月要 0.9M，不小心就会超了起始限制了
 
 ## 中优先级
-- [ ] nextjs 16 升级
+- [ ] 等 @opennextjs/cloudflare 支持 Next 16 Adapters API 后，将 `apps/web/middleware.ts` 迁移为 `proxy.ts`；当前 1.19.4 + Next 16.2.4 使用 `proxy.ts` preview 会报 `File server/middleware.js does not exist`，see also: https://github.com/opennextjs/opennextjs-cloudflare/issues/972, https://github.com/opennextjs/opennextjs-cloudflare/issues/962
 - [ ] 好好梳理一下对于 zod 的使用
 
 ## 低优先级

@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { routing, type Locale } from '@/i18n/routing'
 
 // 根页面的语言检测和重定向
-// Next.js 15: cookies() / headers() / params / searchParams 都是异步 Dynamic APIs
+// Next.js 16 要求异步读取 cookies() / headers() 等 Dynamic APIs。
 export default async function RootPage() {
   const [cookieStore, headersList] = await Promise.all([cookies(), headers()])
 

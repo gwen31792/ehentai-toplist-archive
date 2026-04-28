@@ -6,9 +6,9 @@
   "scripts": {},
   "private": true,
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20251120.0",
+    "@cloudflare/workers-types": "^4.20260426.1",
     "@eslint/js": "^9.39.1",
-    "@next/eslint-plugin-next": "^16.0.7",
+    "@next/eslint-plugin-next": "^16.2.4",
     "@nx/esbuild": "22.6.5",
     "@nx/eslint": "22.6.5",
     "@nx/eslint-plugin": "22.6.5",
@@ -34,7 +34,7 @@
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.47.0",
-    "wrangler": "^4.49.0"
+    "wrangler": "^4.85.0"
   },
   "dependencies": {
     "drizzle-orm": "^0.44.7",

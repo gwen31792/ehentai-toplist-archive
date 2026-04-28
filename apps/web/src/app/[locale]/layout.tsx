@@ -8,7 +8,7 @@ import { routing } from '@/i18n/routing'
 
 type Props = {
   children: React.ReactNode
-  // Next.js 15 Dynamic APIs: params 已异步化（Promise），需显式 await 才能访问属性
+  // Next.js 16 Dynamic APIs 中 params 需显式 await 后才能访问属性。
   params: Promise<{ locale: string }>
 }
 
