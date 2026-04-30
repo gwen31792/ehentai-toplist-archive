@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/popover'
 import { Switch } from '@/components/ui/switch'
 import { VirtualizedFilterList } from '@/components/virtualized-filter-list'
+import { cn } from '@/lib/utils'
 
 type TagFilterMode = 'or' | 'and'
 
@@ -49,6 +50,12 @@ export function TableHeaderControls<TData>({
   const [typePopoverOpen, setTypePopoverOpen] = useState(false)
   const [tagPopoverOpen, setTagPopoverOpen] = useState(false)
   const [tagSearch, setTagSearch] = useState('')
+
+  // 标签存在且没有全选时，才把筛选数量外显到按钮上，避免空数据时显示 0/0。
+  const hasActiveTagFilter = extractedTags.length > 0 && selectedTags.size !== extractedTags.length
+  const tagFilterButtonLabel = hasActiveTagFilter
+    ? `${t('headers.tags')} ${selectedTags.size}/${extractedTags.length}`
+    : t('tagFilter')
 
   // 搜索只缩小标签弹窗中的可见选项，不改变表格实际筛选条件。
   const filteredTags = useMemo(() => {
@@ -122,10 +129,15 @@ export function TableHeaderControls<TData>({
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className="bg-zinc-50 dark:bg-zinc-800"
+              className={cn(
+                'bg-zinc-50 dark:bg-zinc-800',
+                hasActiveTagFilter
+                  ? 'border-zinc-400 bg-zinc-100 text-zinc-900 shadow-sm hover:bg-zinc-200 dark:border-zinc-500 dark:bg-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-700/80'
+                  : null,
+              )}
             >
               <Tags className="mr-2 h-4 w-4" />
-              {t('tagFilter')}
+              {tagFilterButtonLabel}
             </Button>
           </PopoverTrigger>
           <PopoverContent align="start" className="w-[300px] bg-zinc-50 dark:bg-zinc-800">
