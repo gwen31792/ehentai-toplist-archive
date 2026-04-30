@@ -56,6 +56,8 @@
       "toggleColumns": "Toggle columns",
       "typeFilter": "Type Filter",
       "tagFilter": "Tag Filter",
+      "tagSearchPlaceholder": "Search tags",
+      "noMatchingTags": "No matching tags",
       "selectAll": "All",
       "clear": "Clear",
       "tagsSelected": "tags selected",

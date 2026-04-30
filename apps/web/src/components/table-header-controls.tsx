@@ -1,9 +1,9 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 
 import { Table, VisibilityState } from '@tanstack/react-table'
-import { Settings, Filter } from 'lucide-react'
+import { Filter, Search, Settings, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { Button } from '@/components/ui/button'
@@ -48,6 +48,24 @@ export function TableHeaderControls<TData>({
   // Popover 打开状态
   const [typePopoverOpen, setTypePopoverOpen] = useState(false)
   const [tagPopoverOpen, setTagPopoverOpen] = useState(false)
+  const [tagSearch, setTagSearch] = useState('')
+
+  // 搜索只缩小标签弹窗中的可见选项，不改变表格实际筛选条件。
+  const filteredTags = useMemo(() => {
+    const normalizedSearch = tagSearch.trim().toLowerCase()
+    if (!normalizedSearch) {
+      return extractedTags
+    }
+
+    return extractedTags.filter(tag => tag.toLowerCase().includes(normalizedSearch))
+  }, [extractedTags, tagSearch])
+
+  const handleTagPopoverOpenChange = (open: boolean) => {
+    setTagPopoverOpen(open)
+    if (!open) {
+      setTagSearch('')
+    }
+  }
 
   return (
     <div className="mb-4 flex items-center justify-end">
@@ -144,7 +162,7 @@ export function TableHeaderControls<TData>({
         </Popover>
 
         {/* 标签筛选器 */}
-        <Popover open={tagPopoverOpen} onOpenChange={setTagPopoverOpen}>
+        <Popover open={tagPopoverOpen} onOpenChange={handleTagPopoverOpenChange}>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
@@ -185,11 +203,36 @@ export function TableHeaderControls<TData>({
                 </div>
               </div>
 
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+                <input
+                  type="search"
+                  value={tagSearch}
+                  onChange={event => setTagSearch(event.target.value)}
+                  placeholder={t('tagSearchPlaceholder')}
+                  className="h-9 w-full rounded-md border border-input bg-zinc-50 pl-8 pr-9 text-sm text-zinc-900 outline-none ring-offset-background transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 dark:bg-zinc-800 dark:text-zinc-100 [&::-webkit-search-cancel-button]:appearance-none"
+                />
+                {tagSearch
+                  ? (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setTagSearch('')}
+                        className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 p-0 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )
+                  : null}
+              </div>
+
               <VirtualizedFilterList
-                items={extractedTags}
+                items={filteredTags}
                 selectedItems={selectedTags}
                 onSelectionChange={onSelectedTagsChange}
                 idPrefix="tag"
+                emptyMessage={t('noMatchingTags')}
               />
             </div>
           </PopoverContent>

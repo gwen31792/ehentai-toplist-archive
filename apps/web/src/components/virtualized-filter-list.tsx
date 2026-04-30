@@ -11,6 +11,7 @@ interface VirtualizedFilterListProps {
   selectedItems: Set<string>
   onSelectionChange: (items: Set<string>) => void
   idPrefix: string
+  emptyMessage?: string
 }
 
 export function VirtualizedFilterList({
@@ -18,6 +19,7 @@ export function VirtualizedFilterList({
   selectedItems,
   onSelectionChange,
   idPrefix,
+  emptyMessage,
 }: VirtualizedFilterListProps) {
   'use no memo'
   const parentRef = useRef<HTMLDivElement>(null)
@@ -28,6 +30,17 @@ export function VirtualizedFilterList({
     estimateSize: () => 28,
     overscan: 10,
   })
+
+  if (items.length === 0 && emptyMessage) {
+    return (
+      <div
+        ref={parentRef}
+        className="flex max-h-[300px] min-h-[200px] items-center justify-center overflow-y-auto rounded-md border border-dashed border-zinc-200 px-4 text-center text-sm text-zinc-500 dark:border-zinc-700 dark:text-zinc-400"
+      >
+        {emptyMessage}
+      </div>
+    )
+  }
 
   return (
     <div

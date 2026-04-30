@@ -56,6 +56,8 @@
       "toggleColumns": "选择显示的列",
       "typeFilter": "类型筛选",
       "tagFilter": "标签筛选",
+      "tagSearchPlaceholder": "搜索标签",
+      "noMatchingTags": "没有匹配的标签",
       "selectAll": "全选",
       "clear": "清空",
       "tagsSelected": "个标签已选择",
