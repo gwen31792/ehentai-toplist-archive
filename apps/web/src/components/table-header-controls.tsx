@@ -70,50 +70,6 @@ export function TableHeaderControls<TData>({
   return (
     <div className="mb-4 flex items-center justify-end">
       <div className="flex items-center gap-2">
-        {/* OR/AND 模式切换（紧凑分段按钮） */}
-        <div className="inline-flex rounded-md border border-zinc-200 bg-zinc-50 p-0.5 dark:border-zinc-700 dark:bg-zinc-800">
-          <HoverCard openDelay={80} closeDelay={100}>
-            <HoverCardTrigger asChild>
-              <Button
-                variant={tagFilterMode === 'or' ? 'default' : 'ghost'}
-                size="sm"
-                className={`h-9 px-3 text-sm ${tagFilterMode === 'or' ? '' : 'text-zinc-700 dark:text-zinc-300'}`}
-                onClick={() => onTagFilterModeChange('or')}
-              >
-                {t('matchAnyShort')}
-              </Button>
-            </HoverCardTrigger>
-            <HoverCardContent
-              side="bottom"
-              align="start"
-              sideOffset={6}
-              className="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1.5 text-xs leading-tight text-zinc-700 shadow-sm dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
-            >
-              {t('matchAnyHint')}
-            </HoverCardContent>
-          </HoverCard>
-          <HoverCard openDelay={80} closeDelay={100}>
-            <HoverCardTrigger asChild>
-              <Button
-                variant={tagFilterMode === 'and' ? 'default' : 'ghost'}
-                size="sm"
-                className={`h-9 px-3 text-sm ${tagFilterMode === 'and' ? '' : 'text-zinc-700 dark:text-zinc-300'}`}
-                onClick={() => onTagFilterModeChange('and')}
-              >
-                {t('matchAllShort')}
-              </Button>
-            </HoverCardTrigger>
-            <HoverCardContent
-              side="bottom"
-              align="start"
-              sideOffset={6}
-              className="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1.5 text-xs leading-tight text-zinc-700 shadow-sm dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
-            >
-              {t('matchAllHint')}
-            </HoverCardContent>
-          </HoverCard>
-        </div>
-
         {/* 类型筛选器 */}
         <Popover open={typePopoverOpen} onOpenChange={setTypePopoverOpen}>
           <PopoverTrigger asChild>
@@ -203,14 +159,58 @@ export function TableHeaderControls<TData>({
                 </div>
               </div>
 
+              {/* 标签匹配模式只影响标签筛选，因此放在标签弹窗内部。 */}
+              <div className="inline-flex rounded-md border border-zinc-200 bg-zinc-50 p-0.5 dark:border-zinc-700 dark:bg-zinc-800">
+                <HoverCard openDelay={80} closeDelay={100}>
+                  <HoverCardTrigger asChild>
+                    <Button
+                      variant={tagFilterMode === 'or' ? 'default' : 'ghost'}
+                      size="sm"
+                      className={`h-7 px-2.5 text-xs ${tagFilterMode === 'or' ? '' : 'text-zinc-700 dark:text-zinc-300'}`}
+                      onClick={() => onTagFilterModeChange('or')}
+                    >
+                      {t('matchAnyShort')}
+                    </Button>
+                  </HoverCardTrigger>
+                  <HoverCardContent
+                    side="bottom"
+                    align="start"
+                    sideOffset={6}
+                    className="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1.5 text-xs leading-tight text-zinc-700 shadow-sm dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
+                  >
+                    {t('matchAnyHint')}
+                  </HoverCardContent>
+                </HoverCard>
+                <HoverCard openDelay={80} closeDelay={100}>
+                  <HoverCardTrigger asChild>
+                    <Button
+                      variant={tagFilterMode === 'and' ? 'default' : 'ghost'}
+                      size="sm"
+                      className={`h-7 px-2.5 text-xs ${tagFilterMode === 'and' ? '' : 'text-zinc-700 dark:text-zinc-300'}`}
+                      onClick={() => onTagFilterModeChange('and')}
+                    >
+                      {t('matchAllShort')}
+                    </Button>
+                  </HoverCardTrigger>
+                  <HoverCardContent
+                    side="bottom"
+                    align="start"
+                    sideOffset={6}
+                    className="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1.5 text-xs leading-tight text-zinc-700 shadow-sm dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
+                  >
+                    {t('matchAllHint')}
+                  </HoverCardContent>
+                </HoverCard>
+              </div>
+
               <div className="relative">
-                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
                 <input
                   type="search"
                   value={tagSearch}
                   onChange={event => setTagSearch(event.target.value)}
                   placeholder={t('tagSearchPlaceholder')}
-                  className="h-9 w-full rounded-md border border-input bg-zinc-50 pl-8 pr-9 text-sm text-zinc-900 outline-none ring-offset-background transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 dark:bg-zinc-800 dark:text-zinc-100 [&::-webkit-search-cancel-button]:appearance-none"
+                  className="h-8 w-full rounded-md border border-input bg-zinc-50 pl-7 pr-8 text-xs text-zinc-900 outline-none ring-offset-background transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 dark:bg-zinc-800 dark:text-zinc-100 [&::-webkit-search-cancel-button]:appearance-none"
                 />
                 {tagSearch
                   ? (
@@ -219,9 +219,9 @@ export function TableHeaderControls<TData>({
                         variant="ghost"
                         size="sm"
                         onClick={() => setTagSearch('')}
-                        className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 p-0 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                        className="absolute right-1 top-1/2 h-6 w-6 -translate-y-1/2 p-0 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
                       >
-                        <X className="h-4 w-4" />
+                        <X className="h-3.5 w-3.5" />
                       </Button>
                     )
                   : null}

@@ -61,10 +61,10 @@
       "selectAll": "全选",
       "clear": "清空",
       "tagsSelected": "个标签已选择",
-      "matchAnyShort": "并集",
-      "matchAllShort": "交集",
-      "matchAnyHint": "并集：命中任意选中标签即显示",
-      "matchAllHint": "交集：必须包含全部选中标签才显示"
+      "matchAnyShort": "任一标签",
+      "matchAllShort": "全部标签",
+      "matchAnyHint": "画廊的任意一个标签被选中就显示",
+      "matchAllHint": "画廊的全部标签被选中才显示"
     },
     "datePicker": {
       "selectDate": "选择日期"

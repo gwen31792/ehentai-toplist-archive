@@ -61,10 +61,10 @@
       "selectAll": "All",
       "clear": "Clear",
       "tagsSelected": "tags selected",
-      "matchAnyShort": "Union",
-      "matchAllShort": "Intersection",
-      "matchAnyHint": "Union: show rows that match any selected tag",
-      "matchAllHint": "Intersection: show rows that match all selected tags"
+      "matchAnyShort": "Any tag",
+      "matchAllShort": "All tags",
+      "matchAnyHint": "Show galleries when any of their tags are selected",
+      "matchAllHint": "Show galleries only when all of their tags are selected"
     },
     "datePicker": {
       "selectDate": "Pick a date"
