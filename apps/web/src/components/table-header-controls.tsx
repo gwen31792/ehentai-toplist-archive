@@ -3,7 +3,7 @@
 import React, { useMemo, useState } from 'react'
 
 import { Table, VisibilityState } from '@tanstack/react-table'
-import { Filter, Search, Settings, X } from 'lucide-react'
+import { Filter, Search, Settings, Tags, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { Button } from '@/components/ui/button'
@@ -124,7 +124,7 @@ export function TableHeaderControls<TData>({
               variant="outline"
               className="bg-zinc-50 dark:bg-zinc-800"
             >
-              <Filter className="mr-2 h-4 w-4" />
+              <Tags className="mr-2 h-4 w-4" />
               {t('tagFilter')}
             </Button>
           </PopoverTrigger>
