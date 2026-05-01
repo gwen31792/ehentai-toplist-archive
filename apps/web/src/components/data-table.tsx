@@ -100,6 +100,13 @@ function getLocalizedTags(item: QueryResponseItem, locale: string): string {
   return item.tags?.trim() || ''
 }
 
+function splitTags(tags: string): string[] {
+  return tags
+    .split(/\s*,\s*/)
+    .map(tag => tag.trim())
+    .filter(tag => tag)
+}
+
 export function DataTable({ data, initialPreferences }: DataTableProps) {
   const t = useTranslations('components.dataTable')
   const locale = useLocale()
@@ -307,16 +314,50 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
     columnHelper.accessor(row => getLocalizedTags(row, locale), {
       id: 'tags',
       header: () => t('headers.tags'),
-      cell: info => <CellWrapper>{info.getValue()}</CellWrapper>,
+      cell: (info) => {
+        const tags = info.getValue()
+        const shouldEmphasizeSelectedTags = effectiveTagFilterMode === 'or'
+          && selectedTags.size > 0
+          && selectedTags.size < extractedTags.length
+
+        if (!shouldEmphasizeSelectedTags) {
+          return <CellWrapper>{tags}</CellWrapper>
+        }
+
+        const tagItems = splitTags(tags)
+
+        // 部分标签 + 任一匹配时，用轻量文本高亮标出当前行真正命中的筛选标签。
+        return (
+          <CellWrapper>
+            {tagItems.map((tag, index) => {
+              const isSelected = selectedTags.has(tag)
+
+              return (
+                <React.Fragment key={`${tag}-${index}`}>
+                  {index > 0 ? ', ' : null}
+                  {isSelected
+                    ? (
+                        <span className="font-semibold text-zinc-950 dark:text-zinc-50">
+                          {tag}
+                        </span>
+                      )
+                    : (
+                        <span className="text-zinc-600 dark:text-zinc-300">
+                          {tag}
+                        </span>
+                      )}
+                </React.Fragment>
+              )
+            })}
+          </CellWrapper>
+        )
+      },
       size: 300,
       filterFn: (row, columnId, filterValue: { values: string[], allSelected: boolean, mode: 'or' | 'and' }) => {
         const tags = row.getValue(columnId) as string
         if (!tags) return false
 
-        const itemTags = tags
-          .split(/\s*,\s*/)
-          .map(tag => tag.trim())
-          .filter(tag => tag)
+        const itemTags = splitTags(tags)
 
         const selected = new Set(filterValue.values)
 
@@ -378,7 +419,7 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
       ),
       size: 80,
     }),
-  ]), [locale, t])
+  ]), [effectiveTagFilterMode, extractedTags.length, locale, selectedTags, t])
 
   // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table's useReactTable returns stable function references
   const table = useReactTable({
