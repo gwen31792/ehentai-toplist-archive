@@ -1,6 +1,5 @@
 # 待开发事项
 ## 高优先级
-- [ ] 减少写入次数，当前每天更新一次 tag 翻译，一天写入 30k，一个月要 0.9M，不小心就会超了起始限制了
 
 ## 中优先级
 - [ ] 等 @opennextjs/cloudflare 支持 Next 16 Adapters API 后，将 `apps/web/middleware.ts` 迁移为 `proxy.ts`；当前 1.19.4 + Next 16.2.4 使用 `proxy.ts` preview 会报 `File server/middleware.js does not exist`，see also: https://github.com/opennextjs/opennextjs-cloudflare/issues/972, https://github.com/opennextjs/opennextjs-cloudflare/issues/962
@@ -15,7 +14,6 @@
 - [ ] SEO 优化，see also: https://vercel.com/blog/how-core-web-vitals-affect-seo
 - [ ] 检查 CLS 问题，see also: https://liudon.com/posts/fix-blog-cls/
 - [ ] 等 eslint-plugin-tailwindcss 支持 Tailwind CSS v4 后重新添加到项目中
-- [ ] galleries 表回扫详细数据，比如 Rating
 - [ ] 使用 <Activity>: https://react.dev/reference/react/Activity
 - [ ] 研究 Cloudflare Agent Readiness: https://blog.cloudflare.com/agent-readiness/
 
@@ -34,25 +32,3 @@ WebP Cloud Services 这里感觉可以不做了，公网连接怎么也不会有
 - [ ] WebP Cloud Services
 - [ ] 图片从 cloudflare r2 中读取
 - [ ] skeleton 尺寸抖动
-
-# 已完成
-- [x] 限流器，防止额度被刷没了，用 durable object 写令牌桶太麻烦了，直接用 cloudflare 自带的 waf 了
-- [x] 日历关闭后再打开的默认月份
-- [x] 图片在空闲时后台加载
-- [x] shadcn/ui 升级，试了一下，tailwind css 升级到 v4 本身不复杂，但是需要在 `globals.css` 里面改一堆，而且没有什么收益，先不管了
-- [x] 重新选择表格库，Tanstack Table?
-- [x] No Data 不居中，不过这个情况也没几个人能看到
-- [x] 定制列
-- [x] skeleton 时列宽收窄
-- [x] 迁移到 @opennextjs/cloudflare，see also: https://blog.cloudflare.com/deploying-nextjs-apps-to-cloudflare-workers-with-the-opennext-adapter/
-- [x] 筛选 tags
-- [x] 使用远程绑定, see also: https://opennext.js.org/cloudflare/bindings#remote-bindings
-- [x] i18n, next-intl
-- [x] 重构后端爬虫，从 AWS Lambda 迁移到 Cloudflare Workers，增加爬取数量
-- [x] 检查 ipv6 支持
-- [x] 爬虫 ip 被 ban 后自动调起一次新的执行，考虑是否完全改造成适配 cloudflare queues，自己做生产者和消费者
-- [x] eslint, eslint-config-next, typescript 5.9 升级
-
-# 不考虑做
-- [ ] tag 中文翻译，因为没有官方的中文翻译，官方目前只有日语翻译
-- [ ] 保持 tags 的过滤，这样能只看某个 tags 的所有的排行，如果做了，新 gallery 进来后，它们的 tags 是默认选中，还是默认不选中？引入太多复杂度了不好，每次切换 toplist 重置最好

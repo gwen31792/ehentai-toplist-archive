@@ -1,9 +1,16 @@
 # 技术栈
-本站使用 React 19 + Next.js 15
 
+本项目使用 React 19 + Next.js 16，运行和部署在 Cloudflare Workers 上。
+
+- Monorepo：pnpm + Nx
 - 前端样式：shadcn/ui + Tailwind CSS
+- UI 基础组件：Radix UI
+- 表格：TanStack Table + TanStack Virtual
 - ORM 框架：Drizzle ORM
-- 语言：Typescript
+- 数据校验：Zod
+- 语言：TypeScript
 - 数据库：Cloudflare D1
-- 国家化：next-intl
-- 部署：Cloudflare Workers
+- 国际化：next-intl
+- 爬虫解析：Cheerio
+- 部署：OpenNext for Cloudflare + Wrangler
+- Cloudflare 服务：D1、KV、Queues、Durable Objects、Cron Triggers
