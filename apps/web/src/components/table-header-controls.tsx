@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/popover'
 import { Switch } from '@/components/ui/switch'
 import { VirtualizedFilterList } from '@/components/virtualized-filter-list'
+import { getSelectedCurrentTagCount } from '@/lib/table-tag-selection'
 import { cn } from '@/lib/utils'
 
 type TagFilterMode = 'or' | 'and'
@@ -25,8 +26,10 @@ interface TableHeaderControlsProps<TData> {
   selectedTags: Set<string>
   extractedTags: string[]
   tagFilterMode: TagFilterMode
+  preserveTagSelection: boolean
   onSelectedTagsChange: (tags: Set<string>) => void
   onTagFilterModeChange: (mode: TagFilterMode) => void
+  onPreserveTagSelectionChange: (preserve: boolean) => void
   selectedTypes: Set<string>
   extractedTypes: string[]
   onSelectedTypesChange: (types: Set<string>) => void
@@ -38,8 +41,10 @@ export function TableHeaderControls<TData>({
   selectedTags,
   extractedTags,
   tagFilterMode,
+  preserveTagSelection,
   onSelectedTagsChange,
   onTagFilterModeChange,
+  onPreserveTagSelectionChange,
   selectedTypes,
   extractedTypes,
   onSelectedTypesChange,
@@ -51,10 +56,20 @@ export function TableHeaderControls<TData>({
   const [tagPopoverOpen, setTagPopoverOpen] = useState(false)
   const [tagSearch, setTagSearch] = useState('')
 
-  // 标签存在且没有全选时，才把筛选数量外显到按钮上，避免空数据时显示 0/0。
-  const hasActiveTagFilter = extractedTags.length > 0 && selectedTags.size !== extractedTags.length
+  // 保留标签筛选会带来当前榜单外的标签，这里拆开当前可见选中数和额外保留数用于计数展示。
+  const selectedCurrentTagCount = useMemo(() => (
+    getSelectedCurrentTagCount(selectedTags, extractedTags)
+  ), [extractedTags, selectedTags])
+  const missingSelectedTagCount = Math.max(0, selectedTags.size - selectedCurrentTagCount)
+  const missingSelectedTagLabel = missingSelectedTagCount > 0
+    ? ` +${missingSelectedTagCount}`
+    : ''
+
+  // 当前数据存在筛选差异，或有跨数据集保留的缺失标签时，才把筛选数量外显到按钮上。
+  const hasActiveTagFilter = missingSelectedTagCount > 0
+    || (extractedTags.length > 0 && selectedCurrentTagCount !== extractedTags.length)
   const tagFilterButtonLabel = hasActiveTagFilter
-    ? `${t('headers.tags')} ${selectedTags.size}/${extractedTags.length}`
+    ? `${t('headers.tags')} ${selectedCurrentTagCount}/${extractedTags.length}${missingSelectedTagLabel}`
     : t('tagFilter')
 
   // 搜索只缩小标签弹窗中的可见选项，不改变表格实际筛选条件。
@@ -146,9 +161,10 @@ export function TableHeaderControls<TData>({
                 <h4 className="font-medium leading-none text-zinc-900 dark:text-zinc-100">
                   {t('tagFilter')}
                   <span className="ml-2 text-xs text-zinc-500 dark:text-zinc-400">
-                    {selectedTags.size}
+                    {selectedCurrentTagCount}
                     /
                     {extractedTags.length}
+                    {missingSelectedTagLabel}
                   </span>
                 </h4>
                 <div className="flex items-center gap-2">
@@ -169,6 +185,30 @@ export function TableHeaderControls<TData>({
                     {t('clear')}
                   </Button>
                 </div>
+              </div>
+
+              <div className="flex items-center justify-between gap-2 px-1">
+                <div className="min-w-0">
+                  <label
+                    htmlFor="preserve-tag-selection"
+                    className="block cursor-pointer text-xs font-medium leading-none text-zinc-700 dark:text-zinc-300"
+                  >
+                    {t('preserveTagSelection')}
+                  </label>
+                  {missingSelectedTagCount > 0
+                    ? (
+                        <div className="mt-0.5 text-[11px] leading-none text-zinc-500 dark:text-zinc-400">
+                          {t('preservedMissingTags', { count: missingSelectedTagCount })}
+                        </div>
+                      )
+                    : null}
+                </div>
+                <Switch
+                  id="preserve-tag-selection"
+                  checked={preserveTagSelection}
+                  onCheckedChange={onPreserveTagSelectionChange}
+                  className="h-4 w-8 shrink-0 data-[state=checked]:bg-zinc-900 data-[state=checked]:[&>span]:translate-x-4 dark:data-[state=checked]:bg-zinc-100 [&>span]:h-3 [&>span]:w-3"
+                />
               </div>
 
               {/* 标签匹配模式只影响标签筛选，因此放在标签弹窗内部。 */}

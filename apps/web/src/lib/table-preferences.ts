@@ -7,6 +7,7 @@ export interface TablePreferences {
   columnVisibility: VisibilityState
   columnSizing: ColumnSizingState
   tagFilterMode: TagFilterMode
+  preserveTagSelection: boolean
 }
 
 // 让 server render 也能拿到表格偏好，避免首屏先按默认列渲染再闪回用户配置。
@@ -31,6 +32,7 @@ export const defaultTablePreferences: TablePreferences = {
   columnVisibility: defaultColumnVisibility,
   columnSizing: {},
   tagFilterMode: 'or',
+  preserveTagSelection: false,
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -58,6 +60,10 @@ export function normalizeTablePreferences(value: unknown): TablePreferences {
     ? value.tagFilterMode
     : defaultTablePreferences.tagFilterMode
 
+  const preserveTagSelection = typeof value.preserveTagSelection === 'boolean'
+    ? value.preserveTagSelection
+    : defaultTablePreferences.preserveTagSelection
+
   // 读取旧 cookie / 非完整对象时，缺失字段自动回退到默认值，避免配置升级后炸掉。
   return {
     pageSize,
@@ -67,6 +73,7 @@ export function normalizeTablePreferences(value: unknown): TablePreferences {
     },
     columnSizing,
     tagFilterMode,
+    preserveTagSelection,
   }
 }
 

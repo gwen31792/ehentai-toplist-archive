@@ -57,6 +57,8 @@
       "typeFilter": "Type Filter",
       "tagFilter": "Tag Filter",
       "tagSearchPlaceholder": "Search tags",
+      "preserveTagSelection": "Keep tag filters across lists",
+      "preservedMissingTags": "+{count} preserved outside this list",
       "noMatchingTags": "No matching tags",
       "selectAll": "All",
       "clear": "Clear",

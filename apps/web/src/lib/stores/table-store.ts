@@ -19,6 +19,12 @@ interface TableState {
   columnVisibility: VisibilityState
   columnSizing: ColumnSizingState
   tagFilterMode: TagFilterMode
+  preserveTagSelection: boolean
+
+  // 会话内状态，不进入 localStorage/cookie，避免把用户选择的大量标签写进持久化偏好。
+  tagSelectionIntent: string[] | null
+  // intent 保存的是当前语言下的展示文本，恢复前必须确认语言一致。
+  tagSelectionIntentLocale: string | null
 
   // 水合标记（避免 SSR 与客户端初始值不一致）
   hasHydrated: boolean
@@ -28,15 +34,18 @@ interface TableState {
   setColumnVisibility: (updaterOrValue: VisibilityState | ((old: VisibilityState) => VisibilityState)) => void
   setColumnSizing: (updaterOrValue: ColumnSizingState | ((old: ColumnSizingState) => ColumnSizingState)) => void
   setTagFilterMode: (mode: TagFilterMode) => void
+  setPreserveTagSelection: (preserve: boolean) => void
+  setTagSelectionIntent: (intent: string[] | null, locale?: string | null) => void
   setHasHydrated: (hydrated: boolean) => void
 }
 
-function pickTablePreferences(state: Pick<TableState, 'pageSize' | 'columnVisibility' | 'columnSizing' | 'tagFilterMode'>): TablePreferences {
+function pickTablePreferences(state: Pick<TableState, 'pageSize' | 'columnVisibility' | 'columnSizing' | 'tagFilterMode' | 'preserveTagSelection'>): TablePreferences {
   return {
     pageSize: state.pageSize,
     columnVisibility: state.columnVisibility,
     columnSizing: state.columnSizing,
     tagFilterMode: state.tagFilterMode,
+    preserveTagSelection: state.preserveTagSelection,
   }
 }
 
@@ -56,6 +65,9 @@ export const useTableStore = create<TableState>()(
       columnVisibility: defaultTablePreferences.columnVisibility,
       columnSizing: defaultTablePreferences.columnSizing,
       tagFilterMode: defaultTablePreferences.tagFilterMode,
+      preserveTagSelection: defaultTablePreferences.preserveTagSelection,
+      tagSelectionIntent: null,
+      tagSelectionIntentLocale: null,
       hasHydrated: false,
 
       setPageSize: pageSize => set((state) => {
@@ -92,6 +104,21 @@ export const useTableStore = create<TableState>()(
           tagFilterMode: mode,
         }))
         return { tagFilterMode: mode }
+      }),
+      setPreserveTagSelection: preserve => set((state) => {
+        writeTablePreferencesCookie(pickTablePreferences({
+          ...state,
+          preserveTagSelection: preserve,
+        }))
+        return {
+          preserveTagSelection: preserve,
+          tagSelectionIntent: preserve ? state.tagSelectionIntent : null,
+          tagSelectionIntentLocale: preserve ? state.tagSelectionIntentLocale : null,
+        }
+      }),
+      setTagSelectionIntent: (intent, locale = null) => set({
+        tagSelectionIntent: intent,
+        tagSelectionIntentLocale: intent === null ? null : locale,
       }),
       setHasHydrated: hydrated => set({ hasHydrated: hydrated }),
     }),

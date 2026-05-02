@@ -57,6 +57,8 @@
       "typeFilter": "类型筛选",
       "tagFilter": "标签筛选",
       "tagSearchPlaceholder": "搜索标签",
+      "preserveTagSelection": "切换榜单时保留标签筛选",
+      "preservedMissingTags": "当前列表外保留 +{count}",
       "noMatchingTags": "没有匹配的标签",
       "selectAll": "全选",
       "clear": "清空",

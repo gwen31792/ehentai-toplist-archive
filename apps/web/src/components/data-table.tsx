@@ -30,6 +30,11 @@ import {
 } from '@/components/ui/table'
 import { hydrateTableStoreOnce, useTableStore } from '@/lib/stores/table-store'
 import { type TablePreferences } from '@/lib/table-preferences'
+import {
+  areAllAndOnlyCurrentTagsSelected,
+  areAllCurrentTagsSelected,
+  getSelectedCurrentTags,
+} from '@/lib/table-tag-selection'
 import { QueryResponseItem } from '@/lib/types'
 
 interface DataTableProps {
@@ -55,7 +60,7 @@ function buildColumnFilters({
       id: 'tags',
       value: {
         values: Array.from(selectedTags),
-        allSelected: selectedTags.size > 0 && selectedTags.size === extractedTags.length,
+        allSelected: areAllCurrentTagsSelected(selectedTags, extractedTags),
         mode: tagFilterMode,
       },
     },
@@ -121,6 +126,11 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
   const setColumnVisibility = useTableStore(s => s.setColumnVisibility)
   const columnSizing = useTableStore(s => s.columnSizing)
   const setColumnSizing = useTableStore(s => s.setColumnSizing)
+  const preserveTagSelection = useTableStore(s => s.preserveTagSelection)
+  const setPreserveTagSelection = useTableStore(s => s.setPreserveTagSelection)
+  const tagSelectionIntent = useTableStore(s => s.tagSelectionIntent)
+  const tagSelectionIntentLocale = useTableStore(s => s.tagSelectionIntentLocale)
+  const setTagSelectionIntent = useTableStore(s => s.setTagSelectionIntent)
   const hasHydrated = useTableStore(s => s.hasHydrated)
 
   // 触发持久化状态水合（skipHydration: true）
@@ -137,6 +147,9 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
   const effectiveColumnSizing = hasHydrated
     ? columnSizing
     : initialPreferences.columnSizing
+  const effectivePreserveTagSelection = hasHydrated
+    ? preserveTagSelection
+    : initialPreferences.preserveTagSelection
 
   // 提取当前语言下的唯一标签；中文翻译缺失时回退英文 tags，避免筛选丢行。
   const extractedTags = useMemo(() => {
@@ -165,21 +178,49 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
     return Array.from(typeSet).sort()
   }, [data])
 
-  const [selectedTags, setSelectedTags] = useState<Set<string>>(() => new Set(extractedTags))
+  const [selectedTags, setSelectedTags] = useState<Set<string>>(() => {
+    if (
+      effectivePreserveTagSelection
+      && tagSelectionIntent !== null
+      && tagSelectionIntentLocale === locale
+    ) {
+      return new Set(tagSelectionIntent)
+    }
+
+    return new Set(extractedTags)
+  })
   const [selectedTypes, setSelectedTypes] = useState<Set<string>>(() => new Set(extractedTypes))
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(() =>
     buildColumnFilters({
-      selectedTags: new Set(extractedTags),
+      selectedTags,
       extractedTags,
       tagFilterMode: effectiveTagFilterMode,
-      selectedTypes: new Set(extractedTypes),
+      selectedTypes,
       extractedTypes,
     }))
 
-  // 初始化标签状态（每次数据变化时重置为全选）
+  // 数据集或语言变化时，仅恢复同语言的显式标签意图，否则用当前语言标签重建选择。
   useEffect(() => {
-    setSelectedTags(new Set(extractedTags))
-  }, [extractedTags])
+    if (!effectivePreserveTagSelection || tagSelectionIntent === null) {
+      setSelectedTags(new Set(extractedTags))
+      return
+    }
+
+    if (tagSelectionIntentLocale !== locale) {
+      setTagSelectionIntent(null)
+      setSelectedTags(new Set(extractedTags))
+      return
+    }
+
+    setSelectedTags(new Set(tagSelectionIntent))
+  }, [
+    effectivePreserveTagSelection,
+    extractedTags,
+    locale,
+    setTagSelectionIntent,
+    tagSelectionIntent,
+    tagSelectionIntentLocale,
+  ])
 
   // 初始化类型状态（每次数据变化时重置为全选）
   useEffect(() => {
@@ -206,6 +247,36 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
       {children}
     </div>
   )
+
+  const handleSelectedTagsChange = (tags: Set<string>) => {
+    setSelectedTags(tags)
+
+    if (!effectivePreserveTagSelection) {
+      return
+    }
+
+    const isPlainCurrentAllSelected = areAllAndOnlyCurrentTagsSelected(tags, extractedTags)
+    setTagSelectionIntent(isPlainCurrentAllSelected ? null : Array.from(tags), locale)
+  }
+
+  const handlePreserveTagSelectionChange = (preserve: boolean) => {
+    setPreserveTagSelection(preserve)
+
+    if (!preserve) {
+      const currentSelectedTags = getSelectedCurrentTags(selectedTags, extractedTags)
+      const hasMissingSelectedTags = currentSelectedTags.length !== selectedTags.size
+      setTagSelectionIntent(null)
+      if (hasMissingSelectedTags) {
+        setSelectedTags(new Set(currentSelectedTags.length > 0 ? currentSelectedTags : extractedTags))
+      }
+      return
+    }
+
+    const isPlainCurrentAllSelected = areAllAndOnlyCurrentTagsSelected(selectedTags, extractedTags)
+    setTagSelectionIntent(isPlainCurrentAllSelected ? null : Array.from(selectedTags), locale)
+  }
+
+  const allCurrentTagsSelected = areAllCurrentTagsSelected(selectedTags, extractedTags)
 
   const columns = useMemo(() => ([
     columnHelper.accessor('rank', {
@@ -318,7 +389,7 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
         const tags = info.getValue()
         const shouldEmphasizeSelectedTags = effectiveTagFilterMode === 'or'
           && selectedTags.size > 0
-          && selectedTags.size < extractedTags.length
+          && !allCurrentTagsSelected
 
         if (!shouldEmphasizeSelectedTags) {
           return <CellWrapper>{tags}</CellWrapper>
@@ -419,7 +490,7 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
       ),
       size: 80,
     }),
-  ]), [effectiveTagFilterMode, extractedTags.length, locale, selectedTags, t])
+  ]), [allCurrentTagsSelected, effectiveTagFilterMode, locale, selectedTags, t])
 
   // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table's useReactTable returns stable function references
   const table = useReactTable({
@@ -461,8 +532,10 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
         selectedTags={selectedTags}
         extractedTags={extractedTags}
         tagFilterMode={effectiveTagFilterMode}
-        onSelectedTagsChange={setSelectedTags}
+        preserveTagSelection={effectivePreserveTagSelection}
+        onSelectedTagsChange={handleSelectedTagsChange}
         onTagFilterModeChange={setTagFilterMode}
+        onPreserveTagSelectionChange={handlePreserveTagSelectionChange}
         selectedTypes={selectedTypes}
         extractedTypes={extractedTypes}
         onSelectedTypesChange={setSelectedTypes}
