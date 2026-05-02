@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -115,6 +115,7 @@ function splitTags(tags: string): string[] {
 export function DataTable({ data, initialPreferences }: DataTableProps) {
   const t = useTranslations('components.dataTable')
   const locale = useLocale()
+  const tableViewportRef = useRef<HTMLDivElement>(null)
   const [pageIndex, setPageIndex] = useState(0)
   const tagFilterMode = useTableStore(s => s.tagFilterMode)
   const setTagFilterMode = useTableStore(s => s.setTagFilterMode)
@@ -277,6 +278,19 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
   }
 
   const allCurrentTagsSelected = areAllCurrentTagsSelected(selectedTags, extractedTags)
+
+  const scrollResultsToTop = useCallback(() => {
+    window.requestAnimationFrame(() => {
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+      // 翻页后把表格本体拉回视口顶部，避免用户停留在新一页底部。
+      tableViewportRef.current?.scrollIntoView({
+        behavior: prefersReducedMotion ? 'auto' : 'smooth',
+        block: 'start',
+        inline: 'nearest',
+      })
+    })
+  }, [])
 
   const columns = useMemo(() => ([
     columnHelper.accessor('rank', {
@@ -503,12 +517,18 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
       const next = typeof updater === 'function'
         ? updater({ pageIndex, pageSize: effectivePageSize })
         : updater
+      const shouldScrollToTop = next.pageIndex !== pageIndex || next.pageSize !== effectivePageSize
+
       if (next.pageSize !== effectivePageSize) {
         setPageSize(next.pageSize)
         setPageIndex(0)
       }
       else {
         setPageIndex(next.pageIndex)
+      }
+
+      if (shouldScrollToTop) {
+        scrollResultsToTop()
       }
     },
     onColumnVisibilityChange: setColumnVisibility,
@@ -541,7 +561,7 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
         onSelectedTypesChange={setSelectedTypes}
       />
 
-      <div className="w-full overflow-x-auto">
+      <div ref={tableViewportRef} className="w-full overflow-x-auto">
         <Table className="w-full" style={{ tableLayout: 'fixed' }}>
           <TableHeader>
             {table.getHeaderGroups().map(headerGroup => (
