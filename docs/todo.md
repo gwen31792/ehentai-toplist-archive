@@ -14,8 +14,10 @@
 - [ ] SEO 优化，see also: https://vercel.com/blog/how-core-web-vitals-affect-seo
 - [ ] 检查 CLS 问题，see also: https://liudon.com/posts/fix-blog-cls/
 - [ ] 等 eslint-plugin-tailwindcss 支持 Tailwind CSS v4 后重新添加到项目中
-- [ ] 使用 <Activity>: https://react.dev/reference/react/Activity
 - [ ] 研究 Cloudflare Agent Readiness: https://blog.cloudflare.com/agent-readiness/
+
+## 不准备做
+- [x] 使用 <Activity>: 当前 Web 没有需要隐藏后保留内部状态/DOM 的核心交互；DataTable 作为 always-visible hydration boundary 的收益不确定，暂不引入。see also: https://react.dev/reference/react/Activity
 
 # 专项
 ## 图片加载速度解决方案
