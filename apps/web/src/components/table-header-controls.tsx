@@ -15,7 +15,10 @@ import {
 } from '@/components/ui/popover'
 import { Switch } from '@/components/ui/switch'
 import { VirtualizedFilterList } from '@/components/virtualized-filter-list'
-import { getSelectedCurrentTagCount } from '@/lib/table-tag-selection'
+import {
+  getSelectedCurrentTagCount,
+  prioritizeSelectedTags,
+} from '@/lib/table-tag-selection'
 import { cn } from '@/lib/utils'
 
 type TagFilterMode = 'or' | 'and'
@@ -81,6 +84,9 @@ export function TableHeaderControls<TData>({
 
     return extractedTags.filter(tag => tag.toLowerCase().includes(normalizedSearch))
   }, [extractedTags, tagSearch])
+  const orderedFilteredTags = useMemo(() => (
+    prioritizeSelectedTags(filteredTags, selectedTags)
+  ), [filteredTags, selectedTags])
 
   const handleTagPopoverOpenChange = (open: boolean) => {
     setTagPopoverOpen(open)
@@ -280,7 +286,7 @@ export function TableHeaderControls<TData>({
               </div>
 
               <VirtualizedFilterList
-                items={filteredTags}
+                items={orderedFilteredTags}
                 selectedItems={selectedTags}
                 onSelectionChange={onSelectedTagsChange}
                 idPrefix="tag"

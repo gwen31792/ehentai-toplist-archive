@@ -10,6 +10,23 @@ export function getSelectedCurrentTagCount(selectedTags: Set<string>, extractedT
   return getSelectedCurrentTags(selectedTags, extractedTags).length
 }
 
+// 长标签列表里需要保留原本排序的可预测性，只把当前已选项稳定地提到弹窗顶部。
+export function prioritizeSelectedTags(tags: string[], selectedTags: Set<string>): string[] {
+  const selected: string[] = []
+  const unselected: string[] = []
+
+  for (const tag of tags) {
+    if (selectedTags.has(tag)) {
+      selected.push(tag)
+    }
+    else {
+      unselected.push(tag)
+    }
+  }
+
+  return [...selected, ...unselected]
+}
+
 // selectedTags 里可以有当前榜单外的保留标签，extractedTags 是当前榜单的完整标签列表；
 // 这个判断只关心当前榜单中的标签是否全部被选中，不要求 selectedTags 刚好等于 extractedTags。
 export function areAllCurrentTagsSelected(selectedTags: Set<string>, extractedTags: string[]): boolean {
