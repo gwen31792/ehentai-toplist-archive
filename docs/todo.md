@@ -11,7 +11,6 @@
 - [ ] 解决 dark mode 下刷新的闪烁问题 FOUC
 - [ ] 多月整合的排行榜，推荐系统
 - [ ] 集成 Cloudflare Turnstile
-- [ ] SEO 优化，see also: https://vercel.com/blog/how-core-web-vitals-affect-seo
 - [ ] 检查 CLS 问题，see also: https://liudon.com/posts/fix-blog-cls/
 - [ ] 等 eslint-plugin-tailwindcss 支持 Tailwind CSS v4 后重新添加到项目中
 - [ ] 研究 Cloudflare Agent Readiness: https://blog.cloudflare.com/agent-readiness/

@@ -1,5 +1,6 @@
 import { CRAWL_TAGS_TRANSLATION_MESSAGE, handleTagsTranslationCrawling } from './crawl-tags-translation'
 import { CRAWL_QUEUE_MESSAGE, handleToplistCrawling } from './crawl-toplist'
+import { handleSyncPreviewAssets, SYNC_PREVIEW_ASSETS_MESSAGE } from './preview-assets'
 import { UPDATE_GALLERY_MESSAGE, handleUpdateGallery } from './update-gallery'
 
 export default {
@@ -22,6 +23,10 @@ export default {
       case '0 */3 * * *':
         // 每 3 小时执行一次
         tasks.push(env.QUEUE.send(UPDATE_GALLERY_MESSAGE))
+        break
+      case '30 */3 * * *':
+        // 和详情页更新错开执行，独立补齐预览图尺寸缓存
+        tasks.push(env.QUEUE.send(SYNC_PREVIEW_ASSETS_MESSAGE))
         break
     }
 
@@ -57,6 +62,15 @@ export default {
           }
           catch (error) {
             console.error('Failed to process update gallery queue message.', error)
+          }
+          break
+
+        case SYNC_PREVIEW_ASSETS_MESSAGE:
+          try {
+            await handleSyncPreviewAssets(env)
+          }
+          catch (error) {
+            console.error('Failed to process preview asset sync queue message.', error)
           }
           break
 

@@ -1,4 +1,5 @@
 import { galleriesTable } from './schema/galleries'
+import { galleryPreviewAssetsTable } from './schema/gallery-preview-assets'
 
 import type { InferSelectModel } from 'drizzle-orm'
 
@@ -7,6 +8,8 @@ import type { InferSelectModel } from 'drizzle-orm'
 // =============================================================================
 
 export type Gallery = InferSelectModel<typeof galleriesTable>
+
+export type GalleryPreviewAsset = InferSelectModel<typeof galleryPreviewAssetsTable>
 
 export interface QueryResponseItem extends Gallery {
   rank: number

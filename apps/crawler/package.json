@@ -9,7 +9,8 @@
   "dependencies": {
     "@ehentai-toplist-archive/db": "workspace:^",
     "cheerio": "^1.1.2",
-    "cloudflare": "^5.2.0"
+    "cloudflare": "^5.2.0",
+    "image-dimensions": "^2.5.0"
   },
   "nx": {
     "implicitDependencies": [

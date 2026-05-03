@@ -222,8 +222,7 @@ export async function parseToplistHtml(
   }
 }
 
-// 分批写入 toplist 结果；对 gallery 额外补写 tags_zh 和 updated_at，
-// 但仍保留“已被详情页更新过的数据不再覆盖”的保护条件。
+// 分批写入 toplist 结果；Toplist 只刷新浅层字段，详情页处理水位由 update-gallery 维护。
 async function storeToplistData(env: Env, galleries: GalleryItem[], toplistItems: ToplistItem[]): Promise<void> {
   if (galleries.length === 0 && toplistItems.length === 0) {
     console.log('No data to persist; skipping database writes.')
@@ -235,7 +234,6 @@ async function storeToplistData(env: Env, galleries: GalleryItem[], toplistItems
   const GALLERY_BATCH_SIZE = 10
 
   if (galleries.length > 0) {
-    const updatedAt = new Date().toISOString().split('T')[0]
     const translationMap = await getTagTranslationMap(
       env.KV,
       galleries.flatMap(gallery => gallery.tags?.split(', ').filter(Boolean) ?? []),
@@ -243,7 +241,6 @@ async function storeToplistData(env: Env, galleries: GalleryItem[], toplistItems
     const galleriesWithMetadata = galleries.map(gallery => ({
       ...gallery,
       tags_zh: translateTagsWithMap(gallery.tags ?? null, translationMap),
-      updated_at: updatedAt,
     }))
 
     const galleryStatements = galleriesWithMetadata.map(gallery =>
@@ -261,9 +258,8 @@ async function storeToplistData(env: Env, galleries: GalleryItem[], toplistItems
           torrents_url: gallery.torrents_url,
           preview_url: gallery.preview_url,
           gallery_url: gallery.gallery_url,
-          updated_at: gallery.updated_at,
         },
-        // 仅当 updated_at 为空时才更新，防止覆盖已被 update-gallery 任务更新过的详细数据（如完整 tags）
+        // updated_at 非空表示详情页任务已经接管过，避免用榜单页少量 tags 降级覆盖完整数据。
         where: isNull(galleriesTable.updated_at),
       }),
     )

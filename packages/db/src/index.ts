@@ -6,6 +6,8 @@ export { createDbClient } from './client'
 // =============================================================================
 // Database Schema（Drizzle 表定义）
 // =============================================================================
+export { galleryPreviewAssetsTable } from './schema/gallery-preview-assets'
+
 export { galleriesTable } from './schema/galleries'
 
 export { getToplistItemsTableByYear } from './schema/toplist-items'
@@ -13,7 +15,7 @@ export { getToplistItemsTableByYear } from './schema/toplist-items'
 // =============================================================================
 // Types（从 Drizzle 推导）
 // =============================================================================
-export { type Gallery, type QueryResponseItem } from './types'
+export { type Gallery, type GalleryPreviewAsset, type QueryResponseItem } from './types'
 
 // =============================================================================
 // Zod Schemas（从 Drizzle 生成 + 业务加强）
