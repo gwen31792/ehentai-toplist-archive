@@ -13,4 +13,6 @@ export type GalleryPreviewAsset = InferSelectModel<typeof galleryPreviewAssetsTa
 
 export interface QueryResponseItem extends Gallery {
   rank: number
+  preview_width: GalleryPreviewAsset['width']
+  preview_height: GalleryPreviewAsset['height']
 }

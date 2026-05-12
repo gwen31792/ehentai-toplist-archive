@@ -1,6 +1,7 @@
 import {
   createDbClient,
   galleriesTable,
+  galleryPreviewAssetsTable,
   getToplistItemsTableByYear,
   type PeriodType,
   type QueryResponseItem,
@@ -57,16 +58,26 @@ export async function queryToplistItems(
     {
       ...toplistColumns,
       ...galleryColumns,
+      preview_width: galleryPreviewAssetsTable.width,
+      preview_height: galleryPreviewAssetsTable.height,
     },
   )
     .from(toplistItemsTable)
+    .innerJoin(galleriesTable, eq(toplistItemsTable.gallery_id, galleriesTable.gallery_id))
+    .leftJoin(
+      galleryPreviewAssetsTable,
+      and(
+        eq(galleryPreviewAssetsTable.gallery_id, galleriesTable.gallery_id),
+        eq(galleryPreviewAssetsTable.source_url, galleriesTable.preview_url),
+        eq(galleryPreviewAssetsTable.sync_status, 'synced'),
+      ),
+    )
     .where(
       and(
         eq(toplistItemsTable.list_date, listDate),
         eq(toplistItemsTable.period_type, periodType),
       ),
     )
-    .innerJoin(galleriesTable, eq(toplistItemsTable.gallery_id, galleriesTable.gallery_id))
     .orderBy(toplistItemsTable.rank)
 
   return result as QueryResponseItem[]

@@ -75,14 +75,25 @@ function buildColumnFilters({
 }
 
 // 隐藏图片预加载组件
-const PreloadImage = ({ src }: { src: string }) => {
+const PreloadImage = ({
+  src,
+  width,
+  height,
+}: {
+  src: string
+  width: number | null
+  height: number | null
+}) => {
+  const imageWidth = width && width > 0 ? width : 3
+  const imageHeight = height && height > 0 ? height : 4
+
   return (
     <div className="pointer-events-none absolute opacity-0" style={{ width: 0, height: 0, overflow: 'hidden' }}>
       <Image
         src={src}
         alt="预加载图片"
-        width={0}
-        height={0}
+        width={imageWidth}
+        height={imageHeight}
         style={{
           width: '100%',
           height: 'auto',
@@ -322,6 +333,8 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
               <ImageWithSkeleton
                 src={url}
                 alt="预览图"
+                width={info.row.original.preview_width}
+                height={info.row.original.preview_height}
                 className="w-full rounded"
               />
             </div>
@@ -335,6 +348,8 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
       cell: (info) => {
         const isPreviewColumnVisible = info.table.getColumn('preview_url')?.getIsVisible() ?? true
         const previewUrl = info.row.original.preview_url
+        const previewWidth = info.row.original.preview_width
+        const previewHeight = info.row.original.preview_height
         const hasPreview = previewUrl && previewUrl !== 'unavailable'
 
         if (isPreviewColumnVisible || !hasPreview) {
@@ -364,13 +379,15 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
                   >
                     {info.getValue()}
                   </Link>
-                  <PreloadImage src={previewUrl} />
+                  <PreloadImage src={previewUrl} width={previewWidth} height={previewHeight} />
                 </div>
               </HoverCardTrigger>
               <HoverCardContent side="left" className="p-1">
                 <ImageWithSkeleton
                   src={previewUrl}
                   alt={info.getValue() as string}
+                  width={previewWidth}
+                  height={previewHeight}
                 />
               </HoverCardContent>
             </HoverCard>
