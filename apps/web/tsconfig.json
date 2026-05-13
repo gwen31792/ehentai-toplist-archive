@@ -31,6 +31,7 @@
   "include": [
     "../../apps/web/.next/types/**/*.ts",
     "../../dist/apps/web/.next/types/**/*.ts",
+    "custom-worker.ts",
     "next-env.d.ts",
     "src/**/*.js",
     "src/**/*.jsx",

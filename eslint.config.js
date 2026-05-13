@@ -129,7 +129,7 @@ export default [
       // 禁止重复导入
       'import/no-duplicates': 'error',
       // 禁止导入不存在的模块
-      'import/no-unresolved': 'error',
+      'import/no-unresolved': ['error', { ignore: ['^\\./\\.open-next/worker\\.js$'] }],
     },
   },
   stylistic.configs.recommended, // 代码风格与格式化规则
