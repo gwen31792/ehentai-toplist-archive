@@ -36,6 +36,10 @@
 
 - 默认不要新增 ARIA 相关属性或文案，例如 `aria-label`、`aria-describedby`；除非用户明确要求，否则保持界面实现中不包含 ARIA 相关内容
 
+# Crawler 定时任务约定
+
+- 修改 `apps/crawler/wrangler.jsonc` 里的 cron 触发时间时，必须同步修改 `apps/crawler/src/index.ts` 中基于 `controller.cron` 的任务分发 `case`；否则 Wrangler 会按新时间触发 Worker，但代码不会把该 cron 映射到对应队列任务。
+
 # Git 操作约定
 
 - 修改代码时不要把进行中的修改自动加入 Git 暂存区；除非用户明确要求执行 Git 相关命令，否则不要运行 `git add`。

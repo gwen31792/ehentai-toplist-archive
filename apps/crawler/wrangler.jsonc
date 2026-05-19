@@ -11,7 +11,7 @@
     "crons": [
       "0 1 * * *", // Toplist crawling
       "0 13 * * 1", // Tags translation crawling (weekly, Monday)
-      "0 */3 * * *", // Update gallery details (every 3 hours)
+      "15 * * * *", // Update gallery details (hourly, offset from other tasks)
       "30 */3 * * *" // Preview asset sync (every 3 hours, offset from gallery updates)
     ]
   },

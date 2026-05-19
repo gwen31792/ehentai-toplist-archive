@@ -20,8 +20,8 @@ export default {
         // 每周一 13 点执行的任务
         tasks.push(env.QUEUE.send(CRAWL_TAGS_TRANSLATION_MESSAGE))
         break
-      case '0 */3 * * *':
-        // 每 3 小时执行一次
+      case '15 * * * *':
+        // 每小时错开到第 15 分钟执行一次
         tasks.push(env.QUEUE.send(UPDATE_GALLERY_MESSAGE))
         break
       case '30 */3 * * *':
