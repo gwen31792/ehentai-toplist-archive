@@ -45,6 +45,7 @@ export const galleryDetailsSchema = z.object({
   publishedTime: dateStringSchema.nullable(),
   uploader: z.string().min(1).nullable(),
   galleryLength: z.number().int().positive().nullable(),
+  rating: z.number().min(0).max(5).nullable(),
   torrentsUrl: z.url().nullable(),
   previewUrl: z.url().nullable(),
 })

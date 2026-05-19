@@ -148,6 +148,7 @@ export async function handleUpdateGallery(env: Env): Promise<void> {
             ...(details.publishedTime && { published_time: details.publishedTime }),
             ...(details.uploader && { uploader: details.uploader }),
             ...(details.galleryLength && { gallery_length: details.galleryLength }),
+            ...(details.rating !== null && { rating: details.rating }),
             ...(details.torrentsUrl && { torrents_url: details.torrentsUrl }),
             ...(details.previewUrl && { preview_url: details.previewUrl }),
             updated_at: new Date().toISOString().split('T')[0],
@@ -219,6 +220,13 @@ function parseGalleryDetails(html: string, galleryId: number): GalleryDetails {
   const style = $('#gleft #gd1 > div').first().attr('style')
   const previewUrl = style?.match(/url\(([^)]+)\)/)?.[1] || null
 
+  const ratingText = $('#rating_label').text().trim()
+  const ratingMatch = ratingText.match(/Average:\s*(\d+(?:\.\d+)?)/)
+  const ratingValue = ratingMatch ? Number(ratingMatch[1]) : null
+  const rating = ratingValue !== null && ratingValue >= 0 && ratingValue <= 5
+    ? ratingValue
+    : null
+
   const tags: string[] = []
   $('#taglist table tbody tr').each((_, tr) => {
     const namespaceText = $(tr).find('td.tc').text().trim().replace(':', '')
@@ -253,6 +261,7 @@ function parseGalleryDetails(html: string, galleryId: number): GalleryDetails {
     publishedTime,
     uploader,
     galleryLength,
+    rating,
     torrentsUrl,
     previewUrl,
   }

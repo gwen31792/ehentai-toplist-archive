@@ -11,7 +11,7 @@ export type Gallery = InferSelectModel<typeof galleriesTable>
 
 export type GalleryPreviewAsset = InferSelectModel<typeof galleryPreviewAssetsTable>
 
-export interface QueryResponseItem extends Gallery {
+export interface QueryResponseItem extends Omit<Gallery, 'updated_at' | 'rating'> {
   rank: number
   preview_width: GalleryPreviewAsset['width']
   preview_height: GalleryPreviewAsset['height']
