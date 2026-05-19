@@ -8,6 +8,7 @@ export interface TablePreferences {
   columnSizing: ColumnSizingState
   tagFilterMode: TagFilterMode
   preserveTagSelection: boolean
+  preserveTypeSelection: boolean
   useExhentaiGalleryLinks: boolean
 }
 
@@ -34,6 +35,7 @@ export const defaultTablePreferences: TablePreferences = {
   columnSizing: {},
   tagFilterMode: 'or',
   preserveTagSelection: false,
+  preserveTypeSelection: false,
   useExhentaiGalleryLinks: false,
 }
 
@@ -66,6 +68,10 @@ export function normalizeTablePreferences(value: unknown): TablePreferences {
     ? value.preserveTagSelection
     : defaultTablePreferences.preserveTagSelection
 
+  const preserveTypeSelection = typeof value.preserveTypeSelection === 'boolean'
+    ? value.preserveTypeSelection
+    : defaultTablePreferences.preserveTypeSelection
+
   const useExhentaiGalleryLinks = typeof value.useExhentaiGalleryLinks === 'boolean'
     ? value.useExhentaiGalleryLinks
     : defaultTablePreferences.useExhentaiGalleryLinks
@@ -80,6 +86,7 @@ export function normalizeTablePreferences(value: unknown): TablePreferences {
     columnSizing,
     tagFilterMode,
     preserveTagSelection,
+    preserveTypeSelection,
     useExhentaiGalleryLinks,
   }
 }

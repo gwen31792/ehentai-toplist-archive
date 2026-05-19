@@ -16,7 +16,9 @@ import {
 import { Switch } from '@/components/ui/switch'
 import { VirtualizedFilterList } from '@/components/virtualized-filter-list'
 import {
+  getSelectedCurrentItemCount,
   getSelectedCurrentTagCount,
+  prioritizeSelectedItems,
   prioritizeSelectedTags,
 } from '@/lib/table-tag-selection'
 import { cn } from '@/lib/utils'
@@ -30,10 +32,12 @@ interface TableHeaderControlsProps<TData> {
   extractedTags: string[]
   tagFilterMode: TagFilterMode
   preserveTagSelection: boolean
+  preserveTypeSelection: boolean
   useExhentaiGalleryLinks: boolean
   onSelectedTagsChange: (tags: Set<string>) => void
   onTagFilterModeChange: (mode: TagFilterMode) => void
   onPreserveTagSelectionChange: (preserve: boolean) => void
+  onPreserveTypeSelectionChange: (preserve: boolean) => void
   onUseExhentaiGalleryLinksChange: (enabled: boolean) => void
   selectedTypes: Set<string>
   extractedTypes: string[]
@@ -47,10 +51,12 @@ export function TableHeaderControls<TData>({
   extractedTags,
   tagFilterMode,
   preserveTagSelection,
+  preserveTypeSelection,
   useExhentaiGalleryLinks,
   onSelectedTagsChange,
   onTagFilterModeChange,
   onPreserveTagSelectionChange,
+  onPreserveTypeSelectionChange,
   onUseExhentaiGalleryLinksChange,
   selectedTypes,
   extractedTypes,
@@ -63,6 +69,23 @@ export function TableHeaderControls<TData>({
   const [tagPopoverOpen, setTagPopoverOpen] = useState(false)
   const [openTargetPopoverOpen, setOpenTargetPopoverOpen] = useState(false)
   const [tagSearch, setTagSearch] = useState('')
+
+  // 类型保留允许存在当前榜单外的历史选择，计数时只把当前榜单内命中的类型算进 current/total。
+  const selectedCurrentTypeCount = useMemo(() => (
+    getSelectedCurrentItemCount(selectedTypes, extractedTypes)
+  ), [extractedTypes, selectedTypes])
+  const missingSelectedTypeCount = Math.max(0, selectedTypes.size - selectedCurrentTypeCount)
+  const missingSelectedTypeLabel = missingSelectedTypeCount > 0
+    ? ` +${missingSelectedTypeCount}`
+    : ''
+  const hasActiveTypeFilter = missingSelectedTypeCount > 0
+    || (extractedTypes.length > 0 && selectedCurrentTypeCount !== extractedTypes.length)
+  const typeFilterButtonLabel = hasActiveTypeFilter
+    ? `${t('headers.gallery_type')} ${selectedCurrentTypeCount}/${extractedTypes.length}${missingSelectedTypeLabel}`
+    : t('typeFilter')
+  const orderedTypes = useMemo(() => (
+    prioritizeSelectedItems(extractedTypes, selectedTypes)
+  ), [extractedTypes, selectedTypes])
 
   // 保留标签筛选会带来当前榜单外的标签，这里拆开当前可见选中数和额外保留数用于计数展示。
   const selectedCurrentTagCount = useMemo(() => (
@@ -113,10 +136,15 @@ export function TableHeaderControls<TData>({
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className="bg-zinc-50 dark:bg-zinc-800"
+              className={cn(
+                'bg-zinc-50 dark:bg-zinc-800',
+                hasActiveTypeFilter
+                  ? 'border-zinc-400 bg-zinc-100 text-zinc-900 shadow-sm hover:bg-zinc-200 dark:border-zinc-500 dark:bg-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-700/80'
+                  : null,
+              )}
             >
               <Filter className="mr-2 h-4 w-4" />
-              {t('typeFilter')}
+              {typeFilterButtonLabel}
             </Button>
           </PopoverTrigger>
           <PopoverContent align="start" className="w-[300px] bg-zinc-50 dark:bg-zinc-800">
@@ -124,6 +152,12 @@ export function TableHeaderControls<TData>({
               <div className="flex items-center justify-between">
                 <h4 className="font-medium leading-none text-zinc-900 dark:text-zinc-100">
                   {t('typeFilter')}
+                  <span className="ml-2 text-xs text-zinc-500 dark:text-zinc-400">
+                    {selectedCurrentTypeCount}
+                    /
+                    {extractedTypes.length}
+                    {missingSelectedTypeLabel}
+                  </span>
                 </h4>
                 <div className="flex items-center gap-2">
                   <Button
@@ -145,8 +179,32 @@ export function TableHeaderControls<TData>({
                 </div>
               </div>
 
+              <div className="flex items-center justify-between gap-2 px-1">
+                <div className="min-w-0">
+                  <label
+                    htmlFor="preserve-type-selection"
+                    className="block cursor-pointer text-xs font-medium leading-none text-zinc-700 dark:text-zinc-300"
+                  >
+                    {t('preserveTypeSelection')}
+                  </label>
+                  {missingSelectedTypeCount > 0
+                    ? (
+                        <div className="mt-0.5 text-[11px] leading-none text-zinc-500 dark:text-zinc-400">
+                          {t('preservedMissingTypes', { count: missingSelectedTypeCount })}
+                        </div>
+                      )
+                    : null}
+                </div>
+                <Switch
+                  id="preserve-type-selection"
+                  checked={preserveTypeSelection}
+                  onCheckedChange={onPreserveTypeSelectionChange}
+                  className="h-4 w-8 shrink-0 data-[state=checked]:bg-zinc-900 data-[state=checked]:[&>span]:translate-x-4 dark:data-[state=checked]:bg-zinc-100 [&>span]:h-3 [&>span]:w-3"
+                />
+              </div>
+
               <VirtualizedFilterList
-                items={extractedTypes}
+                items={orderedTypes}
                 selectedItems={selectedTypes}
                 onSelectionChange={onSelectedTypesChange}
                 idPrefix="type"

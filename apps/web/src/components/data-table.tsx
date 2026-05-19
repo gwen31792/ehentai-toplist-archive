@@ -32,8 +32,11 @@ import { rewriteGalleryUrlForExhentai } from '@/lib/gallery-url'
 import { hydrateTableStoreOnce, useTableStore } from '@/lib/stores/table-store'
 import { type TablePreferences } from '@/lib/table-preferences'
 import {
+  areAllAndOnlyCurrentItemsSelected,
+  areAllCurrentItemsSelected,
   areAllAndOnlyCurrentTagsSelected,
   areAllCurrentTagsSelected,
+  getSelectedCurrentItems,
   getSelectedCurrentTags,
 } from '@/lib/table-tag-selection'
 import { QueryResponseItem } from '@/lib/types'
@@ -69,7 +72,7 @@ function buildColumnFilters({
       id: 'gallery_type',
       value: {
         values: Array.from(selectedTypes),
-        allSelected: selectedTypes.size > 0 && selectedTypes.size === extractedTypes.length,
+        allSelected: areAllCurrentItemsSelected(selectedTypes, extractedTypes),
       },
     },
   ]
@@ -141,11 +144,15 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
   const setColumnSizing = useTableStore(s => s.setColumnSizing)
   const preserveTagSelection = useTableStore(s => s.preserveTagSelection)
   const setPreserveTagSelection = useTableStore(s => s.setPreserveTagSelection)
+  const preserveTypeSelection = useTableStore(s => s.preserveTypeSelection)
+  const setPreserveTypeSelection = useTableStore(s => s.setPreserveTypeSelection)
   const useExhentaiGalleryLinks = useTableStore(s => s.useExhentaiGalleryLinks)
   const setUseExhentaiGalleryLinks = useTableStore(s => s.setUseExhentaiGalleryLinks)
   const tagSelectionIntent = useTableStore(s => s.tagSelectionIntent)
   const tagSelectionIntentLocale = useTableStore(s => s.tagSelectionIntentLocale)
   const setTagSelectionIntent = useTableStore(s => s.setTagSelectionIntent)
+  const typeSelectionIntent = useTableStore(s => s.typeSelectionIntent)
+  const setTypeSelectionIntent = useTableStore(s => s.setTypeSelectionIntent)
   const hasHydrated = useTableStore(s => s.hasHydrated)
 
   // 触发持久化状态水合（skipHydration: true）
@@ -165,6 +172,9 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
   const effectivePreserveTagSelection = hasHydrated
     ? preserveTagSelection
     : initialPreferences.preserveTagSelection
+  const effectivePreserveTypeSelection = hasHydrated
+    ? preserveTypeSelection
+    : initialPreferences.preserveTypeSelection
   const effectiveUseExhentaiGalleryLinks = hasHydrated
     ? useExhentaiGalleryLinks
     : initialPreferences.useExhentaiGalleryLinks
@@ -207,7 +217,13 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
 
     return new Set(extractedTags)
   })
-  const [selectedTypes, setSelectedTypes] = useState<Set<string>>(() => new Set(extractedTypes))
+  const [selectedTypes, setSelectedTypes] = useState<Set<string>>(() => {
+    if (effectivePreserveTypeSelection && typeSelectionIntent !== null) {
+      return new Set(typeSelectionIntent)
+    }
+
+    return new Set(extractedTypes)
+  })
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(() =>
     buildColumnFilters({
       selectedTags,
@@ -240,10 +256,15 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
     tagSelectionIntentLocale,
   ])
 
-  // 初始化类型状态（每次数据变化时重置为全选）
+  // 数据集变化时，类型筛选按独立 intent 恢复；未开启保留时仍回到当前榜单全选。
   useEffect(() => {
-    setSelectedTypes(new Set(extractedTypes))
-  }, [extractedTypes])
+    if (!effectivePreserveTypeSelection || typeSelectionIntent === null) {
+      setSelectedTypes(new Set(extractedTypes))
+      return
+    }
+
+    setSelectedTypes(new Set(typeSelectionIntent))
+  }, [effectivePreserveTypeSelection, extractedTypes, typeSelectionIntent])
 
   // 更新列过滤器（加入模式与全选状态，切换 OR/AND/全选都会触发重算）
   useEffect(() => {
@@ -292,6 +313,34 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
 
     const isPlainCurrentAllSelected = areAllAndOnlyCurrentTagsSelected(selectedTags, extractedTags)
     setTagSelectionIntent(isPlainCurrentAllSelected ? null : Array.from(selectedTags), locale)
+  }
+
+  const handleSelectedTypesChange = (types: Set<string>) => {
+    setSelectedTypes(types)
+
+    if (!effectivePreserveTypeSelection) {
+      return
+    }
+
+    const isPlainCurrentAllSelected = areAllAndOnlyCurrentItemsSelected(types, extractedTypes)
+    setTypeSelectionIntent(isPlainCurrentAllSelected ? null : Array.from(types))
+  }
+
+  const handlePreserveTypeSelectionChange = (preserve: boolean) => {
+    setPreserveTypeSelection(preserve)
+
+    if (!preserve) {
+      const currentSelectedTypes = getSelectedCurrentItems(selectedTypes, extractedTypes)
+      const hasMissingSelectedTypes = currentSelectedTypes.length !== selectedTypes.size
+      setTypeSelectionIntent(null)
+      if (hasMissingSelectedTypes) {
+        setSelectedTypes(new Set(currentSelectedTypes.length > 0 ? currentSelectedTypes : extractedTypes))
+      }
+      return
+    }
+
+    const isPlainCurrentAllSelected = areAllAndOnlyCurrentItemsSelected(selectedTypes, extractedTypes)
+    setTypeSelectionIntent(isPlainCurrentAllSelected ? null : Array.from(selectedTypes))
   }
 
   const allCurrentTagsSelected = areAllCurrentTagsSelected(selectedTags, extractedTags)
@@ -580,14 +629,16 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
         extractedTags={extractedTags}
         tagFilterMode={effectiveTagFilterMode}
         preserveTagSelection={effectivePreserveTagSelection}
+        preserveTypeSelection={effectivePreserveTypeSelection}
         useExhentaiGalleryLinks={effectiveUseExhentaiGalleryLinks}
         onSelectedTagsChange={handleSelectedTagsChange}
         onTagFilterModeChange={setTagFilterMode}
         onPreserveTagSelectionChange={handlePreserveTagSelectionChange}
+        onPreserveTypeSelectionChange={handlePreserveTypeSelectionChange}
         onUseExhentaiGalleryLinksChange={setUseExhentaiGalleryLinks}
         selectedTypes={selectedTypes}
         extractedTypes={extractedTypes}
-        onSelectedTypesChange={setSelectedTypes}
+        onSelectedTypesChange={handleSelectedTypesChange}
       />
 
       <div ref={tableViewportRef} className="w-full overflow-x-auto">

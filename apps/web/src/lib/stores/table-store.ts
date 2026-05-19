@@ -20,12 +20,15 @@ interface TableState {
   columnSizing: ColumnSizingState
   tagFilterMode: TagFilterMode
   preserveTagSelection: boolean
+  preserveTypeSelection: boolean
   useExhentaiGalleryLinks: boolean
 
   // 会话内状态，不进入 localStorage/cookie，避免把用户选择的大量标签写进持久化偏好。
   tagSelectionIntent: string[] | null
   // intent 保存的是当前语言下的展示文本，恢复前必须确认语言一致。
   tagSelectionIntentLocale: string | null
+  // gallery_type 不随语言变化，只需要在当前会话中保留用户显式选择。
+  typeSelectionIntent: string[] | null
 
   // 水合标记（避免 SSR 与客户端初始值不一致）
   hasHydrated: boolean
@@ -36,18 +39,21 @@ interface TableState {
   setColumnSizing: (updaterOrValue: ColumnSizingState | ((old: ColumnSizingState) => ColumnSizingState)) => void
   setTagFilterMode: (mode: TagFilterMode) => void
   setPreserveTagSelection: (preserve: boolean) => void
+  setPreserveTypeSelection: (preserve: boolean) => void
   setUseExhentaiGalleryLinks: (enabled: boolean) => void
   setTagSelectionIntent: (intent: string[] | null, locale?: string | null) => void
+  setTypeSelectionIntent: (intent: string[] | null) => void
   setHasHydrated: (hydrated: boolean) => void
 }
 
-function pickTablePreferences(state: Pick<TableState, 'pageSize' | 'columnVisibility' | 'columnSizing' | 'tagFilterMode' | 'preserveTagSelection' | 'useExhentaiGalleryLinks'>): TablePreferences {
+function pickTablePreferences(state: Pick<TableState, 'pageSize' | 'columnVisibility' | 'columnSizing' | 'tagFilterMode' | 'preserveTagSelection' | 'preserveTypeSelection' | 'useExhentaiGalleryLinks'>): TablePreferences {
   return {
     pageSize: state.pageSize,
     columnVisibility: state.columnVisibility,
     columnSizing: state.columnSizing,
     tagFilterMode: state.tagFilterMode,
     preserveTagSelection: state.preserveTagSelection,
+    preserveTypeSelection: state.preserveTypeSelection,
     useExhentaiGalleryLinks: state.useExhentaiGalleryLinks,
   }
 }
@@ -69,9 +75,11 @@ export const useTableStore = create<TableState>()(
       columnSizing: defaultTablePreferences.columnSizing,
       tagFilterMode: defaultTablePreferences.tagFilterMode,
       preserveTagSelection: defaultTablePreferences.preserveTagSelection,
+      preserveTypeSelection: defaultTablePreferences.preserveTypeSelection,
       useExhentaiGalleryLinks: defaultTablePreferences.useExhentaiGalleryLinks,
       tagSelectionIntent: null,
       tagSelectionIntentLocale: null,
+      typeSelectionIntent: null,
       hasHydrated: false,
 
       setPageSize: pageSize => set((state) => {
@@ -120,6 +128,16 @@ export const useTableStore = create<TableState>()(
           tagSelectionIntentLocale: preserve ? state.tagSelectionIntentLocale : null,
         }
       }),
+      setPreserveTypeSelection: preserve => set((state) => {
+        writeTablePreferencesCookie(pickTablePreferences({
+          ...state,
+          preserveTypeSelection: preserve,
+        }))
+        return {
+          preserveTypeSelection: preserve,
+          typeSelectionIntent: preserve ? state.typeSelectionIntent : null,
+        }
+      }),
       setUseExhentaiGalleryLinks: enabled => set((state) => {
         writeTablePreferencesCookie(pickTablePreferences({
           ...state,
@@ -131,6 +149,7 @@ export const useTableStore = create<TableState>()(
         tagSelectionIntent: intent,
         tagSelectionIntentLocale: intent === null ? null : locale,
       }),
+      setTypeSelectionIntent: intent => set({ typeSelectionIntent: intent }),
       setHasHydrated: hydrated => set({ hasHydrated: hydrated }),
     }),
     {
