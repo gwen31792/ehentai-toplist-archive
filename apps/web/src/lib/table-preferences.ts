@@ -8,6 +8,7 @@ export interface TablePreferences {
   columnSizing: ColumnSizingState
   tagFilterMode: TagFilterMode
   preserveTagSelection: boolean
+  useExhentaiGalleryLinks: boolean
 }
 
 // 让 server render 也能拿到表格偏好，避免首屏先按默认列渲染再闪回用户配置。
@@ -33,6 +34,7 @@ export const defaultTablePreferences: TablePreferences = {
   columnSizing: {},
   tagFilterMode: 'or',
   preserveTagSelection: false,
+  useExhentaiGalleryLinks: false,
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -64,6 +66,10 @@ export function normalizeTablePreferences(value: unknown): TablePreferences {
     ? value.preserveTagSelection
     : defaultTablePreferences.preserveTagSelection
 
+  const useExhentaiGalleryLinks = typeof value.useExhentaiGalleryLinks === 'boolean'
+    ? value.useExhentaiGalleryLinks
+    : defaultTablePreferences.useExhentaiGalleryLinks
+
   // 读取旧 cookie / 非完整对象时，缺失字段自动回退到默认值，避免配置升级后炸掉。
   return {
     pageSize,
@@ -74,6 +80,7 @@ export function normalizeTablePreferences(value: unknown): TablePreferences {
     columnSizing,
     tagFilterMode,
     preserveTagSelection,
+    useExhentaiGalleryLinks,
   }
 }
 

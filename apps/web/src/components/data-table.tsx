@@ -28,6 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { rewriteGalleryUrlForExhentai } from '@/lib/gallery-url'
 import { hydrateTableStoreOnce, useTableStore } from '@/lib/stores/table-store'
 import { type TablePreferences } from '@/lib/table-preferences'
 import {
@@ -140,6 +141,8 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
   const setColumnSizing = useTableStore(s => s.setColumnSizing)
   const preserveTagSelection = useTableStore(s => s.preserveTagSelection)
   const setPreserveTagSelection = useTableStore(s => s.setPreserveTagSelection)
+  const useExhentaiGalleryLinks = useTableStore(s => s.useExhentaiGalleryLinks)
+  const setUseExhentaiGalleryLinks = useTableStore(s => s.setUseExhentaiGalleryLinks)
   const tagSelectionIntent = useTableStore(s => s.tagSelectionIntent)
   const tagSelectionIntentLocale = useTableStore(s => s.tagSelectionIntentLocale)
   const setTagSelectionIntent = useTableStore(s => s.setTagSelectionIntent)
@@ -162,6 +165,9 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
   const effectivePreserveTagSelection = hasHydrated
     ? preserveTagSelection
     : initialPreferences.preserveTagSelection
+  const effectiveUseExhentaiGalleryLinks = hasHydrated
+    ? useExhentaiGalleryLinks
+    : initialPreferences.useExhentaiGalleryLinks
 
   // 提取当前语言下的唯一标签；中文翻译缺失时回退英文 tags，避免筛选丢行。
   const extractedTags = useMemo(() => {
@@ -351,12 +357,16 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
         const previewWidth = info.row.original.preview_width
         const previewHeight = info.row.original.preview_height
         const hasPreview = previewUrl && previewUrl !== 'unavailable'
+        const galleryHref = rewriteGalleryUrlForExhentai(
+          info.row.original.gallery_url as string,
+          effectiveUseExhentaiGalleryLinks,
+        )
 
         if (isPreviewColumnVisible || !hasPreview) {
           return (
             <CellWrapper>
               <Link
-                href={info.row.original.gallery_url as string}
+                href={galleryHref}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -372,7 +382,7 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
               <HoverCardTrigger asChild>
                 <div className="w-full">
                   <Link
-                    href={info.row.original.gallery_url as string}
+                    href={galleryHref}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block w-full break-all"
@@ -521,7 +531,7 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
       ),
       size: 80,
     }),
-  ]), [allCurrentTagsSelected, effectiveTagFilterMode, locale, selectedTags, t])
+  ]), [allCurrentTagsSelected, effectiveTagFilterMode, effectiveUseExhentaiGalleryLinks, locale, selectedTags, t])
 
   // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table's useReactTable returns stable function references
   const table = useReactTable({
@@ -570,9 +580,11 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
         extractedTags={extractedTags}
         tagFilterMode={effectiveTagFilterMode}
         preserveTagSelection={effectivePreserveTagSelection}
+        useExhentaiGalleryLinks={effectiveUseExhentaiGalleryLinks}
         onSelectedTagsChange={handleSelectedTagsChange}
         onTagFilterModeChange={setTagFilterMode}
         onPreserveTagSelectionChange={handlePreserveTagSelectionChange}
+        onUseExhentaiGalleryLinksChange={setUseExhentaiGalleryLinks}
         selectedTypes={selectedTypes}
         extractedTypes={extractedTypes}
         onSelectedTypesChange={setSelectedTypes}

@@ -3,7 +3,7 @@
 import React, { useMemo, useState } from 'react'
 
 import { Table, VisibilityState } from '@tanstack/react-table'
-import { Filter, Search, Settings, Tags, X } from 'lucide-react'
+import { ExternalLink, Filter, Search, Settings, Tags, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { Button } from '@/components/ui/button'
@@ -30,9 +30,11 @@ interface TableHeaderControlsProps<TData> {
   extractedTags: string[]
   tagFilterMode: TagFilterMode
   preserveTagSelection: boolean
+  useExhentaiGalleryLinks: boolean
   onSelectedTagsChange: (tags: Set<string>) => void
   onTagFilterModeChange: (mode: TagFilterMode) => void
   onPreserveTagSelectionChange: (preserve: boolean) => void
+  onUseExhentaiGalleryLinksChange: (enabled: boolean) => void
   selectedTypes: Set<string>
   extractedTypes: string[]
   onSelectedTypesChange: (types: Set<string>) => void
@@ -45,9 +47,11 @@ export function TableHeaderControls<TData>({
   extractedTags,
   tagFilterMode,
   preserveTagSelection,
+  useExhentaiGalleryLinks,
   onSelectedTagsChange,
   onTagFilterModeChange,
   onPreserveTagSelectionChange,
+  onUseExhentaiGalleryLinksChange,
   selectedTypes,
   extractedTypes,
   onSelectedTypesChange,
@@ -57,6 +61,7 @@ export function TableHeaderControls<TData>({
   // Popover 打开状态
   const [typePopoverOpen, setTypePopoverOpen] = useState(false)
   const [tagPopoverOpen, setTagPopoverOpen] = useState(false)
+  const [openTargetPopoverOpen, setOpenTargetPopoverOpen] = useState(false)
   const [tagSearch, setTagSearch] = useState('')
 
   // 保留标签筛选会带来当前榜单外的标签，这里拆开当前可见选中数和额外保留数用于计数展示。
@@ -95,9 +100,14 @@ export function TableHeaderControls<TData>({
     }
   }
 
+  const handleGalleryOpenTargetChange = (enabled: boolean) => {
+    onUseExhentaiGalleryLinksChange(enabled)
+    setOpenTargetPopoverOpen(false)
+  }
+
   return (
     <div className="mb-4 flex items-center justify-end">
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center justify-end gap-2">
         {/* 类型筛选器 */}
         <Popover open={typePopoverOpen} onOpenChange={setTypePopoverOpen}>
           <PopoverTrigger asChild>
@@ -292,6 +302,47 @@ export function TableHeaderControls<TData>({
                 idPrefix="tag"
                 emptyMessage={t('noMatchingTags')}
               />
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        {/* 画廊打开方式 */}
+        <Popover open={openTargetPopoverOpen} onOpenChange={setOpenTargetPopoverOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className="bg-zinc-50 dark:bg-zinc-800"
+            >
+              <ExternalLink className="mr-2 h-4 w-4" />
+              {t('galleryOpenTarget')}
+              <span className="ml-1 text-zinc-500 dark:text-zinc-400">
+                {useExhentaiGalleryLinks ? t('galleryOpenTargetExhentai') : t('galleryOpenTargetEHentai')}
+              </span>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="end" className="w-[220px] bg-zinc-50 dark:bg-zinc-800">
+            <div className="space-y-2">
+              <h4 className="font-medium leading-none text-zinc-900 dark:text-zinc-100">
+                {t('galleryOpenTargetTitle')}
+              </h4>
+              <div className="inline-flex w-full rounded-md border border-zinc-200 bg-zinc-50 p-0.5 dark:border-zinc-700 dark:bg-zinc-800">
+                <Button
+                  variant={useExhentaiGalleryLinks ? 'ghost' : 'default'}
+                  size="sm"
+                  className={`h-8 flex-1 px-2.5 text-xs ${useExhentaiGalleryLinks ? 'text-zinc-700 dark:text-zinc-300' : ''}`}
+                  onClick={() => handleGalleryOpenTargetChange(false)}
+                >
+                  {t('galleryOpenTargetEHentai')}
+                </Button>
+                <Button
+                  variant={useExhentaiGalleryLinks ? 'default' : 'ghost'}
+                  size="sm"
+                  className={`h-8 flex-1 px-2.5 text-xs ${useExhentaiGalleryLinks ? '' : 'text-zinc-700 dark:text-zinc-300'}`}
+                  onClick={() => handleGalleryOpenTargetChange(true)}
+                >
+                  {t('galleryOpenTargetExhentai')}
+                </Button>
+              </div>
             </div>
           </PopoverContent>
         </Popover>

@@ -20,6 +20,7 @@ interface TableState {
   columnSizing: ColumnSizingState
   tagFilterMode: TagFilterMode
   preserveTagSelection: boolean
+  useExhentaiGalleryLinks: boolean
 
   // 会话内状态，不进入 localStorage/cookie，避免把用户选择的大量标签写进持久化偏好。
   tagSelectionIntent: string[] | null
@@ -35,17 +36,19 @@ interface TableState {
   setColumnSizing: (updaterOrValue: ColumnSizingState | ((old: ColumnSizingState) => ColumnSizingState)) => void
   setTagFilterMode: (mode: TagFilterMode) => void
   setPreserveTagSelection: (preserve: boolean) => void
+  setUseExhentaiGalleryLinks: (enabled: boolean) => void
   setTagSelectionIntent: (intent: string[] | null, locale?: string | null) => void
   setHasHydrated: (hydrated: boolean) => void
 }
 
-function pickTablePreferences(state: Pick<TableState, 'pageSize' | 'columnVisibility' | 'columnSizing' | 'tagFilterMode' | 'preserveTagSelection'>): TablePreferences {
+function pickTablePreferences(state: Pick<TableState, 'pageSize' | 'columnVisibility' | 'columnSizing' | 'tagFilterMode' | 'preserveTagSelection' | 'useExhentaiGalleryLinks'>): TablePreferences {
   return {
     pageSize: state.pageSize,
     columnVisibility: state.columnVisibility,
     columnSizing: state.columnSizing,
     tagFilterMode: state.tagFilterMode,
     preserveTagSelection: state.preserveTagSelection,
+    useExhentaiGalleryLinks: state.useExhentaiGalleryLinks,
   }
 }
 
@@ -66,6 +69,7 @@ export const useTableStore = create<TableState>()(
       columnSizing: defaultTablePreferences.columnSizing,
       tagFilterMode: defaultTablePreferences.tagFilterMode,
       preserveTagSelection: defaultTablePreferences.preserveTagSelection,
+      useExhentaiGalleryLinks: defaultTablePreferences.useExhentaiGalleryLinks,
       tagSelectionIntent: null,
       tagSelectionIntentLocale: null,
       hasHydrated: false,
@@ -115,6 +119,13 @@ export const useTableStore = create<TableState>()(
           tagSelectionIntent: preserve ? state.tagSelectionIntent : null,
           tagSelectionIntentLocale: preserve ? state.tagSelectionIntentLocale : null,
         }
+      }),
+      setUseExhentaiGalleryLinks: enabled => set((state) => {
+        writeTablePreferencesCookie(pickTablePreferences({
+          ...state,
+          useExhentaiGalleryLinks: enabled,
+        }))
+        return { useExhentaiGalleryLinks: enabled }
       }),
       setTagSelectionIntent: (intent, locale = null) => set({
         tagSelectionIntent: intent,
