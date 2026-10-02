@@ -74,7 +74,7 @@ export function LanguageSelector() {
         <Languages size={24} />
       </button>
       {isOpen && (
-        <div className="absolute right-0 z-20 mt-2 min-w-[120px] whitespace-nowrap rounded-md bg-white py-2 shadow-xl dark:bg-zinc-800">
+        <div className="absolute right-0 z-20 mt-2 min-w-30 rounded-md bg-white py-2 whitespace-nowrap shadow-xl dark:bg-zinc-800">
           {locales.map(locale => (
             <button
               key={locale}
@@ -91,7 +91,7 @@ export function LanguageSelector() {
       <PendingStatusBadge
         show={isPending}
         text={pendingStatusT('updatingResults')}
-        className="left-auto right-0 translate-x-0"
+        className="right-0 left-auto translate-x-0"
       />
     </div>
   )

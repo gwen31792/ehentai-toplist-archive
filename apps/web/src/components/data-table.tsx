@@ -282,7 +282,7 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
   }, [data])
 
   const CellWrapper = ({ children }: { children: React.ReactNode }) => (
-    <div className="whitespace-normal break-all text-sm">
+    <div className="text-sm break-all whitespace-normal">
       {children}
     </div>
   )
@@ -649,7 +649,7 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
                 {headerGroup.headers.map(header => (
                   <TableHead
                     key={header.id}
-                    className="whitespace-nowrap relative select-none"
+                    className="relative whitespace-nowrap select-none"
                     style={{
                       width: header.getSize(),
                     }}
@@ -667,7 +667,7 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
                         <div
                           onMouseDown={header.getResizeHandler()}
                           onTouchStart={header.getResizeHandler()}
-                          className={`absolute right-0 top-0 h-full w-2 cursor-col-resize bg-transparent hover:bg-blue-500 transition-colors ${
+                          className={`absolute top-0 right-0 h-full w-2 cursor-col-resize bg-transparent transition-colors hover:bg-blue-500 ${
                             header.column.getIsResizing() ? 'bg-blue-500' : ''
                           } z-10`}
                           style={{
@@ -697,7 +697,7 @@ export function DataTable({ data, initialPreferences }: DataTableProps) {
                       {row.getVisibleCells().map(cell => (
                         <TableCell
                           key={cell.id}
-                          className="align-top py-2"
+                          className="py-2 align-top"
                           style={{
                             width: cell.column.getSize(),
                           }}

@@ -2,7 +2,7 @@
 
 // 首页顶部的排行榜查询控件：负责日期/周期切换、URL 参数同步和结果更新中的提示。
 
-import { useEffect, useState, useTransition } from 'react'
+import { useOptimistic, useTransition } from 'react'
 
 import { usePathname, useRouter } from 'next/navigation'
 
@@ -29,17 +29,9 @@ export function ToplistQueryControls({
   const pathname = usePathname()
   const pendingStatusT = useTranslations('components.pendingStatus')
   const [isPending, startTransition] = useTransition()
-  const [currentDateString, setCurrentDateString] = useState(selectedDateString)
-  const [currentType, setCurrentType] = useState<PeriodType>(selectedType)
-
-  // server 返回新参数后，用它覆盖本地的乐观值，避免控件长期漂移。
-  useEffect(() => {
-    setCurrentDateString(selectedDateString)
-  }, [selectedDateString])
-
-  useEffect(() => {
-    setCurrentType(selectedType)
-  }, [selectedType])
+  // 乐观值只在导航期间保留；导航完成或前进/返回时，直接使用 server 传入的参数。
+  const [currentDateString, setCurrentDateString] = useOptimistic(selectedDateString)
+  const [currentType, setCurrentType] = useOptimistic(selectedType)
 
   // 这里不直接拉数据，只更新 URL，让 page.tsx 重新走 server 查询。
   const updateURL = (newDateString: string, newType: PeriodType) => {
@@ -49,30 +41,22 @@ export function ToplistQueryControls({
 
     const nextSearchParamsString = params.toString()
     if (nextSearchParamsString === searchParamsString) {
-      return false
+      return
     }
 
     startTransition(() => {
+      setCurrentDateString(newDateString)
+      setCurrentType(newType)
       router.push(`${pathname}?${nextSearchParamsString}`, { scroll: false })
     })
-
-    return true
   }
 
   const handleDateChange = (dateString: string) => {
-    if (!updateURL(dateString, currentType)) {
-      return
-    }
-
-    setCurrentDateString(dateString)
+    updateURL(dateString, currentType)
   }
 
   const handleTypeChange = (type: PeriodType) => {
-    if (!updateURL(currentDateString, type)) {
-      return
-    }
-
-    setCurrentType(type)
+    updateURL(currentDateString, type)
   }
 
   return (

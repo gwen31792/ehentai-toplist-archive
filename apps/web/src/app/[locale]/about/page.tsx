@@ -13,7 +13,7 @@ export default async function About() {
 
   return (
     <div className="flex min-h-screen flex-col items-center bg-zinc-100 transition-colors dark:bg-zinc-900">
-      <div className="absolute right-4 top-4 flex items-center space-x-2">
+      <div className="absolute top-4 right-4 flex items-center space-x-2">
         <LanguageSelector />
         <GitHubLink />
         <ThemeToggle />

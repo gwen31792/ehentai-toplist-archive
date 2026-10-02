@@ -143,14 +143,14 @@ export function TableHeaderControls<TData>({
                   : null,
               )}
             >
-              <Filter className="mr-2 h-4 w-4" />
+              <Filter className="mr-2 size-4" />
               {typeFilterButtonLabel}
             </Button>
           </PopoverTrigger>
-          <PopoverContent align="start" className="w-[300px] bg-zinc-50 dark:bg-zinc-800">
+          <PopoverContent align="start" className="w-75 bg-zinc-50 dark:bg-zinc-800">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <h4 className="font-medium leading-none text-zinc-900 dark:text-zinc-100">
+                <h4 className="leading-none font-medium text-zinc-900 dark:text-zinc-100">
                   {t('typeFilter')}
                   <span className="ml-2 text-xs text-zinc-500 dark:text-zinc-400">
                     {selectedCurrentTypeCount}
@@ -183,7 +183,7 @@ export function TableHeaderControls<TData>({
                 <div className="min-w-0">
                   <label
                     htmlFor="preserve-type-selection"
-                    className="block cursor-pointer text-xs font-medium leading-none text-zinc-700 dark:text-zinc-300"
+                    className="block cursor-pointer text-xs leading-none font-medium text-zinc-700 dark:text-zinc-300"
                   >
                     {t('preserveTypeSelection')}
                   </label>
@@ -199,7 +199,7 @@ export function TableHeaderControls<TData>({
                   id="preserve-type-selection"
                   checked={preserveTypeSelection}
                   onCheckedChange={onPreserveTypeSelectionChange}
-                  className="h-4 w-8 shrink-0 data-[state=checked]:bg-zinc-900 data-[state=checked]:[&>span]:translate-x-4 dark:data-[state=checked]:bg-zinc-100 [&>span]:h-3 [&>span]:w-3"
+                  className="h-4 w-8 shrink-0 data-[state=checked]:bg-zinc-900 dark:data-[state=checked]:bg-zinc-100 [&>span]:size-3 data-[state=checked]:[&>span]:translate-x-4"
                 />
               </div>
 
@@ -225,14 +225,14 @@ export function TableHeaderControls<TData>({
                   : null,
               )}
             >
-              <Tags className="mr-2 h-4 w-4" />
+              <Tags className="mr-2 size-4" />
               {tagFilterButtonLabel}
             </Button>
           </PopoverTrigger>
-          <PopoverContent align="start" className="w-[300px] bg-zinc-50 dark:bg-zinc-800">
+          <PopoverContent align="start" className="w-75 bg-zinc-50 dark:bg-zinc-800">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <h4 className="font-medium leading-none text-zinc-900 dark:text-zinc-100">
+                <h4 className="leading-none font-medium text-zinc-900 dark:text-zinc-100">
                   {t('tagFilter')}
                   <span className="ml-2 text-xs text-zinc-500 dark:text-zinc-400">
                     {selectedCurrentTagCount}
@@ -265,7 +265,7 @@ export function TableHeaderControls<TData>({
                 <div className="min-w-0">
                   <label
                     htmlFor="preserve-tag-selection"
-                    className="block cursor-pointer text-xs font-medium leading-none text-zinc-700 dark:text-zinc-300"
+                    className="block cursor-pointer text-xs leading-none font-medium text-zinc-700 dark:text-zinc-300"
                   >
                     {t('preserveTagSelection')}
                   </label>
@@ -281,7 +281,7 @@ export function TableHeaderControls<TData>({
                   id="preserve-tag-selection"
                   checked={preserveTagSelection}
                   onCheckedChange={onPreserveTagSelectionChange}
-                  className="h-4 w-8 shrink-0 data-[state=checked]:bg-zinc-900 data-[state=checked]:[&>span]:translate-x-4 dark:data-[state=checked]:bg-zinc-100 [&>span]:h-3 [&>span]:w-3"
+                  className="h-4 w-8 shrink-0 data-[state=checked]:bg-zinc-900 dark:data-[state=checked]:bg-zinc-100 [&>span]:size-3 data-[state=checked]:[&>span]:translate-x-4"
                 />
               </div>
 
@@ -330,13 +330,13 @@ export function TableHeaderControls<TData>({
               </div>
 
               <div className="relative">
-                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
+                <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-zinc-400" />
                 <input
                   type="search"
                   value={tagSearch}
                   onChange={event => setTagSearch(event.target.value)}
                   placeholder={t('tagSearchPlaceholder')}
-                  className="h-8 w-full rounded-md border border-input bg-zinc-50 pl-7 pr-8 text-xs text-zinc-900 outline-none ring-offset-background transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 dark:bg-zinc-800 dark:text-zinc-100 [&::-webkit-search-cancel-button]:appearance-none"
+                  className="h-8 w-full rounded-md border border-input bg-zinc-50 pr-8 pl-7 text-xs text-zinc-900 ring-offset-background transition-colors outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none dark:bg-zinc-800 dark:text-zinc-100 [&::-webkit-search-cancel-button]:appearance-none"
                 />
                 {tagSearch
                   ? (
@@ -345,9 +345,9 @@ export function TableHeaderControls<TData>({
                         variant="ghost"
                         size="sm"
                         onClick={() => setTagSearch('')}
-                        className="absolute right-1 top-1/2 h-6 w-6 -translate-y-1/2 p-0 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                        className="absolute top-1/2 right-1 size-6 -translate-y-1/2 p-0 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
                       >
-                        <X className="h-3.5 w-3.5" />
+                        <X className="size-3.5" />
                       </Button>
                     )
                   : null}
@@ -371,16 +371,16 @@ export function TableHeaderControls<TData>({
               variant="outline"
               className="bg-zinc-50 dark:bg-zinc-800"
             >
-              <ExternalLink className="mr-2 h-4 w-4" />
+              <ExternalLink className="mr-2 size-4" />
               {t('galleryOpenTarget')}
               <span className="ml-1 text-zinc-500 dark:text-zinc-400">
                 {useExhentaiGalleryLinks ? t('galleryOpenTargetExhentai') : t('galleryOpenTargetEHentai')}
               </span>
             </Button>
           </PopoverTrigger>
-          <PopoverContent align="end" className="w-[220px] bg-zinc-50 dark:bg-zinc-800">
+          <PopoverContent align="end" className="w-55 bg-zinc-50 dark:bg-zinc-800">
             <div className="space-y-2">
-              <h4 className="font-medium leading-none text-zinc-900 dark:text-zinc-100">
+              <h4 className="leading-none font-medium text-zinc-900 dark:text-zinc-100">
                 {t('galleryOpenTargetTitle')}
               </h4>
               <div className="inline-flex w-full rounded-md border border-zinc-200 bg-zinc-50 p-0.5 dark:border-zinc-700 dark:bg-zinc-800">
@@ -412,13 +412,13 @@ export function TableHeaderControls<TData>({
               variant="outline"
               className="bg-zinc-50 dark:bg-zinc-800"
             >
-              <Settings className="mr-2 h-4 w-4" />
+              <Settings className="mr-2 size-4" />
               {t('columns')}
             </Button>
           </PopoverTrigger>
-          <PopoverContent align="end" className="w-[200px] bg-zinc-50 dark:bg-zinc-800">
+          <PopoverContent align="end" className="w-50 bg-zinc-50 dark:bg-zinc-800">
             <div className="space-y-2">
-              <h4 className="font-medium leading-none text-zinc-900 dark:text-zinc-100">
+              <h4 className="leading-none font-medium text-zinc-900 dark:text-zinc-100">
                 {t('toggleColumns')}
               </h4>
               <div className="space-y-2">
@@ -432,7 +432,7 @@ export function TableHeaderControls<TData>({
                     />
                     <label
                       htmlFor={`col-toggle-${column.id}`}
-                      className="text-sm font-normal text-zinc-700 dark:text-zinc-300 cursor-pointer"
+                      className="cursor-pointer text-sm font-normal text-zinc-700 dark:text-zinc-300"
                     >
                       {t(`headers.${column.id}`) || column.id}
                     </label>

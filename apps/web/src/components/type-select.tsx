@@ -59,7 +59,7 @@ export function TypeSelect({
       onValueChange={value => onSelectChange(value as PeriodType)}
       disabled={disabled}
     >
-      <SelectTrigger className="w-[180px] bg-zinc-50 dark:bg-zinc-800">
+      <SelectTrigger className="w-45 bg-zinc-50 dark:bg-zinc-800">
         <SelectValue placeholder={t('placeholder')} />
       </SelectTrigger>
       <SelectContent className="bg-zinc-50 dark:bg-zinc-800">

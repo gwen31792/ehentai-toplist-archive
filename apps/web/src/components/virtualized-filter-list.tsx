@@ -35,7 +35,7 @@ export function VirtualizedFilterList({
     return (
       <div
         ref={parentRef}
-        className="flex max-h-[300px] min-h-[200px] items-center justify-center overflow-y-auto rounded-md border border-dashed border-zinc-200 px-4 text-center text-sm text-zinc-500 dark:border-zinc-700 dark:text-zinc-400"
+        className="flex max-h-75 min-h-50 items-center justify-center overflow-y-auto rounded-md border border-dashed border-zinc-200 px-4 text-center text-sm text-zinc-500 dark:border-zinc-700 dark:text-zinc-400"
       >
         {emptyMessage}
       </div>
@@ -45,7 +45,7 @@ export function VirtualizedFilterList({
   return (
     <div
       ref={parentRef}
-      className="max-h-[300px] min-h-[200px] overflow-y-auto"
+      className="max-h-75 min-h-50 overflow-y-auto"
     >
       <div
         style={{
@@ -86,7 +86,7 @@ export function VirtualizedFilterList({
               />
               <label
                 htmlFor={`${idPrefix}-${item}`}
-                className="text-sm font-normal text-zinc-700 dark:text-zinc-300 cursor-pointer flex-1"
+                className="flex-1 cursor-pointer text-sm font-normal text-zinc-700 dark:text-zinc-300"
               >
                 {item}
               </label>

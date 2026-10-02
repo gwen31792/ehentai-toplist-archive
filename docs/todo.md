@@ -11,7 +11,7 @@
 - [ ] 解决 dark mode 下刷新的闪烁问题 FOUC
 - [ ] 多月整合的排行榜，推荐系统
 - [ ] 集成 Cloudflare Turnstile
-- [ ] 等 eslint-plugin-tailwindcss 支持 Tailwind CSS v4 后重新添加到项目中
+- [ ] 等 eslint-plugin-react 和 eslint-plugin-import 的稳定版原生支持 ESLint 10 后，升级 ESLint 及相关依赖，并验证全仓 lint
 - [ ] 研究 Cloudflare Agent Readiness: https://blog.cloudflare.com/agent-readiness/
 
 ## 不准备做

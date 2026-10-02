@@ -79,7 +79,7 @@ export function DatePicker({
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          className="w-[280px] justify-start bg-zinc-50 text-left font-normal dark:bg-zinc-800"
+          className="w-70 justify-start bg-zinc-50 text-left font-normal dark:bg-zinc-800"
           disabled={disabled}
         >
           <CalendarIcon className="mr-2 size-4" />

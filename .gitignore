@@ -92,3 +92,6 @@ opencode.json
 .github/agents/
 .github/prompts/
 .github/skills/
+
+.nx/self-healing
+.nx/migrate-runs

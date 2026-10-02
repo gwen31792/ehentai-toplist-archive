@@ -1,12 +1,19 @@
+import { fileURLToPath } from 'node:url'
+
 import js from '@eslint/js'
 import pluginNext from '@next/eslint-plugin-next'
-import nx from '@nx/eslint-plugin'
+import { configs as nxConfigs } from '@nx/eslint-plugin'
 import stylistic from '@stylistic/eslint-plugin'
 import pluginImport from 'eslint-plugin-import'
 import pluginReact from 'eslint-plugin-react'
 import pluginReactHooks from 'eslint-plugin-react-hooks'
+import pluginTailwindcss from 'eslint-plugin-tailwindcss'
 import globals from 'globals'
-import tseslint from 'typescript-eslint'
+import { configs as tseslintConfigs } from 'typescript-eslint'
+
+// Next 插件的 CommonJS 运行时没有 configs 命名导出，需通过默认导出读取。
+// eslint-disable-next-line import/no-named-as-default-member
+const { configs: nextConfigs } = pluginNext
 
 export default [
   {
@@ -23,11 +30,11 @@ export default [
       '**/*.d.ts',
     ],
   },
-  ...nx.configs['flat/base'],
-  ...nx.configs['flat/typescript'],
-  ...nx.configs['flat/javascript'],
+  ...nxConfigs['flat/base'],
+  ...nxConfigs['flat/typescript'],
+  ...nxConfigs['flat/javascript'],
   js.configs.recommended, // JavaScript 推荐规则
-  ...tseslint.configs.recommended, // TypeScript 推荐规则
+  ...tseslintConfigs.recommended, // TypeScript 推荐规则
   // 通用语言选项与基础规则
   {
     files: ['**/*.{js,mjs,cjs,jsx,ts,tsx}'],
@@ -42,7 +49,7 @@ export default [
   },
   // React 配置
   {
-    files: ['**/*.{js,jsx,ts,tsx}'],
+    files: ['apps/web/**/*.{js,jsx,ts,tsx}'],
     plugins: {
       'react': pluginReact,
       'react-hooks': pluginReactHooks,
@@ -63,11 +70,21 @@ export default [
     rules: {
       ...pluginReact.configs.recommended.rules,
       ...pluginReactHooks.configs.recommended.rules,
-      ...pluginNext.configs.recommended.rules,
-      ...pluginNext.configs['core-web-vitals'].rules,
+      ...nextConfigs.recommended.rules,
+      ...nextConfigs['core-web-vitals'].rules,
       // 关闭 React 17+ 不再需要的规则
       'react/react-in-jsx-scope': 'off',
       'react/jsx-uses-react': 'off',
+    },
+  },
+  // 从固定 CSS 入口读取 v4 主题与自定义 utility，避免 Nx 切换工作目录后解析错误。
+  {
+    ...pluginTailwindcss.configs.recommended,
+    files: ['apps/web/**/*.{js,jsx,ts,tsx}'],
+    settings: {
+      tailwindcss: {
+        cssConfigPath: fileURLToPath(new URL('./apps/web/src/app/globals.css', import.meta.url)),
+      },
     },
   },
   // Import 插件配置

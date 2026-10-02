@@ -29,7 +29,7 @@ export function ImageWithSkeleton({ src, alt, width, height, className }: ImageW
   return (
     <div className="relative w-full overflow-hidden" style={{ aspectRatio }}>
       {!imageLoaded && (
-        <Skeleton className="absolute inset-0 h-full w-full bg-gray-200 dark:bg-gray-700" />
+        <Skeleton className="absolute inset-0 size-full bg-gray-200 dark:bg-gray-700" />
       )}
       <Image
         src={src}
