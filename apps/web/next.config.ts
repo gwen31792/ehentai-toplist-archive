@@ -16,6 +16,11 @@ const nextConfig: NextConfig = {
     ],
   },
   reactCompiler: true,
+  experimental: {
+    // Next 16.3 起 next build 默认改用 tsc CLI 做类型检查，不再关闭 composite；
+    // custom-worker.ts 会把已有的 .open-next 产物拉进项目报 TS6307，所以沿用 API 检查。
+    useTypeScriptCli: false,
+  },
 }
 
 export default withNextIntl(nextConfig)
