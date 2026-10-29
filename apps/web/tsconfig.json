@@ -10,7 +10,9 @@
       "dom.iterable",
       "esnext"
     ],
-    "allowJs": true,
+    // custom-worker.ts 引用 OpenNext 生成的 .open-next/worker.js，开启 allowJs 时 tsc 会顺着 import
+    // 把整套构建产物拉进项目，composite 下报 TS6307；项目里也没有需要检查的 JS 源文件。
+    "allowJs": false,
     "allowSyntheticDefaultImports": true,
     "incremental": true,
     "plugins": [
@@ -33,8 +35,6 @@
     "../../dist/apps/web/.next/types/**/*.ts",
     "custom-worker.ts",
     "next-env.d.ts",
-    "src/**/*.js",
-    "src/**/*.jsx",
     "src/**/*.ts",
     "src/**/*.tsx",
     ".next/types/**/*.ts"
