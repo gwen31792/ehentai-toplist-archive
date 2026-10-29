@@ -20,6 +20,7 @@ pnpm nx typecheck web        # 类型检查
 # Crawler
 pnpm nx dev crawler          # 爬虫开发服务器
 pnpm nx deploy crawler       # 部署到 Cloudflare
+pnpm nx cf-typegen crawler   # 生成 Workers 类型（typecheck 会先自动执行）
 
 # 数据库包（修改 schema 后必须执行）
 pnpm nx build db
@@ -116,7 +117,8 @@ Crawler 使用 Zod 解析 Cheerio 提取的 HTML 数据，因为：
 
 ### 类型安全
 - 修改 `packages/db` 后必须 `pnpm nx build db`
-- 绑定变更后运行 `pnpm cf-typegen` 更新 `cloudflare-env.d.ts`
+- Workers 类型（web 的 `cloudflare-env.d.ts`、crawler 的 `worker-configuration.d.ts`）由 `wrangler types` 根据 wrangler 配置和已安装的 wrangler 版本生成，不提交到 git
+- `typecheck` 依赖 `cf-typegen`，每次先重新生成类型再检查；绑定、compatibility date 或 wrangler 版本变化后直接跑 typecheck 即可
 - 远程图片只允许 `ehgt.org`（配置在 `next.config.ts` 的 `remotePatterns`）
 
 ### Next.js 15 注意
@@ -141,7 +143,7 @@ Crawler 使用 Zod 解析 Cheerio 提取的 HTML 数据，因为：
 ## 常见问题
 
 - **数据为空**: 检查年份是否有对应分区表，确认 `period_type` 拼写
-- **TypeScript 报错**: `pnpm cf-typegen` 更新 Cloudflare 环境类型
+- **TypeScript 报错**: `pnpm nx cf-typegen <project>` 重新生成 Cloudflare 类型
 - **db 包修改后未生效**: `pnpm nx build db`
 - **ESLint 配置**: `eslint.config.js`
 

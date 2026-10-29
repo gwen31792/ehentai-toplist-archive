@@ -9,28 +9,28 @@ export default {
   },
 
   async scheduled(controller: ScheduledController, env: Env): Promise<void> {
-    const tasks: Promise<void>[] = []
-
     switch (controller.cron) {
       case '0 1 * * *':
         // 每天 1 点执行的任务
-        tasks.push(env.QUEUE.send(CRAWL_QUEUE_MESSAGE))
+        await env.QUEUE.send(CRAWL_QUEUE_MESSAGE)
         break
       case '0 13 * * 1':
         // 每周一 13 点执行的任务
-        tasks.push(env.QUEUE.send(CRAWL_TAGS_TRANSLATION_MESSAGE))
+        await env.QUEUE.send(CRAWL_TAGS_TRANSLATION_MESSAGE)
         break
       case '15 * * * *':
         // 每小时错开到第 15 分钟执行一次
-        tasks.push(env.QUEUE.send(UPDATE_GALLERY_MESSAGE))
+        await env.QUEUE.send(UPDATE_GALLERY_MESSAGE)
         break
       case '30 */3 * * *':
         // 和详情页更新错开执行，独立补齐预览图尺寸缓存
-        tasks.push(env.QUEUE.send(SYNC_PREVIEW_ASSETS_MESSAGE))
+        await env.QUEUE.send(SYNC_PREVIEW_ASSETS_MESSAGE)
+        break
+      default:
+        // cron 表达式要和 wrangler.jsonc 的 triggers.crons 同步修改，漏改会让对应任务停跑，记录日志便于发现
+        console.warn('Ignoring unexpected cron trigger.', { cron: controller.cron })
         break
     }
-
-    await Promise.all(tasks)
   },
 
   async queue(batch: MessageBatch<unknown>, env: Env): Promise<void> {

@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "cf-typegen": "wrangler types"
   },
   "dependencies": {
     "@ehentai-toplist-archive/db": "workspace:^",
@@ -17,6 +18,12 @@
       "@ehentai-toplist-archive/db"
     ],
     "targets": {
+      "typecheck": {
+        "dependsOn": [
+          "cf-typegen",
+          "^typecheck"
+        ]
+      },
       "dev": {
         "dependsOn": [
           "^build"
